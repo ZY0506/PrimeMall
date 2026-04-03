@@ -1,0 +1,8 @@
+syntax = "v1"
+
+info(
+    title: "PrimaMall-订单服务"
+    desc: "订单相关，包括购物车、下单、价格计算、订单状态流转"
+    author: "烤冷面"
+    version: "v1.0"
+)

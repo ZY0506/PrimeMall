@@ -1,0 +1,9 @@
+syntax = "v1"
+
+info(
+    title: "PrimeMall-网关服务"
+    desc: "负责路由分发、鉴权和权限控制等等"
+    author: "烤冷面"
+    version: "v1.0"
+)
+
