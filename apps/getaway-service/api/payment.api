@@ -1,0 +1,8 @@
+syntax = "v1"
+
+info(
+    title: "PrimeMall-支付服务"
+    desc: "type desc here"
+    author: "烤冷面"
+    version: "v1.0"
+)
