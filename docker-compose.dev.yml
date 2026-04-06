@@ -1,0 +1,34 @@
+version: '3.8'
+
+name: prime_mall
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-prime_mall
+    restart: unless-stopped
+    environment:
+      # 引用 .env 中的变量
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-123456}
+      - TZ=Asia/Shanghai
+    ports:
+      # 宿主机端口 : 容器端口
+      - "${DB_PORT_EXTERNAL:-13306}:3306"
+    volumes:
+      # 1. 初始化脚本：确保你的 8 个 SQL 放在这个目录下
+      - ./deployments/docker/mysql/init:/docker-entrypoint-initdb.d
+      # 2. 持久化数据
+      - ./storage/mysql/data:/var/lib/mysql
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max_connections=1000
+      - --wait_timeout=3600
+    healthcheck:
+      # 健康检查的密码也要同步
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-123456}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s

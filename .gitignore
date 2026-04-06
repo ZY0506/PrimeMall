@@ -1,0 +1,8 @@
+.env
+go.mod
+go.sum
+.git
+.gitignore
+.idea
+.vscode
+*.log
