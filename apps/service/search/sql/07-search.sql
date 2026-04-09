@@ -37,7 +37,6 @@ CREATE TABLE IF NOT EXISTS `hot_keyword` (
     `search_count` BIGINT          NOT NULL DEFAULT '1' COMMENT '搜索次数（累计）',
     `sort`         INT             NOT NULL DEFAULT '0' COMMENT '排序值：数值越小越靠前',
     `status`       TINYINT         NOT NULL DEFAULT '1' COMMENT '状态：1-显示，2-隐藏',
-    `created_at`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_keyword` (`keyword`),

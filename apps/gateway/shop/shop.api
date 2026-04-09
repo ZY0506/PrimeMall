@@ -1,0 +1,895 @@
+syntax = "v1"
+
+info(
+    title: "PrimeMall API Gateway"
+    desc: "统一网关入口，负责用户、商品、订单、支付、营销等所有业务模块的请求转发与鉴权"
+    author: "烤冷面"
+    version: "v1.0"
+)
+
+// =============================================================
+// 0. 公共类型定义
+// =============================================================
+
+type (
+    // 通用路径参数：ID
+    IdPathReq {
+        Id int64 `path:"id"` // ID
+    }
+
+        // 通用路径参数：订单号
+    OrderSnPathReq {
+        OrderSn string `path:"order_sn"` // 订单号
+    }
+
+        // 通用路径参数：支付流水号
+    PaymentSnPathReq {
+        PaymentSn string `path:"payment_sn"` // 支付流水号
+    }
+
+        // 批量SKU ID请求
+    SkuIdsReq {
+        SkuIds []int64 `json:"sku_ids"` // SKU ID列表
+    }
+
+        // 分页参数（可嵌入使用）
+    Pagination {
+        Page int64 `form:"page,default=1"`  // 页码，默认1
+        Size int64 `form:"size,default=10"` // 每页数量，默认10
+    }
+)
+
+// =============================================================
+// 1. 用户服务模块 (userApi)
+// =============================================================
+
+type (
+    // 基础鉴权请求
+    CaptchaReq {
+        Phone string `json:"phone"` // 手机号
+        Scene string `json:"scene"` // 场景：login, register, reset_pwd
+    }
+
+    LoginReq {
+        Phone    string `json:"phone"`    // 手机号
+        Password string `json:"password"` // 密码
+    }
+
+    MobileLoginReq {
+        Phone string `json:"phone"` // 手机号
+        Code  string `json:"code"`  // 验证码
+    }
+
+    RegisterReq {
+        Phone    string `json:"phone"`                // 手机号
+        Password string `json:"password"`             // 密码
+        Code     string `json:"code"`                 // 验证码
+        Nickname string `json:"nickname,optional"`    // 昵称（可选）
+    }
+
+    LoginResp {
+        AccessToken  string `json:"access_token"`       // 访问令牌
+        AccessExpire int64  `json:"access_expire"`      // 访问令牌有效期
+        RefreshToken string `json:"refresh_token"`      // 刷新令牌
+        RefreshExpire int64 `json:"refresh_expire"`     // 刷新令牌有效期
+    }
+
+    ResetPasswordReq {
+        Phone       string `json:"phone"`        // 手机号
+        Code        string `json:"code"`         // 验证码
+        NewPassword string `json:"new_password"` // 新密码
+    }
+
+        // 用户资料响应
+    UserInfoResp {
+        Id          int64  `json:"id"`           // 用户ID
+        Phone       string `json:"phone"`        // 手机号
+        Nickname    string `json:"nickname"`     // 昵称
+        Avatar      string `json:"avatar"`       // 头像URL
+        Gender      int64  `json:"gender"`       // 性别：0-未知，1-男，2-女
+        Birthday    string `json:"birthday"`     // 生日（YYYY-MM-DD格式）
+        Status      int64  `json:"status"`       // 账号状态：1-正常，2-限制下单，3-封禁
+        StatusDesc  string `json:"status_desc"`  // 状态描述
+    }
+
+    UpdateUserInfoReq {
+        Nickname string `json:"nickname,optional"` // 昵称（可选）
+        Avatar   string `json:"avatar,optional"`   // 头像URL（可选）
+        Gender   int64  `json:"gender,optional"`   // 性别：0-未知，1-男，2-女（可选）
+        Birthday string `json:"birthday,optional"` // 生日（YYYY-MM-DD格式，可选）
+    }
+
+    UpdatePasswordReq {
+        OldPassword string `json:"old_password"` // 旧密码
+        NewPassword string `json:"new_password"` // 新密码
+    }
+
+    UpdatePhoneReq {
+        OldPhoneCode string `json:"old_phone_code,optional"` // 原手机验证码（已登录时可选）
+        NewPhone     string `json:"new_phone"`               // 新手机号
+        NewPhoneCode string `json:"new_phone_code"`          // 新手机验证码
+    }
+
+    DeleteAccountReq {
+        Password string `json:"password"`          // 密码验证
+        Code     string `json:"code,optional"`     // 或短信验证码
+    }
+
+        // 收货地址
+    AddressItem {
+        Id            int64  `json:"id,optional"`              // 地址ID（新增时可选，更新时必填）
+        ReceiverName  string `json:"receiver_name"`            // 收货人姓名
+        ReceiverPhone string `json:"receiver_phone"`           // 收货人电话
+        Province      string `json:"province"`                 // 省份
+        City          string `json:"city"`                     // 城市
+        District      string `json:"district"`                 // 区/县
+        DetailAddress string `json:"detail_address"`           // 详细地址
+        IsDefault     int64  `json:"is_default"`               // 是否默认地址：0-否，1-是
+        Tag           string `json:"tag,optional"`             // 地址标签：HOME-家，OFFICE-公司，SCHOOL-学校
+        PostalCode    string `json:"postal_code,optional"`     // 邮政编码
+    }
+
+    AddressListResp {
+        List []AddressItem `json:"list"` // 地址列表
+    }
+)
+
+// 无需认证的接口
+@server(
+    group:  auth
+    prefix: /api/v1/user
+)
+service userApi {
+    @doc "获取短信验证码"
+    @handler captcha
+    post /captcha (CaptchaReq) returns ()
+
+    @doc "手机号密码登录"
+    @handler login
+    post /login (LoginReq) returns (LoginResp)
+
+    @doc "手机号验证码登录"
+    @handler mobileLogin
+    post /login/mobile (MobileLoginReq) returns (LoginResp)
+
+    @doc "用户注册"
+    @handler register
+    post /register (RegisterReq) returns (LoginResp)
+
+    @doc "忘记密码重置"
+    @handler resetPassword
+    post /password/reset (ResetPasswordReq) returns ()
+
+    @doc "token刷新"
+    @handler refreshToken
+    post /token/refresh returns (LoginResp)
+}
+
+// 需登录的用户个人模块
+@server(
+    jwt:    JwtAuth
+    group:  user
+    prefix: /api/v1/user
+)
+service userApi {
+    @doc "获取个人资料"
+    @handler detail
+    get /info returns (UserInfoResp)
+
+    @doc "更新个人资料"
+    @handler updateInfo
+    put /info (UpdateUserInfoReq) returns ()
+
+    @doc "修改登录密码"
+    @handler updatePassword
+    put /password/update (UpdatePasswordReq) returns ()
+
+    @doc "修改手机号"
+    @handler updatePhone
+    put /phone (UpdatePhoneReq) returns ()
+
+    @doc "注销账号"
+    @handler deleteAccount
+    delete /account (DeleteAccountReq) returns ()
+
+    @doc "退出登录"
+    @handler logout
+    post /logout returns ()
+}
+
+// 需登录的地址管理模块
+@server(
+    jwt:    JwtAuth
+    group:  address
+    prefix: /api/v1/address
+)
+service userApi {
+    @doc "添加收货地址"
+    @handler addAddress
+    post / (AddressItem) returns ()
+
+    @doc "获取地址列表"
+    @handler listAddress
+    get /list returns (AddressListResp)
+
+    @doc "更新收货地址"
+    @handler updateAddress
+    put / (AddressItem) returns ()
+
+    @doc "删除收货地址"
+    @handler deleteAddress
+    delete /:id (IdPathReq) returns ()
+
+    @doc "设置默认收货地址"
+    @handler setDefaultAddress
+    patch /default/:id (IdPathReq) returns ()
+}
+
+// =============================================================
+// 2. 商品服务模块 (productApi)
+// =============================================================
+
+type (
+    // 商品分类（树形）
+    Category {
+        Id       int64      `json:"id"`                // 分类ID
+        ParentId int64      `json:"parent_id"`         // 父分类ID
+        Name     string     `json:"name"`              // 分类名称
+        Icon     string     `json:"icon"`              // 分类图标URL
+        Level    int64      `json:"level"`             // 分类层级：1一级 2二级 3三级
+        Children []Category `json:"children,optional"` // 子分类列表
+    }
+
+    CategoryInfo {
+        Id       int64  `json:"id"`        // 分类ID
+        ParentId int64  `json:"parent_id"` // 父分类ID
+        Name     string `json:"name"`      // 分类名称
+        Icon     string `json:"icon"`      // 分类图标URL
+        Level    int64  `json:"level"`     // 分类层级：1一级 2二级 3三级
+    }
+
+    CategoryTreeResp {
+        List []Category `json:"list"` // 分类列表
+    }
+
+    CategoryResp {
+        Category CategoryInfo `json:"category"` // 分类信息
+    }
+
+        // 商品列表请求
+    ProductListReq {
+        CategoryId int64  `form:"category_id,optional"` // 分类ID
+        Brand      string `form:"brand,optional"`       // 品牌名称（模糊匹配）
+        MinPrice   int64  `form:"min_price,optional"`   // 最低价格（单位：分）
+        MaxPrice   int64  `form:"max_price,optional"`   // 最高价格（单位：分）
+        Keyword    string `form:"keyword,optional"`     // 简单关键词搜索（大数据量建议使用独立搜索服务）
+        Attrs      string `form:"attrs,optional"`       // 属性过滤，格式 "颜色:红色,内存:64G"
+        IsNew      bool   `form:"is_new,optional"`      // 是否新品（按创建时间<7天）
+        Sort       string `form:"sort,optional"`        // 排序: price_asc, price_desc, sales_desc, new_desc
+        Pagination
+    }
+
+        // 商品列表项
+    ProductItem {
+        Id          int64  `json:"id"`           // 商品ID
+        Name        string `json:"name"`         // 商品名称
+        Brand       string `json:"brand"`        // 品牌名称
+        Description string `json:"description"`  // 商品简介
+        DefaultPic  string `json:"default_pic"`  // 默认主图URL
+        Price       int64  `json:"price"`        // 最低SKU价格（单位：分）
+        Sales       int64  `json:"sales"`        // 实际销量
+        ShowSales   int64  `json:"show_sales"`   // 前台展示销量 = sales + virtual_sales
+    }
+
+    ProductListResp {
+        Total int64         `json:"total"` // 总数量
+        List  []ProductItem `json:"list"`  // 商品列表
+    }
+
+        // 商品详情
+    ProductDetailResp {
+        Id                int64           `json:"id"`                   // 商品ID
+        CategoryId        int64           `json:"category_id"`          // 所属分类ID
+        Brand             string          `json:"brand"`                // 品牌名称
+        Name              string          `json:"name"`                 // 商品名称
+        Description       string          `json:"description"`          // 商品简介
+        Content           string          `json:"content"`              // 富文本详情
+        DefaultPic        string          `json:"default_pic"`          // 默认主图URL
+        BannerPics        []string        `json:"banner_pics"`          // 轮播图列表
+        VideoUrl          string          `json:"video_url,optional"`   // 商品视频URL
+        Weight            int64           `json:"weight"`               // 重量（克）
+        FreightTemplateId int64           `json:"freight_template_id"`  // 运费模板ID
+        Price             int64           `json:"price"`                // 最低SKU价格（单位：分）
+        Sales             int64           `json:"sales"`                // 实际销量
+        ShowSales         int64           `json:"show_sales"`           // 展示销量
+        Status            int64           `json:"status"`               // 1:上架 2:下架
+        StatusDesc        string          `json:"status_desc"`          // 状态描述
+        Skus              []SkuItem       `json:"skus"`                 // SKU列表
+        Attributes        []AttributeItem `json:"attributes"`           // 聚合属性（用于前端筛选）
+    }
+
+    SkuItem {
+        Id       int64  `json:"id"`         // SKU ID
+        Name     string `json:"name"`       // 规格名称，如"红色 64G"
+        Pic      string `json:"pic"`        // SKU图片URL
+        Price    int64  `json:"price"`      // 价格（单位：分）
+        Stock    int64  `json:"stock"`      // 库存数量
+        SpecData string `json:"spec_data"`  // 原始JSON，如{"颜色":"红色","容量":"64G"}
+    }
+
+    AttributeItem {
+        Name   string   `json:"name"`   // 属性名，如"颜色"
+        Values []string `json:"values"` // 属性值列表，如["红色","蓝色","白色"]
+    }
+
+        // 个性化推荐请求
+    RecommendReq {
+        Scene     string `form:"scene,optional"`      // 场景：home(首页), cart(购物车), detail(详情页)
+        Limit     int64  `form:"limit,default=10"`    // 返回数量
+        CurrentId int64  `form:"current_id,optional"` // 当前商品ID（详情页推荐时使用）
+    }
+
+        // 批量SKU查询响应
+    BatchSkuResp {
+        List []SkuSimple `json:"list"` // SKU列表
+    }
+
+    SkuSimple {
+        Id    int64 `json:"id"`    // SKU ID
+        Price int64 `json:"price"` // 价格（单位：分）
+        Stock int64 `json:"stock"` // 库存数量
+    }
+)
+
+// 商品分类接口（无需认证）
+@server(
+    group:  category
+    prefix: /api/v1/product
+)
+service productApi {
+    @doc "获取商品全部分类树"
+    @handler categoryTree
+    get /category/tree returns (CategoryTreeResp)
+
+    @doc "获取单个分类详情"
+    @handler categoryInfo
+    get /category/:id (IdPathReq) returns (CategoryResp)
+}
+
+// 商品浏览接口（无需认证，但部分敏感操作可能需要，根据业务调整）
+@server(
+    group:  product
+    prefix: /api/v1/product
+)
+service productApi {
+    @doc "商品列表与筛选"
+    @handler list
+    get /list (ProductListReq) returns (ProductListResp)
+
+    @doc "商品详情"
+    @handler productDetail
+    get /detail/:id (IdPathReq) returns (ProductDetailResp)
+
+    @doc "个性化推荐"
+    @handler recommend
+    get /recommend (RecommendReq) returns (ProductListResp)
+
+    @doc "批量获取SKU信息（价格、库存）"
+    @handler batchSku
+    post /skus/batch (SkuIdsReq) returns (BatchSkuResp)
+}
+
+// =============================================================
+// 3. 订单服务模块 (orderApi)
+// =============================================================
+
+type (
+    // 购物车项
+    CartItem {
+        Id          int64  `json:"id,optional"`   // 购物车记录ID
+        SkuId       int64  `json:"sku_id"`        // SKU ID
+        SpuId       int64  `json:"spu_id"`        // SPU ID
+        ProductName string `json:"product_name"`  // 商品名称
+        SkuName     string `json:"sku_name"`      // 规格名称
+        Pic         string `json:"pic"`           // 商品图片
+        Price       int64  `json:"price"`         // 实时单价（分）
+        Quantity    int64  `json:"quantity"`      // 数量
+        Selected    bool   `json:"selected"`      // 是否勾选
+        Stock       int64  `json:"stock"`         // 实时库存
+        Status      int64  `json:"status"`        // 商品状态 1:正常 2:下架/失效
+    }
+
+    CartListResp {
+        Items       []CartItem `json:"items"`         // 购物车商品列表
+        TotalAmount int64      `json:"total_amount"`  // 勾选商品总金额（单位：分）
+    }
+
+    UpdateCartReq {
+        SkuId    int64 `json:"sku_id"`    // SKU ID
+        Quantity int64 `json:"quantity"`  // 数量，若为0则从购物车移除
+    }
+
+    SelectCartReq {
+        SkuId    int64 `json:"sku_id"`    // SKU ID
+        Selected bool  `json:"selected"`  // 是否勾选
+    }
+
+        // 下单商品项
+    OrderItemReq {
+        SkuId    int64 `json:"sku_id"`    // SKU ID
+        Quantity int64 `json:"quantity"`  // 购买数量
+    }
+
+    SettlementTokenResp {
+        Token      string `json:"settlement_token"` // 结算令牌，有效期5分钟
+        ExpireTime int64  `json:"expire_time"`      // 过期时间戳（秒）
+    }
+
+    PreOrderReq {
+        Items     []OrderItemReq `json:"items"`                // 下单商品列表
+        AddressId int64          `json:"address_id,optional"`  // 地址ID（可选）
+        CouponId  int64          `json:"coupon_id,optional"`   // 优惠券ID（可选）
+    }
+
+    AddressSnapshot {
+        ReceiverName  string `json:"receiver_name"`   // 收货人姓名
+        ReceiverPhone string `json:"receiver_phone"`  // 收货人电话
+        Province      string `json:"province"`        // 省份
+        City          string `json:"city"`            // 城市
+        District      string `json:"district"`        // 区/县
+        DetailAddress string `json:"detail_address"`  // 详细地址
+    }
+
+    PreOrderResp {
+        Token         string          `json:"settlement_token"` // 结算令牌
+        Items         []CartItem      `json:"items"`            // 商品清单
+        Address       AddressSnapshot `json:"address"`          // 地址详情
+        TotalAmount   int64           `json:"total_amount"`     // 商品总价（单位：分）
+        FreightAmount int64           `json:"freight_amount"`   // 运费（单位：分）
+        CouponAmount  int64           `json:"coupon_amount"`    // 优惠券减免（单位：分）
+        PayAmount     int64           `json:"pay_amount"`       // 实际支付金额（单位：分）
+    }
+
+    CreateOrderReq {
+        SettlementToken string `json:"settlement_token"`        // 结算令牌
+        AddressId       int64  `json:"address_id"`              // 最终使用的地址ID
+        CouponId        int64  `json:"coupon_id,optional"`      // 优惠券ID（可选）
+        PayType         int64  `json:"pay_type,optional"`       // 支付方式：1-微信，2-支付宝
+        PayAmount       int64  `json:"pay_amount"`              // 前端传回的应付金额（分），后端必须重新计算并校验
+        Remark          string `json:"remark,optional"`         // 订单备注
+        IdempotencyKey  string `json:"idempotency_key"`         // 幂等键（前端生成）
+    }
+
+    CreateOrderResp {
+        OrderSn   string `json:"order_sn"`    // 订单号
+        PayAmount int64  `json:"pay_amount"`  // 实际支付金额（单位：分）
+    }
+
+    OrderItemSnapshot {
+        SkuId       int64  `json:"sku_id"`        // SKU ID
+        SpuId       int64  `json:"spu_id"`        // SPU ID
+        ProductName string `json:"product_name"`  // 商品名称
+        SkuName     string `json:"sku_name"`      // 规格名称
+        Pic         string `json:"pic"`           // 商品图片
+        Price       int64  `json:"price"`         // 下单时单价（单位：分）
+        Quantity    int64  `json:"quantity"`      // 数量
+        TotalAmount int64  `json:"total_amount"`  // 小计金额（单位：分）
+    }
+
+    OrderListItem {
+        OrderSn    string              `json:"order_sn"`     // 订单号
+        Status     int64               `json:"status"`       // 10:待付款 20:待发货 30:待收货 40:已完成 50:已取消 60:售后中
+        StatusDesc string              `json:"status_desc"`  // 状态描述
+        PayAmount  int64               `json:"pay_amount"`   // 实付金额（单位：分）
+        CreateTime string              `json:"create_time"`  // RFC3339格式
+        Items      []OrderItemSnapshot `json:"items"`        // 商品快照列表
+    }
+
+    OrderListReq {
+        Status int64 `form:"status,default=0"` // 0:全部 10,20,30,40,50,60
+        Pagination
+    }
+
+    OrderListResp {
+        Total int64          `json:"total"` // 总数量
+        List  []OrderListItem `json:"list"` // 订单列表
+    }
+
+    OrderDetailResp {
+        OrderListItem
+        Address        AddressSnapshot `json:"address"`                   // 收货地址快照
+        FreightAmount  int64           `json:"freight_amount"`            // 运费（分）
+        CouponAmount   int64           `json:"coupon_amount"`             // 优惠金额（分）
+        DeliverySn     string          `json:"delivery_sn,optional"`      // 物流单号
+        DeliveryCorp   string          `json:"delivery_corp,optional"`    // 物流公司
+        ExpireTime     int64           `json:"expire_time,optional"`      // 待付款倒计时截止时间戳（秒）
+        Remark         string          `json:"remark,optional"`           // 订单备注
+    }
+
+    CancelOrderReq {
+        CancelReason string `json:"cancel_reason,optional"` // 取消原因
+    }
+
+        // 物流轨迹节点
+    DeliveryTrackItem {
+        Time        string `json:"time"`         // RFC3339格式
+        Station     string `json:"station"`      // 地点
+        Status      string `json:"status"`       // 状态描述
+        Description string `json:"description"`  // 详细说明
+    }
+
+    DeliveryTrackResp {
+        OrderSn      string               `json:"order_sn"`       // 订单号
+        DeliverySn   string               `json:"delivery_sn"`    // 物流单号
+        DeliveryCorp string               `json:"delivery_corp"`  // 物流公司
+        Status       int64                `json:"status"`         // 物流主状态码：100-已揽收，200-运输中，300-派送中，400-已签收，500-异常
+        StatusDesc   string               `json:"status_desc"`    // 状态描述
+        Tracks       []DeliveryTrackItem  `json:"tracks"`         // 轨迹节点列表
+    }
+
+        // 售后申请
+    AfterSaleReq {
+        OrderSn     string   `json:"order_sn"`               // 订单号
+        SkuId       int64    `json:"sku_id"`                 // SKU ID
+        Quantity    int64    `json:"quantity"`               // 退款数量（支持部分退款）
+        Type        int64    `json:"type"`                   // 1:仅退款 2:退货退款
+        Reason      string   `json:"reason"`                 // 售后原因
+        ApplyAmount int64    `json:"apply_amount"`           // 申请退款金额（单位：分）
+        Images      []string `json:"images,optional"`        // 凭证图片URL列表
+    }
+
+    AfterSaleResp {
+        AfterSaleId  int64  `json:"after_sale_id"`   // 售后单ID
+        Status       int64  `json:"status"`          // 1:待审核 2:待退货 3:退款中 4:已完成 5:已拒绝
+        StatusDesc   string `json:"status_desc"`     // 状态描述
+        ApplyAmount  int64  `json:"apply_amount"`    // 申请退款金额（分）
+        AuditRemark  string `json:"audit_remark,optional"` // 审核备注
+        CreatedAt    string `json:"created_at"`      // RFC3339格式
+    }
+)
+
+// 购物车模块（需登录）
+@server(
+    jwt:    JwtAuth
+    group:  cart
+    prefix: /api/v1/order/cart
+)
+service orderApi {
+    @doc "添加/更新购物车商品（数量为0则删除）"
+    @handler updateCart
+    post /update (UpdateCartReq) returns ()
+
+    @doc "修改购物车商品的勾选状态"
+    @handler selectCart
+    post /select (SelectCartReq) returns ()
+
+    @doc "获取购物车列表"
+    @handler cartList
+    get /list returns (CartListResp)
+
+    @doc "批量删除购物车商品"
+    @handler removeCart
+    delete /remove (SkuIdsReq) returns ()
+
+    @doc "清空购物车"
+    @handler clearCart
+    delete /clear returns ()
+}
+
+// 订单核心模块（需登录）
+@server(
+    jwt:    JwtAuth
+    group:  order
+    prefix: /api/v1/order
+)
+service orderApi {
+    @doc "预下单（确认订单页，生成结算令牌）"
+    @handler preOrder
+    post /pre-order (PreOrderReq) returns (PreOrderResp)
+
+    @doc "正式提交订单"
+    @handler createOrder
+    post /create (CreateOrderReq) returns (CreateOrderResp)
+
+    @doc "订单列表"
+    @handler orderList
+    get /list (OrderListReq) returns (OrderListResp)
+
+    @doc "订单详情"
+    @handler orderDetail
+    get /detail/:order_sn (OrderSnPathReq) returns (OrderDetailResp)
+
+    @doc "取消订单（仅待支付状态可取消）"
+    @handler cancelOrder
+    post /cancel/:order_sn (CancelOrderReq) returns ()
+
+    @doc "确认收货"
+    @handler confirmReceipt
+    post /confirm/:order_sn (OrderSnPathReq) returns ()
+}
+
+// 物流模块（需登录）
+@server(
+    jwt:    JwtAuth
+    group:  delivery
+    prefix: /api/v1/order/delivery
+)
+service orderApi {
+    @doc "查询物流轨迹"
+    @handler track
+    get /track/:order_sn (OrderSnPathReq) returns (DeliveryTrackResp)
+}
+
+// 售后模块（需登录）
+@server(
+    jwt:    JwtAuth
+    group:  aftersale
+    prefix: /api/v1/order/aftersale
+)
+service orderApi {
+    @doc "申请售后"
+    @handler applyAfterSale
+    post /apply (AfterSaleReq) returns (AfterSaleResp)
+
+    @doc "查询售后详情"
+    @handler afterSaleDetail
+    get /detail/:id (IdPathReq) returns (AfterSaleResp)
+
+    @doc "取消售后申请（仅待审核状态可取消）"
+    @handler cancelAfterSale
+    post /cancel/:id (IdPathReq) returns ()
+}
+
+// =============================================================
+// 4. 支付服务模块 (paymentApi)
+// =============================================================
+
+type (
+    // 发起支付请求
+    CreatePaymentReq {
+        OrderSn string `json:"order_sn"`           // 订单号
+        Channel string `json:"channel"`            // 支付渠道: alipay, wechat
+        PayType string `json:"pay_type"`           // 支付场景: APP, H5, JSAPI, QR
+        Amount  int64  `json:"amount"`             // 应付金额（分），用于后端校验
+        OpenId  string `json:"openid,optional"`    // 微信JSAPI支付时必传
+    }
+
+    CreatePaymentResp {
+        PaymentSn string `json:"payment_sn"`       // 支付流水号
+        PayData   string `json:"pay_data"`         // 支付参数（JSON字符串或表单HTML）
+    }
+
+    PaymentStatusResp {
+        PaymentSn      string `json:"payment_sn"`                // 支付流水号
+        OrderSn        string `json:"order_sn"`                  // 订单号
+        Channel        string `json:"channel"`                   // 支付渠道
+        ChannelOrderSn string `json:"channel_order_sn,optional"` // 渠道订单号
+        TransactionId  string `json:"transaction_id,optional"`   // 第三方交易号
+        Status         int64  `json:"status"`                    // 0:待支付 1:成功 2:失败 3:退款中 4:退款成功
+        StatusDesc     string `json:"status_desc"`               // 状态描述
+        Amount         int64  `json:"amount"`                    // 单位：分
+        PayTime        string `json:"pay_time,optional"`         // RFC3339格式支付时间
+        ErrorMsg       string `json:"error_msg,optional"`        // 错误信息
+    }
+
+        // 退款申请（由订单服务售后调用）
+    RefundApplyReq {
+        OrderSn   string   `json:"order_sn"`             // 订单号
+        PaymentSn string   `json:"payment_sn,optional"`  // 支付流水号（可选，不传则自动查找）
+        Amount    int64    `json:"amount"`               // 退款金额（分）
+        Reason    string   `json:"reason"`               // 退款原因
+        Type      int64    `json:"type"`                 // 1:仅退款 2:退货退款
+        Images    []string `json:"images,optional"`      // 退款凭证图片
+    }
+
+    RefundApplyResp {
+        RefundSn   string `json:"refund_sn"`    // 退款单号
+        Status     int64  `json:"status"`       // 0:处理中 1:成功 2:失败
+        StatusDesc string `json:"status_desc"`  // 状态描述
+    }
+
+    RefundDetailResp {
+        RefundSn      string `json:"refund_sn"`               // 退款单号
+        PaymentSn     string `json:"payment_sn"`              // 支付流水号
+        OrderSn       string `json:"order_sn"`                // 订单号
+        Amount        int64  `json:"amount"`                  // 退款金额（分）
+        Status        int64  `json:"status"`                  // 0:处理中 1:成功 2:失败
+        StatusDesc    string `json:"status_desc"`             // 状态描述
+        RefundTime    string `json:"refund_time,optional"`    // 退款完成时间
+        TransactionId string `json:"transaction_id,optional"` // 第三方退款交易号
+        ErrorMsg      string `json:"error_msg,optional"`      // 错误信息
+    }
+
+        // 支付回调统一响应（实际需按渠道返回特定格式，handler中处理）
+    CallbackResp {
+        Code    string `json:"code,optional"`    // 响应码
+        Message string `json:"message,optional"` // 响应消息
+    }
+)
+
+// 支付模块（需登录）
+@server(
+    jwt:    JwtAuth
+    group:  payment
+    prefix: /api/v1/payment
+)
+service paymentApi {
+    @doc "创建支付单（获取第三方支付拉起参数）"
+    @handler createPayment
+    post /create (CreatePaymentReq) returns (CreatePaymentResp)
+
+    @doc "根据支付流水号查询支付状态"
+    @handler statusByPaymentSn
+    get /status/payment/:payment_sn (PaymentSnPathReq) returns (PaymentStatusResp)
+
+    @doc "根据订单号查询支付状态"
+    @handler statusByOrderSn
+    get /status/order/:order_sn (OrderSnPathReq) returns (PaymentStatusResp)
+
+    @doc "关闭支付单（未支付时）"
+    @handler closePayment
+    post /close/:payment_sn (PaymentSnPathReq) returns ()
+
+    @doc "申请退款（由订单服务售后调用）"
+    @handler refundApply
+    post /refund/apply (RefundApplyReq) returns (RefundApplyResp)
+
+    @doc "查询退款详情"
+    @handler refundDetail
+    get /refund/detail/:order_sn (OrderSnPathReq) returns (RefundDetailResp)
+}
+
+// 第三方回调接口（无需认证）
+@server(
+    group:  callback
+    prefix: /api/v1/payment/callback
+)
+service paymentApi {
+    @doc "支付宝异步回调"
+    @handler alipayCallback
+    post /alipay returns (CallbackResp)
+
+    @doc "微信支付异步回调"
+    @handler wechatCallback
+    post /wechat returns (CallbackResp)
+}
+
+// =============================================================
+// 5. 营销服务模块 (marketingApi)
+// =============================================================
+
+type (
+    // 优惠券基础信息（领券中心展示）
+    Coupon {
+        Id                int64  `json:"id"`                   // 优惠券ID
+        Name              string `json:"name"`                 // 优惠券名称
+        Type              int64  `json:"type"`                 // 1-满减券，2-折扣券，3-无门槛券
+        ThresholdAmount   int64  `json:"threshold_amount"`     // 使用门槛（单位：分）
+        ReduceAmount      int64  `json:"reduce_amount"`        // 满减金额（单位：分），仅满减券有效
+        DiscountRate      int64  `json:"discount_rate"`        // 折扣率：80 表示8折，仅折扣券有效
+        MaxDiscountAmount int64  `json:"max_discount_amount"`  // 折扣封顶金额（单位：分），仅折扣券有效
+        StartTime         string `json:"start_time"`           // 生效开始时间 RFC3339
+        EndTime           string `json:"end_time"`             // 生效结束时间 RFC3339
+        Description       string `json:"description"`          // 优惠券描述
+        IsClaimed         bool   `json:"is_claimed"`           // 当前用户是否已领取
+    }
+
+        // 用户优惠券资产（我的卡包）
+    UserCoupon {
+        Id                 int64  `json:"id"`                           // 用户优惠券记录ID
+        CouponId           int64  `json:"coupon_id"`                    // 优惠券ID
+        Name               string `json:"name"`                         // 优惠券名称
+        Type               int64  `json:"type"`                         // 优惠券类型
+        Status             int64  `json:"status"`                       // 0-未使用，1-已使用，2-已过期
+        ExpireTime         string `json:"expire_time"`                  // 用户持有过期时间 RFC3339
+        OrderSn            string `json:"order_sn,optional"`            // 使用该券的订单号
+        UnavailableReason  string `json:"unavailable_reason,optional"`  // 不可用原因（结算页用）
+                                                                        // 快照字段（防止优惠券规则修改影响历史订单）
+        ThresholdAmount    int64  `json:"threshold_amount"`     // 使用门槛（分）
+        ReduceAmount       int64  `json:"reduce_amount"`        // 满减金额（分）
+        DiscountRate       int64  `json:"discount_rate"`        // 折扣率
+        MaxDiscountAmount  int64  `json:"max_discount_amount"`  // 折扣封顶金额（分）
+    }
+
+    CouponListReq {
+        Pagination
+    }
+
+    CouponListResp {
+        Total int64    `json:"total"` // 总数量
+        List  []Coupon `json:"list"`  // 优惠券列表
+    }
+
+    ClaimCouponReq {
+        CouponId int64 `json:"coupon_id"` // 优惠券ID
+    }
+
+    ClaimCouponResp {
+        UserCouponId int64  `json:"user_coupon_id"` // 用户优惠券记录ID
+        ExpireTime   string `json:"expire_time"`    // 领取后的过期时间
+    }
+
+    MyCouponListReq {
+        Status int64 `form:"status,default=0"` // 0-未使用，1-已使用，2-已过期
+        Pagination
+    }
+
+    MyCouponListResp {
+        Total int64        `json:"total"` // 总数量
+        List  []UserCoupon `json:"list"`  // 用户优惠券列表
+    }
+
+    AvailableCouponsReq {
+        OrderAmount int64 `json:"order_amount"` // 当前订单总金额（单位：分）
+    }
+
+    AvailableCouponsResp {
+        Available   []UserCoupon `json:"available"`   // 可使用的优惠券
+        Unavailable []UserCoupon `json:"unavailable"` // 不可使用的优惠券（含原因）
+    }
+
+        // ---------- 内部接口（供订单服务调用） ----------
+        // 注意：以下接口仅供内部服务调用，普通用户不应直接访问。
+        // 后续将通过 IP 白名单、独立 JWT 或 mTLS 等方式限制访问来源。
+    UseCouponReq {
+        UserCouponId int64  `json:"user_coupon_id"` // 用户优惠券记录ID
+        OrderSn      string `json:"order_sn"`       // 订单号
+    }
+
+    UseCouponResp {
+        Success        bool   `json:"success"`          // 是否成功
+        DiscountAmount int64  `json:"discount_amount"`  // 实际减免金额（单位：分）
+        ErrorMsg       string `json:"error_msg,optional"` // 错误信息
+    }
+
+    UnlockCouponReq {
+        UserCouponId int64  `json:"user_coupon_id"` // 用户优惠券记录ID
+        OrderSn      string `json:"order_sn"`       // 订单号
+    }
+
+    UnlockCouponResp {
+        Success  bool   `json:"success"`           // 是否成功
+        ErrorMsg string `json:"error_msg,optional"` // 错误信息
+    }
+)
+
+// C端优惠券接口（需登录）
+@server(
+    jwt:    JwtAuth
+    group:  coupon
+    prefix: /api/v1/marketing/coupon
+)
+service marketingApi {
+    @doc "领券中心：获取全场可领取优惠券"
+    @handler couponList
+    get /list (CouponListReq) returns (CouponListResp)
+
+    @doc "用户领取优惠券"
+    @handler claimCoupon
+    post /claim (ClaimCouponReq) returns (ClaimCouponResp)
+
+    @doc "我的优惠券：查看个人卡券包"
+    @handler myCoupons
+    get /mine (MyCouponListReq) returns (MyCouponListResp)
+
+    @doc "结算页：根据订单金额获取可用优惠券"
+    @handler availableCoupons
+    post /available (AvailableCouponsReq) returns (AvailableCouponsResp)
+}
+
+// 内部接口（仅供订单服务等可信调用方使用）
+// 当前使用 JwtAuth，但应配置专用 client 凭证或后续改为 IP 白名单/独立 JWT 签发者。
+@server(
+    jwt:    JwtAuth
+    group:  internal
+    prefix: /internal/v1/coupon
+)
+service marketingApi {
+    @doc "订单服务：使用优惠券（锁定并扣减）"
+    @handler useCoupon
+    post /use (UseCouponReq) returns (UseCouponResp)
+
+    @doc "订单服务：解锁优惠券（订单取消时回滚）"
+    @handler unlockCoupon
+    post /unlock (UnlockCouponReq) returns (UnlockCouponResp)
+}

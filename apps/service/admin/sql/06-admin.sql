@@ -127,7 +127,6 @@ CREATE TABLE IF NOT EXISTS `help_category` (
     `sort`       INT             NOT NULL DEFAULT '0' COMMENT '排序值：数值越小越靠前',
     `status`     TINYINT         NOT NULL DEFAULT '1' COMMENT '状态：1-启用，2-禁用',
     `created_at` DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `updated_at` DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4

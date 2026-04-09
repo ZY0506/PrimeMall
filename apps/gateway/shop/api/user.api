@@ -1,9 +1,201 @@
 syntax = "v1"
 
 info(
-    title: "type title here"
-    desc: "type desc here"
-    author: "type author here"
-    email: "type email here"
-    version: "type version here"
+    title: "PrimeMall-用户服务"
+    desc: "负责用户注册、登录、个人资料管理及收货地址管理"
+    author: "烤冷面"
+    version: "v1.0"
 )
+
+// =============================================================
+// 1. 数据结构定义
+// =============================================================
+
+type (
+    // 基础鉴权请求
+    CaptchaReq {
+        Phone string `json:"phone"`     // 手机号
+        Scene string `json:"scene"`     // 场景：login, register, reset_pwd
+    }
+
+    LoginReq {
+        Phone    string `json:"phone"`      // 手机号
+        Password string `json:"password"`   // 密码
+    }
+
+    MobileLoginReq {
+        Phone string `json:"phone"`     // 手机号
+        Code  string `json:"code"`      // 验证码
+    }
+
+    RegisterReq {
+        Phone    string `json:"phone"`      // 手机号
+        Password string `json:"password"`   // 密码
+        Code     string `json:"code"`       // 验证码
+        Nickname string `json:"nickname,optional"`  // 昵称（可选）
+    }
+
+    LoginResp {
+        AccessToken  string `json:"access_token"`    // 访问令牌
+        AccessExpire int64  `json:"access_expire"`   // 访问令牌过期时间戳
+        RefreshAfter int64  `json:"refresh_after"`   // 建议刷新令牌的时间戳
+    }
+
+    ResetPasswordReq {
+        Phone       string `json:"phone"`          // 手机号
+        Code        string `json:"code"`           // 验证码
+        NewPassword string `json:"new_password"`   // 新密码
+    }
+)
+
+type (
+    // 用户资料
+    UserInfoResp {
+        Id          int64  `json:"id"`            // 用户ID
+        Phone       string `json:"phone"`         // 手机号
+        Nickname    string `json:"nickname"`      // 昵称
+        Avatar      string `json:"avatar"`        // 头像URL
+        Gender      int64  `json:"gender"`        // 性别：0-未知，1-男，2-女
+        Birthday    string `json:"birthday"`      // 生日（YYYY-MM-DD格式）
+        Status      int64  `json:"status"`        // 账号状态：0-禁用，1-正常
+        StatusDesc  string `json:"status_desc"`   // 状态描述
+    }
+
+    UpdateUserInfoReq {
+        Nickname string `json:"nickname,optional"`   // 昵称（可选）
+        Avatar   string `json:"avatar,optional"`     // 头像URL（可选）
+        Gender   int64  `json:"gender,optional"`     // 性别：0-未知，1-男，2-女（可选）
+        Birthday string `json:"birthday,optional"`   // 生日（YYYY-MM-DD格式，可选）
+    }
+
+    UpdatePasswordReq {
+        OldPassword string `json:"old_password"`   // 旧密码
+        NewPassword string `json:"new_password"`   // 新密码
+    }
+
+    UpdatePhoneReq {
+        OldPhoneCode string `json:"old_phone_code,optional"` // 原手机验证码（已登录时可选）
+        NewPhone     string `json:"new_phone"`               // 新手机号
+        NewPhoneCode string `json:"new_phone_code"`          // 新手机验证码
+    }
+
+    DeleteAccountReq {
+        Password string `json:"password"`          // 密码验证
+        Code     string `json:"code,optional"`     // 或短信验证码
+    }
+)
+
+type (
+    // 收货地址
+    AddressItem {
+        Id            int64  `json:"id,optional"`              // 地址ID（新增时可选，更新时必填）
+        ReceiverName  string `json:"receiver_name"`            // 收货人姓名
+        ReceiverPhone string `json:"receiver_phone"`           // 收货人电话
+        Province      string `json:"province"`                 // 省份
+        City          string `json:"city"`                     // 城市
+        District      string `json:"district"`                 // 区/县
+        DetailAddress string `json:"detail_address"`           // 详细地址
+        IsDefault     int64  `json:"is_default"`               // 是否默认地址：0-否，1-是
+        Tag           string `json:"tag,optional"`             // 地址标签：HOME-家，OFFICE-公司，SCHOOL-学校
+        PostalCode    string `json:"postal_code,optional"`     // 邮政编码
+    }
+
+    AddressListResp {
+        List []AddressItem `json:"list"`   // 地址列表
+    }
+
+    AddressIdReq {
+        Id int64 `path:"id"`   // 地址ID
+    }
+)
+
+// =============================================================
+// 2. 服务接口定义
+// =============================================================
+
+// --- 免登录认证模块 ---
+@server(
+    group:  auth
+    prefix: api/v1/user
+)
+service shop-api {
+    @doc "获取短信验证码"
+    @handler captcha
+    post /captcha (CaptchaReq) returns ()
+
+    @doc "手机号密码登录"
+    @handler login
+    post /login (LoginReq) returns (LoginResp)
+
+    @doc "手机号验证码登录"
+    @handler mobileLogin
+    post /login/mobile (MobileLoginReq) returns (LoginResp)
+
+    @doc "用户注册"
+    @handler register
+    post /register (RegisterReq) returns (LoginResp)
+
+    @doc "忘记密码重置"
+    @handler resetPassword
+    post /password/reset (ResetPasswordReq) returns ()
+}
+
+// --- 需登录个人信息模块 ---
+@server(
+    jwt:    JwtAuth
+    group:  user
+    prefix: api/v1/user
+)
+service shop-api {
+    @doc "获取个人资料"
+    @handler detail
+    get /info returns (UserInfoResp)
+
+    @doc "更新个人资料"
+    @handler updateInfo
+    put /info (UpdateUserInfoReq) returns ()
+
+    @doc "修改登录密码"
+    @handler updatePassword
+    put /password/update (UpdatePasswordReq) returns ()
+
+    @doc "修改手机号"
+    @handler updatePhone
+    put /phone (UpdatePhoneReq) returns ()
+
+    @doc "注销账号"
+    @handler deleteAccount
+    delete /account (DeleteAccountReq) returns ()
+
+    @doc "退出登录"
+    @handler logout
+    post /logout returns ()
+}
+
+// --- 需登录地址管理模块 ---
+@server(
+    jwt:    JwtAuth
+    group:  address
+    prefix: api/v1/address
+)
+service shop-api {
+    @doc "添加收货地址"
+    @handler add
+    post / (AddressItem) returns ()
+
+    @doc "获取地址列表"
+    @handler list
+    get /list returns (AddressListResp)
+
+    @doc "更新收货地址"
+    @handler update
+    put / (AddressItem) returns ()
+
+    @doc "删除收货地址"
+    @handler deleteById
+    delete /:id (AddressIdReq) returns ()
+
+    @doc "设置默认收货地址"
+    @handler setDefault
+    patch /default/:id (AddressIdReq) returns ()
+}
