@@ -1,9 +1,194 @@
 syntax = "v1"
 
 info(
-    title: "type title here"
-    desc: "type desc here"
-    author: "type author here"
-    email: "type email here"
-    version: "type version here"
+    title: "PrimeMall-商品服务"
+    desc: "负责商品分类、商品列表/详情、推荐及批量SKU查询。注意：复杂关键词搜索请使用独立搜索服务。"
+    author: "烤冷面"
+    version: "v1.0"
 )
+
+// =============================================================
+// 1. 数据结构定义
+// =============================================================
+
+type (
+    // 商品分类信息（用于树形结构）
+    Category {
+        Id       int64       `json:"id"`                // 分类ID
+        ParentId int64       `json:"parent_id"`         // 父分类ID
+        Name     string      `json:"name"`              // 分类名称
+        Icon     string      `json:"icon"`              // 分类图标URL
+        Level    int64       `json:"level"`             // 分类层级：1一级 2二级 3三级
+        Children []Category  `json:"children,optional"` // 子分类列表
+    }
+
+    // 分类详情（无 children，用于单分类查询）
+    CategoryInfo {
+        Id       int64  `json:"id"`                // 分类ID
+        ParentId int64  `json:"parent_id"`         // 父分类ID
+        Name     string `json:"name"`              // 分类名称
+        Icon     string `json:"icon"`              // 分类图标URL
+        Level    int64  `json:"level"`             // 分类层级：1一级 2二级 3三级
+    }
+
+    // 分类树响应
+    CategoryTreeResp {
+        List []Category `json:"list"` // 分类列表
+    }
+
+    // 分类详情响应
+    CategoryResp {
+        Category CategoryInfo `json:"category"` // 分类信息
+    }
+)
+
+type (
+    // 商品列表请求（支持多维度筛选）
+    ProductListReq {
+        CategoryId int64  `form:"category_id,optional"` // 分类ID
+        Brand      string `form:"brand,optional"`       // 品牌名称（模糊匹配）
+        MinPrice   int64  `form:"min_price,optional"`   // 最低价格（单位：分）
+        MaxPrice   int64  `form:"max_price,optional"`   // 最高价格（单位：分）
+        Keyword    string `form:"keyword,optional"`     // 简单关键词搜索（大数据量建议使用搜索服务）
+        Attrs      string `form:"attrs,optional"`       // 属性过滤，格式 "颜色:红色,内存:64G"
+        IsNew      bool   `form:"is_new,optional"`      // 是否新品（按创建时间<7天）
+        Page       int64  `form:"page,default=1"`       // 页码
+        Size       int64  `form:"size,default=10"`      // 每页数量
+        Sort       string `form:"sort,optional"`        // 排序: price_asc, price_desc, sales_desc, new_desc
+    }
+
+    // 商品列表项
+    ProductItem {
+        Id          int64   `json:"id"`                // 商品ID
+        Name        string  `json:"name"`              // 商品名称
+        Brand       string  `json:"brand"`             // 品牌名称
+        Description string  `json:"description"`       // 商品简介
+        DefaultPic  string  `json:"default_pic"`       // 默认主图URL
+        Price       int64   `json:"price"`             // 最低SKU价格（单位：分）
+        Sales       int64   `json:"sales"`             // 实际销量
+        ShowSales   int64   `json:"show_sales"`        // 前台展示销量 = sales + virtual_sales
+    }
+
+    // 商品列表响应
+    ProductListResp {
+        Total int64         `json:"total"` // 总数量
+        List  []ProductItem `json:"list"`  // 商品列表
+    }
+)
+
+type (
+    // 商品详情
+    ProductDetailResp {
+        Id               int64           `json:"id"`                  // 商品ID
+        CategoryId       int64           `json:"category_id"`         // 所属分类ID
+        Brand            string          `json:"brand"`               // 品牌名称
+        Name             string          `json:"name"`                // 商品名称
+        Description      string          `json:"description"`         // 商品简介
+        Content          string          `json:"content"`             // 富文本详情
+        DefaultPic       string          `json:"default_pic"`         // 默认主图URL
+        BannerPics       []string        `json:"banner_pics"`         // 轮播图列表
+        VideoUrl         string          `json:"video_url,optional"`  // 商品视频URL
+        Weight           int64           `json:"weight"`              // 重量(g)
+        FreightTemplateId int64          `json:"freight_template_id"` // 运费模板ID
+        Price            int64           `json:"price"`               // 最低SKU价格（单位：分）
+        Sales            int64           `json:"sales"`               // 实际销量
+        ShowSales        int64           `json:"show_sales"`          // 展示销量
+        Status           int64           `json:"status"`              // 1:上架 2:下架
+        StatusDesc       string          `json:"status_desc"`         // 状态描述
+        Skus             []SkuItem       `json:"skus"`                // SKU列表
+        Attributes       []AttributeItem `json:"attributes"`          // 聚合属性（颜色、内存等）
+    }
+
+    // SKU 信息
+    SkuItem {
+        Id        int64   `json:"id"`                // SKU ID
+        Name      string  `json:"name"`              // 规格名称，服务端根据 spec_data 生成，如"红色 64G"
+        Pic       string  `json:"pic"`               // SKU图片URL
+        Price     int64   `json:"price"`             // 价格（单位：分）
+        Stock     int64   `json:"stock"`             // 库存数量
+        SpecData  string  `json:"spec_data"`         // 原始 JSON，如 {"颜色":"红色","容量":"64G"}
+    }
+
+    // 属性聚合项（用于前端筛选）
+    AttributeItem {
+        Name   string   `json:"name"`   // 属性名，如"颜色"
+        Values []string `json:"values"` // 属性值列表，如 ["红色","蓝色","白色"]
+    }
+
+    // 通用ID请求
+    ProductIdReq {
+        Id int64 `path:"id"` // 商品ID或分类ID
+    }
+)
+
+// 推荐接口独立参数
+type (
+    // 推荐请求
+    RecommendReq {
+        Scene     string `form:"scene,optional"`      // 场景：home(首页), cart(购物车), detail(详情页)
+        Limit     int64  `form:"limit,default=10"`    // 返回数量
+        CurrentId int64  `form:"current_id,optional"` // 当前商品ID（详情页推荐时使用）
+    }
+)
+
+// 批量查询SKU
+type (
+    // 批量SKU请求
+    BatchSkuReq {
+        SkuIds []int64 `json:"sku_ids"` // SKU ID列表
+    }
+
+    // SKU简要信息
+    SkuSimple {
+        Id    int64  `json:"id"`     // SKU ID
+        Price int64  `json:"price"`  // 价格（单位：分）
+        Stock int64  `json:"stock"`  // 库存数量
+    }
+
+    // 批量SKU响应
+    BatchSkuResp {
+        List []SkuSimple `json:"list"` // SKU列表
+    }
+)
+
+// =============================================================
+// 2. 服务接口定义
+// =============================================================
+
+// --- 商品分类模块 ---
+@server(
+    group:  category
+    prefix: api/v1/product
+)
+service shop-api {
+    @doc "获取商品全部分类树"
+    @handler categoryTree
+    get /category/tree returns (CategoryTreeResp)
+
+    @doc "获取单个分类详情"
+    @handler categoryInfo
+    get /category/:id (ProductIdReq) returns (CategoryResp)
+}
+
+// --- 商品浏览模块 ---
+@server(
+    group:  product
+    prefix: api/v1/product
+)
+service shop-api {
+    @doc "商品列表与筛选（简单关键词搜索，大数据量建议使用搜索服务）"
+    @handler list
+    get /list (ProductListReq) returns (ProductListResp)
+
+    @doc "商品详情"
+    @handler detail
+    get /detail/:id (ProductIdReq) returns (ProductDetailResp)
+
+    @doc "个性化推荐（首页、购物车、详情页）"
+    @handler recommend
+    get /recommend (RecommendReq) returns (ProductListResp)
+
+    @doc "批量获取SKU信息（价格、库存）"
+    @handler batchSku
+    post /skus/batch (BatchSkuReq) returns (BatchSkuResp)
+}

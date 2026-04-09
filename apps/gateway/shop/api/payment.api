@@ -2,7 +2,150 @@ syntax = "v1"
 
 info(
     title: "PrimeMall-支付服务"
-    desc: "type desc here"
+    desc: "负责支付单创建、支付拉起、第三方回调处理及退款申请"
     author: "烤冷面"
     version: "v1.0"
 )
+
+// =============================================================
+// 1. 公共类型定义
+// =============================================================
+
+type (
+    // 订单号路径参数（复用订单服务定义，此处独立以避免循环依赖）
+    OrderSnReq {
+        OrderSn string `path:"order_sn"` // 订单号
+    }
+
+    PaymentSnReq {
+        PaymentSn string `path:"payment_sn"` // 支付流水号
+    }
+
+    // 第三方支付回调响应
+    CallbackResp {
+        Code    string `json:"code,optional"`     // 响应码
+        Message string `json:"message,optional"`  // 响应消息
+    }
+)
+
+// =============================================================
+// 2. 支付相关数据结构
+// =============================================================
+
+type (
+    // 发起支付请求
+    CreatePaymentReq {
+        OrderSn string `json:"order_sn"`           // 订单号
+        Channel string `json:"channel"`            // alipay, wechat
+        PayType string `json:"pay_type"`           // APP, H5, JSAPI, QR
+        Amount  int64  `json:"amount"`             // 应付金额（分），用于后端校验
+        OpenId  string `json:"openid,optional"`    // 微信JSAPI支付时必传
+    }
+
+    // 发起支付响应
+    CreatePaymentResp {
+        PaymentSn string `json:"payment_sn"`       // 支付流水号
+        PayData   string `json:"pay_data"`         // 支付参数（JSON字符串或直接表单HTML）
+    }
+
+    // 支付状态查询响应
+    PaymentStatusResp {
+        PaymentSn      string `json:"payment_sn"`              // 支付流水号
+        OrderSn        string `json:"order_sn"`                // 订单号
+        Channel        string `json:"channel"`                 // 支付渠道：alipay, wechat
+        ChannelOrderSn string `json:"channel_order_sn,optional"` // 渠道订单号
+        TransactionId  string `json:"transaction_id,optional"` // 第三方交易号
+        Status         int64  `json:"status"`                  // 0:待支付 1:成功 2:失败 3:退款中 4:退款成功
+        StatusDesc     string `json:"status_desc"`             // 状态描述
+        Amount         int64  `json:"amount"`                  // 单位：分
+        PayTime        string `json:"pay_time,optional"`       // RFC3339格式支付时间
+        ErrorMsg       string `json:"error_msg,optional"`      // 错误信息
+    }
+)
+
+// =============================================================
+// 3. 退款相关数据结构
+// =============================================================
+
+type (
+    // 申请退款请求（由订单服务售后流程调用，需内部鉴权）
+    RefundApplyReq {
+        OrderSn     string   `json:"order_sn"`           // 订单号
+        PaymentSn   string   `json:"payment_sn"`         // 支付流水号（可选，不传则自动查找）
+        Amount      int64    `json:"amount"`             // 退款金额（分）
+        Reason      string   `json:"reason"`             // 退款原因
+        Type        int64    `json:"type"`               // 退款类型：1:仅退款 2:退货退款
+        Images      []string `json:"images,optional"`    // 退款凭证图片
+    }
+
+    // 退款申请响应
+    RefundApplyResp {
+        RefundSn     string `json:"refund_sn"`       // 退款单号
+        Status       int64  `json:"status"`          // 0:处理中 1:成功 2:失败
+        StatusDesc   string `json:"status_desc"`     // 状态描述
+    }
+
+    // 退款详情响应
+    RefundDetailResp {
+        RefundSn      string `json:"refund_sn"`             // 退款单号
+        PaymentSn     string `json:"payment_sn"`            // 支付流水号
+        OrderSn       string `json:"order_sn"`              // 订单号
+        Amount        int64  `json:"amount"`                // 退款金额（分）
+        Status        int64  `json:"status"`                // 0:处理中 1:成功 2:失败
+        StatusDesc    string `json:"status_desc"`           // 状态描述
+        RefundTime    string `json:"refund_time,optional"`  // 退款完成时间
+        TransactionId string `json:"transaction_id,optional"` // 第三方退款交易号
+        ErrorMsg      string `json:"error_msg,optional"`    // 错误信息
+    }
+)
+
+// =============================================================
+// 4. 服务接口定义
+// =============================================================
+
+// --- C端用户支付模块（需登录）---
+@server(
+    jwt:    JwtAuth
+    group:  payment
+    prefix: api/v1/payment
+)
+service shop-api {
+    @doc "创建支付单（获取第三方支付拉起参数）"
+    @handler create
+    post /create (CreatePaymentReq) returns (CreatePaymentResp)
+
+    @doc "根据支付流水号查询支付状态"
+    @handler statusByPaymentSn
+    get /status/payment/:payment_sn (PaymentSnReq) returns (PaymentStatusResp)
+
+    @doc "根据订单号查询支付状态"
+    @handler statusByOrderSn
+    get /status/order/:order_sn (OrderSnReq) returns (PaymentStatusResp)
+
+    @doc "关闭支付单（未支付时）"
+    @handler close
+    post /close/:payment_sn (PaymentSnReq) returns ()
+
+    @doc "申请退款（由订单服务售后调用）"
+    @handler refundApply
+    post /refund/apply (RefundApplyReq) returns (RefundApplyResp)
+
+    @doc "查询退款详情"
+    @handler refundDetail
+    get /refund/detail/:order_sn (OrderSnReq) returns (RefundDetailResp)
+}
+
+// --- 第三方支付回调模块（无需JWT认证）---
+@server(
+    group:  callback
+    prefix: api/v1/payment/callback
+)
+service shop-api {
+    @doc "支付宝异步回调"
+    @handler alipayCallback
+    post /alipay returns (CallbackResp)   // 实际返回支付宝要求的 success 字符串，这里用 map 占位
+
+    @doc "微信支付异步回调"
+    @handler wechatCallback
+    post /wechat returns (CallbackResp)
+}

@@ -1,8 +1,406 @@
 syntax = "v1"
 
 info(
-    title: "PrimeMall-后台管理服务"
-    desc: "关于商品的上架、类型发布、订单审核和基础数据维护等"
+    title: "PrimeMall-管理端"
+    desc: "负责管理员认证、用户管理、商品配置、订单发货、售后审批及优惠券管理"
     author: "烤冷面"
     version: "v1.0"
 )
+
+// =============================================================
+// 1. 公共类型定义
+// =============================================================
+
+type (
+    // 通用ID路径参数
+    IdReq {
+        Id int64 `path:"id"`
+    }
+
+        // 通用订单号路径参数
+    OrderSnReq {
+        OrderSn string `path:"order_sn"`
+    }
+
+        // 通用分页请求
+    PageReq {
+        Page int64 `form:"page,default=1"`
+        Size int64 `form:"size,default=10"`
+    }
+
+        // 通用状态更新请求
+    UpdateStatusReq {
+        Id     int64 `json:"id"`
+        Status int64 `json:"status"` // 1:启用/正常 2:禁用/下架
+    }
+)
+
+// =============================================================
+// 2. 管理员认证与个人信息
+// =============================================================
+
+type (
+    // 登录请求
+    LoginReq {
+        Username string `json:"username"`
+        Password string `json:"password"`
+    }
+
+        // 登录响应
+    LoginResp {
+        AccessToken  string `json:"access_token"`
+        AccessExpire int64  `json:"access_expire"`
+        RefreshAfter int64  `json:"refresh_after"`
+    }
+
+        // 修改密码请求
+    ChangePasswordReq {
+        OldPassword string `json:"old_password"`
+        NewPassword string `json:"new_password"`
+    }
+)
+
+// =============================================================
+// 3. C端用户管理
+// =============================================================
+
+type (
+    AdminUserItem {
+        Id        int64  `json:"id"`
+        Username  string `json:"username"`
+        Phone     string `json:"phone"`
+        Nickname  string `json:"nickname"`
+        Avatar    string `json:"avatar"`
+        Status    int64  `json:"status"` // 1:正常 2:禁用
+        CreatedAt string `json:"created_at"`
+    }
+
+    AdminUserListResp {
+        Total int64           `json:"total"`
+        List  []AdminUserItem `json:"list"`
+    }
+)
+
+// =============================================================
+// 4. 商品分类管理
+// =============================================================
+
+type (
+    // 分类列表项
+    CategoryItem {
+        Id       int64  `json:"id"`
+        ParentId int64  `json:"parent_id"`
+        Name     string `json:"name"`
+        Icon     string `json:"icon"`
+        Level    int64  `json:"level"`
+        Sort     int64  `json:"sort"`
+    }
+
+    CategoryListResp {
+        List []CategoryItem `json:"list"`
+    }
+
+        // 保存/更新分类
+    SaveCategoryReq {
+        Id       int64  `json:"id,optional"`
+        ParentId int64  `json:"parent_id"`
+        Name     string `json:"name"`
+        Icon     string `json:"icon,optional"`
+        Sort     int64  `json:"sort"`
+    }
+)
+
+// =============================================================
+// 5. 商品管理
+// =============================================================
+
+type (
+    // 商品列表项
+    AdminProductItem {
+        Id          int64  `json:"id"`
+        Name        string `json:"name"`
+        Brand       string `json:"brand"`
+        CategoryId  int64  `json:"category_id"`
+        DefaultPic  string `json:"default_pic"`
+        Price       int64  `json:"price"`   // 最低SKU价格（分）
+        Status      int64  `json:"status"`  // 1:上架 2:下架
+        CreatedAt   string `json:"created_at"`
+    }
+
+        // 商品列表请求
+    AdminProductListReq {
+        Page       int64  `form:"page,default=1"`
+        Size       int64  `form:"size,default=10"`
+        Keyword    string `form:"keyword,optional"`
+        CategoryId int64  `form:"category_id,optional"`
+        Status     int64  `form:"status,optional"` // 1:上架 2:下架
+    }
+
+    AdminProductListResp {
+        Total int64               `json:"total"`
+        List  []AdminProductItem  `json:"list"`
+    }
+
+        // SKU 保存结构
+    SaveSkuItem {
+        Id       int64  `json:"id,optional"`
+        Name     string `json:"name"`
+        Pic      string `json:"pic"`
+        Price    int64  `json:"price"`      // 分
+        Stock    int64  `json:"stock"`
+        SpecData string `json:"spec_data"`  // JSON格式
+    }
+
+        // 保存/更新商品
+    SaveProductReq {
+        Id          int64         `json:"id,optional"`
+        CategoryId  int64         `json:"category_id"`
+        Name        string        `json:"name"`
+        Brand       string        `json:"brand"`
+        Description string        `json:"description"`
+        Content     string        `json:"content"`
+        DefaultPic  string        `json:"default_pic"`
+        BannerPics  []string      `json:"banner_pics"`
+        Weight      int64         `json:"weight"` // 克
+        Skus        []SaveSkuItem `json:"skus"`
+    }
+
+        // 商品上下架请求
+    UpdateProductStatusReq {
+        Id     int64 `json:"id"`
+        Status int64 `json:"status"` // 1:上架 2:下架
+    }
+)
+
+// =============================================================
+// 6. 订单与售后管理
+// =============================================================
+
+type (
+    // 订单列表请求
+    AdminOrderListReq {
+        Page      int64  `form:"page,default=1"`
+        Size      int64  `form:"size,default=10"`
+        Status    int64  `form:"status,optional"`      // 订单状态 10,20,30,40,50,60
+        StartTime string `form:"start_time,optional"`  // RFC3339
+        EndTime   string `form:"end_time,optional"`
+        OrderSn   string `form:"order_sn,optional"`
+    }
+
+        // 订单列表项
+    AdminOrderItem {
+        OrderSn    string `json:"order_sn"`
+        UserId     int64  `json:"user_id"`
+        UserPhone  string `json:"user_phone"`
+        PayAmount  int64  `json:"pay_amount"`
+        Status     int64  `json:"status"`
+        StatusDesc string `json:"status_desc"`
+        CreatedAt  string `json:"created_at"`
+    }
+
+    AdminOrderListResp {
+        Total int64            `json:"total"`
+        List  []AdminOrderItem `json:"list"`
+    }
+
+        // 订单商品快照（管理端）
+    AdminOrderItemSnapshot {
+        SkuId       int64  `json:"sku_id"`
+        SpuId       int64  `json:"spu_id"`
+        ProductName string `json:"product_name"`
+        SkuName     string `json:"sku_name"`
+        Pic         string `json:"pic"`
+        Price       int64  `json:"price"`      // 成交单价（分）
+        Quantity    int64  `json:"quantity"`
+        TotalAmount int64  `json:"total_amount"`
+    }
+
+        // 收货地址快照
+    AdminAddressSnapshot {
+        ReceiverName  string `json:"receiver_name"`
+        ReceiverPhone string `json:"receiver_phone"`
+        Province      string `json:"province"`
+        City          string `json:"city"`
+        District      string `json:"district"`
+        DetailAddress string `json:"detail_address"`
+    }
+
+        // 订单详情响应
+    AdminOrderDetailResp {
+        OrderSn         string                    `json:"order_sn"`
+        UserId          int64                     `json:"user_id"`
+        UserPhone       string                    `json:"user_phone"`
+        Status          int64                     `json:"status"`
+        StatusDesc      string                    `json:"status_desc"`
+        PayAmount       int64                     `json:"pay_amount"`
+        FreightAmount   int64                     `json:"freight_amount"`
+        CouponAmount    int64                     `json:"coupon_amount"`
+        Remark          string                    `json:"remark"`
+        Address         AdminAddressSnapshot      `json:"address"`
+        Items           []AdminOrderItemSnapshot  `json:"items"`
+        DeliverySn      string                    `json:"delivery_sn,optional"`
+        DeliveryCompany string                    `json:"delivery_company,optional"`
+        PayTime         string                    `json:"pay_time,optional"`
+        CreatedAt       string                    `json:"created_at"`
+    }
+
+        // 订单发货请求
+    ShipOrderReq {
+        OrderSn         string `json:"order_sn"`
+        DeliveryCompany string `json:"delivery_company"`
+        DeliverySn      string `json:"delivery_sn"`
+    }
+
+        // 售后审批请求
+    HandleRefundReq {
+        RefundSn string `json:"refund_sn"`
+        Action   int64  `json:"action"` // 1:通过 2:拒绝
+        Remark   string `json:"remark,optional"`
+    }
+)
+
+// =============================================================
+// 7. 优惠券管理
+// =============================================================
+
+type (
+    // 创建/编辑优惠券请求
+    CreateCouponReq {
+        Id                int64  `json:"id,optional"`
+        Name              string `json:"name"`
+        Type              int64  `json:"type"`                 // 1-满减 2-折扣 3-无门槛
+        ThresholdAmount   int64  `json:"threshold_amount"`     // 使用门槛（分）
+        ReduceAmount      int64  `json:"reduce_amount"`        // 满减金额（分）
+        DiscountRate      int64  `json:"discount_rate"`        // 折扣率（如80表示8折）
+        MaxDiscountAmount int64  `json:"max_discount_amount"`  // 折扣封顶（分）
+        TotalQuantity     int64  `json:"total_quantity"`       // 发行总量
+        PerUserLimit      int64  `json:"per_user_limit"`       // 每人限领数量
+        StartTime         string `json:"start_time"`           // RFC3339
+        EndTime           string `json:"end_time"`
+        Status            int64  `json:"status"`               // 1:启用 2:禁用
+        Description       string `json:"description,optional"`
+    }
+
+        // 优惠券列表项
+    AdminCouponItem {
+        Id            int64  `json:"id"`
+        Name          string `json:"name"`
+        Type          int64  `json:"type"`
+        TotalQuantity int64  `json:"total_quantity"`
+        UsedQuantity  int64  `json:"used_quantity"`
+        Status        int64  `json:"status"`
+        StartTime     string `json:"start_time"`
+        EndTime       string `json:"end_time"`
+        CreatedAt     string `json:"created_at"`
+    }
+
+        // 优惠券列表请求
+    AdminCouponListReq {
+        Page   int64  `form:"page,default=1"`
+        Size   int64  `form:"size,default=10"`
+        Status int64  `form:"status,optional"` // 1:启用 2:禁用
+        Name   string `form:"name,optional"`   // 模糊搜索
+    }
+
+    AdminCouponListResp {
+        Total int64              `json:"total"`
+        List  []AdminCouponItem  `json:"list"`
+    }
+)
+
+// =============================================================
+// 8. 服务接口定义
+// =============================================================
+
+// --- 认证模块（无需JWT）---
+@server(
+    group:  auth
+    prefix: api/v1/admin
+)
+service shop-api {
+    @doc "管理员登录"
+    @handler login
+    post /login (LoginReq) returns (LoginResp)
+}
+
+// --- 需认证管理端接口 ---
+@server(
+    jwt:    JwtAuth
+    group:  admin
+    prefix: api/v1/admin
+)
+service shop-api {
+    // ========== 管理员个人 ==========
+    @doc "修改当前管理员密码"
+    @handler changePassword
+    put /password (ChangePasswordReq) returns ()
+
+    // ========== C端用户管理 ==========
+    @doc "用户列表"
+    @handler userList
+    get /user/list (PageReq) returns (AdminUserListResp)
+
+    @doc "更新用户状态（禁用/启用）"
+    @handler updateUserStatus
+    post /user/status (UpdateStatusReq) returns ()
+
+    // ========== 商品分类管理 ==========
+    @doc "获取分类列表（平铺，前端自行组装树）"
+    @handler categoryList
+    get /category/list returns (CategoryListResp)
+
+    @doc "保存/修改分类"
+    @handler saveCategory
+    post /category/save (SaveCategoryReq) returns ()
+
+    @doc "删除分类"
+    @handler deleteCategory
+    delete /category/:id (IdReq) returns ()
+
+    // ========== 商品管理 ==========
+    @doc "商品列表（支持分页、搜索、分类筛选、状态筛选）"
+    @handler productList
+    get /product/list (AdminProductListReq) returns (AdminProductListResp)
+
+    @doc "保存/修改商品（含SKU）"
+    @handler saveProduct
+    post /product/save (SaveProductReq) returns ()
+
+    @doc "更新商品上下架状态"
+    @handler updateProductStatus
+    post /product/status (UpdateProductStatusReq) returns ()
+
+    @doc "删除商品（软删除）"
+    @handler deleteProduct
+    delete /product/:id (IdReq) returns ()
+
+    // ========== 订单与售后管理 ==========
+    @doc "订单列表（支持状态、时间、订单号筛选）"
+    @handler orderList
+    get /order/list (AdminOrderListReq) returns (AdminOrderListResp)
+
+    @doc "订单详情（包含地址、商品清单、买家留言）"
+    @handler orderDetail
+    get /order/detail/:order_sn (OrderSnReq) returns (AdminOrderDetailResp)
+
+    @doc "订单发货"
+    @handler shipOrder
+    post /order/ship (ShipOrderReq) returns ()
+
+    @doc "处理退款申请（售后审批）"
+    @handler handleRefund
+    post /order/refund/handle (HandleRefundReq) returns ()
+
+    // ========== 优惠券管理 ==========
+    @doc "优惠券列表"
+    @handler couponList
+    get /coupon/list (AdminCouponListReq) returns (AdminCouponListResp)
+
+    @doc "创建/编辑优惠券"
+    @handler saveCoupon
+    post /coupon/save (CreateCouponReq) returns ()
+
+    @doc "更新优惠券状态（启用/禁用）"
+    @handler updateCouponStatus
+    post /coupon/status (UpdateStatusReq) returns ()
+}

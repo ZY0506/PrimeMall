@@ -15,7 +15,7 @@ services:
       # 宿主机端口 : 容器端口
       - "${DB_PORT_EXTERNAL:-13306}:3306"
     volumes:
-      # 1. 初始化脚本：确保你的 8 个 SQL 放在这个目录下
+      # 1. 初始化脚本：确保你的 7 个 SQL 放在这个目录下
       - ./deployments/docker/mysql/init:/docker-entrypoint-initdb.d
       # 2. 持久化数据
       - ./storage/mysql/data:/var/lib/mysql
