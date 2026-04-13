@@ -32,3 +32,30 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+
+  redis:
+    image: redis:7.2
+    container_name: rdb-prime_mall
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      # 宿主机端口 : 容器端口
+      - "${REDIS_PORT:-16379}:6379"
+    volumes:
+      # 持久化 Redis 数据
+      - ./storage/rdb/data:/data
+    command: >
+      sh -c "
+        redis-server 
+        --appendonly yes 
+        --requirepass ${REDIS_PASSWORD:-} 
+        --maxmemory 256mb 
+        --maxmemory-policy allkeys-lru
+      "
+    healthcheck:
+      test: ["CMD", "rdb-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s

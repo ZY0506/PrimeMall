@@ -1,5 +1,253 @@
 syntax = "proto3";
+import "google/protobuf/timestamp.proto";
 
 package user;
-
 option go_package = "./user";
+
+// 用户服务（面向客户端）
+service User {
+  // 获取短信验证码
+  rpc Captcha(CaptchaReq) returns (EmptyResp);
+  // 手机号密码登录
+  rpc Login(LoginReq) returns (LoginResp);
+  // 手机号验证码登录
+  rpc MobileLogin(MobileLoginReq) returns (LoginResp);
+  // 用户注册
+  rpc Register(RegisterReq) returns (LoginResp);
+  // 忘记密码重置
+  rpc ResetPassword(ResetPasswordReq) returns (EmptyResp);
+  // 修改登录密码（已登录）
+  rpc UpdatePassword(UpdatePasswordReq) returns (EmptyResp);
+  // 修改手机号
+  rpc UpdatePhone(UpdatePhoneReq) returns (EmptyResp);
+  // 获取个人资料
+  rpc GetUserInfo(EmptyReq) returns (UserInfoResp);
+  // 更新个人资料
+  rpc UpdateUserInfo(UpdateUserInfoReq) returns (EmptyResp);
+  // 注销账号
+  rpc DeleteAccount(DeleteAccountReq) returns (EmptyResp);
+  // 退出登录
+  rpc Logout(LogoutReq) returns (EmptyResp);
+  // token刷新
+  rpc RefreshToken(RefreshTokenReq) returns (LoginResp);
+  // 获取OSS上传凭证
+  rpc GetOssToken(OssTokenReq) returns (OssTokenResp);
+  // OSS上传回调
+  rpc OssCallback(OssCallbackReq) returns (OssCallbackResp);
+
+  // 添加收货地址
+  rpc AddAddress(AddAddressReq) returns (EmptyResp);
+  // 更新收货地址
+  rpc UpdateAddress(AddressItem) returns (EmptyResp);
+  // 获取地址列表
+  rpc ListAddress(AddressListReq) returns (AddressListResp);
+  // 设置默认地址
+  rpc SetDefaultAddress(IdPathReq) returns (EmptyResp);
+  // 删除收货地址
+  rpc DeleteAddress(IdPathReq) returns (EmptyResp);
+}
+
+// 内部服务（供其他服务调用）
+service UserInternal {
+  // 根据用户ID获取用户基本信息（用于订单、购物车等）
+  rpc GetUserById(GetUserByIdReq) returns (UserBasicInfo);
+  // 批量获取用户基本信息
+  rpc BatchGetUserById(BatchGetUserByIdReq) returns (BatchUserBasicInfoResp);
+  // 校验用户状态（是否被封禁/限制下单）
+  rpc CheckUserStatus(CheckUserStatusReq) returns (CheckUserStatusResp);
+}
+
+// ------------------------------ 公共消息 ------------------------------
+message EmptyReq {}
+message EmptyResp {}
+
+// ------------------------------ 枚举 ------------------------------
+enum UserStatus {
+  USER_STATUS_UNKNOWN = 0;    // 未知
+  USER_STATUS_NORMAL = 1;     // 正常
+  USER_STATUS_RESTRICTED = 2; // 限制下单
+  USER_STATUS_BANNED = 3;     // 封禁
+}
+
+// 通用ID路径参数
+message IdPathReq {
+  int64 id = 1;
+}
+
+// ------------------------------ 认证相关 ------------------------------
+message CaptchaReq {
+  string phone = 1;
+  string scene = 2;  // login, register, reset_pwd
+  string device_id = 3;
+  string ip = 4;
+  string user_agent = 5;
+  string idempotency_key = 6;
+}
+
+message LoginReq {
+  string phone = 1;
+  string password = 2;
+}
+
+message MobileLoginReq {
+  string phone = 1;
+  string code = 2;
+}
+
+message RegisterReq {
+  string phone = 1;
+  string password = 2;
+  string confirm_password = 3;
+  string code = 4;
+  string nickname = 5;
+  string idempotency_key = 6;
+}
+
+message ResetPasswordReq {
+  string phone = 1;
+  string code = 2;
+  string new_password = 3;
+  string idempotency_key = 4;
+}
+
+message LogoutReq {
+  string jti = 1;
+}
+
+message RefreshTokenReq{
+  string jti = 1;
+}
+
+message UpdatePasswordReq {
+  string old_password = 1;
+  string new_password = 2;
+  string confirm_password = 3;
+}
+
+message UpdatePhoneReq {
+  string old_phone_code = 1;      // 原手机验证码（已登录时可选）
+  string new_phone = 2;
+  string new_phone_code = 3;
+  string idempotency_key = 4;
+}
+
+message DeleteAccountReq {
+  string password = 1;            // 密码验证
+}
+
+message LoginResp {
+  string access_token = 1;
+  google.protobuf.Timestamp access_expire = 2;       // RFC3339格式
+  string refresh_token = 3;
+  google.protobuf.Timestamp refresh_expire = 4;
+}
+
+// ------------------------------ 用户资料 ------------------------------
+message UserInfoResp {
+  int64 id = 1;
+  string phone = 2;
+  string nickname = 3;
+  string avatar = 4;
+  int64 gender = 5;               // 0-未知，1-男，2-女
+  google.protobuf.Timestamp birthday = 6;            // RFC3339日期格式 2006-01-02
+  UserStatus status = 7;          // 1-正常，2-限制下单，3-封禁
+  string status_desc = 8;
+}
+
+message UpdateUserInfoReq {
+  string nickname = 1;
+  string avatar = 2;
+  int64 gender = 3;
+  google.protobuf.Timestamp birthday = 4;
+}
+
+// ------------------------------ OSS上传 ------------------------------
+message OssTokenReq {
+  string file_name = 1;           // 原始文件名（用于提取扩展名）
+}
+
+message OssTokenResp {
+  string access_id = 1;
+  string host = 2;
+  string policy = 3;
+  string signature = 4;
+  google.protobuf.Timestamp expire = 5;              // RFC3339格式
+  string dir = 6;                 // OSS存储目录（avatar/）
+  string object_key = 7;          // OSS存储对象名
+}
+
+message OssCallbackReq {
+  string bucket = 1;
+  string object = 2;
+  string etag = 3;
+  int64 size = 4;
+  string mime_type = 5;
+}
+
+message OssCallbackResp {
+  string status = 1;              // 固定返回 "OK"
+}
+
+// ------------------------------ 地址管理 ------------------------------
+message AddressDetail {
+  string province = 1;
+  string city = 2;
+  string district = 3;
+  string detail = 4;
+  string postal_code = 5;
+}
+message AddAddressReq {
+  string receiver_name = 2;
+  string receiver_phone = 3;
+  AddressDetail address = 4;      // 地址详情
+  int64 is_default = 5;           // 0-否，1-是
+  string tag = 6;                 // HOME, OFFICE, SCHOOL
+}
+message AddressItem {
+  int64 id = 1;
+  string receiver_name = 2;
+  string receiver_phone = 3;
+  AddressDetail address = 4;      // 地址详情
+  int64 is_default = 5;           // 0-否，1-是
+  string tag = 6;                 // HOME, OFFICE, SCHOOL
+}
+message AddressListReq {
+  int64 page = 1;  // 可选
+  int64 size = 2;  // 可选
+}
+message AddressListResp {
+  repeated AddressItem list = 1;
+  int64 total = 2;
+}
+
+// ------------------------------ 内部服务消息 ------------------------------
+message GetUserByIdReq {
+  int64 user_id = 1;
+}
+
+message UserBasicInfo {
+  int64 id = 1;
+  string phone = 2;
+  string nickname = 3;
+  string avatar = 4;
+  UserStatus status = 5;               // 1-正常，2-限制下单，3-封禁
+}
+
+message BatchGetUserByIdReq {
+  repeated int64 user_ids = 1;
+}
+
+message BatchUserBasicInfoResp {
+  map<int64, UserBasicInfo> users = 1;
+}
+
+message CheckUserStatusReq {
+  int64 user_id = 1;
+  // 需要检查的权限类型：1-下单权限，2-登录权限
+  int64 check_type = 2;
+}
+
+message CheckUserStatusResp {
+  bool allowed = 1;               // 是否允许操作
+  string reason = 2;              // 禁止原因
+}
