@@ -71,7 +71,7 @@ enum UserStatus {
 
 // 通用ID路径参数
 message IdPathReq {
-  int64 id = 1;
+  uint64 id = 1;
 }
 
 // ------------------------------ 认证相关 ------------------------------
@@ -144,7 +144,7 @@ message LoginResp {
 
 // ------------------------------ 用户资料 ------------------------------
 message UserInfoResp {
-  int64 id = 1;
+  uint64 id = 1;
   string phone = 2;
   string nickname = 3;
   string avatar = 4;
@@ -204,7 +204,7 @@ message AddAddressReq {
   string tag = 6;                 // HOME, OFFICE, SCHOOL
 }
 message AddressItem {
-  int64 id = 1;
+  uint64 id = 1;
   string receiver_name = 2;
   string receiver_phone = 3;
   AddressDetail address = 4;      // 地址详情
@@ -222,11 +222,11 @@ message AddressListResp {
 
 // ------------------------------ 内部服务消息 ------------------------------
 message GetUserByIdReq {
-  int64 user_id = 1;
+  uint64 user_id = 1;
 }
 
 message UserBasicInfo {
-  int64 id = 1;
+  uint64 id = 1;
   string phone = 2;
   string nickname = 3;
   string avatar = 4;
@@ -234,15 +234,15 @@ message UserBasicInfo {
 }
 
 message BatchGetUserByIdReq {
-  repeated int64 user_ids = 1;
+  repeated uint64 user_ids = 1;
 }
 
 message BatchUserBasicInfoResp {
-  map<int64, UserBasicInfo> users = 1;
+  map<uint64, UserBasicInfo> users = 1;
 }
 
 message CheckUserStatusReq {
-  int64 user_id = 1;
+  uint64 user_id = 1;
   // 需要检查的权限类型：1-下单权限，2-登录权限
   int64 check_type = 2;
 }

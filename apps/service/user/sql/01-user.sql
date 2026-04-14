@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS `user_address` (
 CREATE TABLE IF NOT EXISTS `user_punish_log` (
     `id`          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '记录ID',
     `user_id`     BIGINT UNSIGNED NOT NULL DEFAULT '0' COMMENT '用户ID',
+    `phone`       VARCHAR(20)     NOT NULL DEFAULT '' COMMENT '手机号码',
     `action_type` VARCHAR(32)     NOT NULL DEFAULT '' COMMENT '处罚类型：BAN_LOGIN-禁止登录，BAN_ORDER-禁止下单',
     `reason`      VARCHAR(255)    NOT NULL DEFAULT '' COMMENT '处罚原因',
     `operator`    VARCHAR(64)     NOT NULL DEFAULT 'SYSTEM' COMMENT '操作人：SYSTEM-系统自动，ADMIN-管理员',
