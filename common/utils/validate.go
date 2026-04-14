@@ -37,3 +37,33 @@ func ValidatePhone(phone string) bool {
 
 	return phoneRegex.MatchString(phone)
 }
+
+// ValidatePassword 验证密码合法性
+func ValidatePassword(pwd string) bool {
+	length := len(pwd)
+
+	// 长度限制
+	if length < 8 || length > 20 {
+		return false
+	}
+	return true
+
+	//var hasLetter, hasNumber bool
+	//
+	//for _, c := range pwd {
+	//	switch {
+	//	case c >= 'a' && c <= 'z':
+	//		hasLetter = true
+	//	case c >= 'A' && c <= 'Z':
+	//		hasLetter = true
+	//	case c >= '0' && c <= '9':
+	//		hasNumber = true
+	//	default:
+	//		// 不允许特殊字符（如果你想允许，可以删掉这段）
+	//		return false
+	//	}
+	//}
+	//
+	//// 必须包含字母 + 数字
+	//return hasLetter && hasNumber
+}
