@@ -4,18 +4,18 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
+	"github.com/zeromicro/go-zero/core/logx"
 	"net/http"
 	"strings"
 )
 
-// 定义私有类型，防止外部冲突
-type ctxKey string
+const ContextKeyClientInfo = "client_info"
 
-const (
-	ContextKeyIP        ctxKey = "client_ip"
-	ContextKeyUserAgent ctxKey = "user_agent"
-	ContextKeyDeviceId  ctxKey = "device_id"
-)
+type ClientInfo struct {
+	IP        string
+	UserAgent string
+	DeviceID  string
+}
 
 type Middleware struct{}
 
@@ -23,6 +23,7 @@ func NewMiddleware() *Middleware {
 	return &Middleware{}
 }
 
+// ClientInfoHandle 获取客户端信息
 func (m *Middleware) ClientInfoHandle(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		clientIP := getClientIP(r)
@@ -33,11 +34,13 @@ func (m *Middleware) ClientInfoHandle(next http.HandlerFunc) http.HandlerFunc {
 			deviceId = generateDeviceFingerprint(clientIP, userAgent)
 		}
 
-		// 批量注入 Context
+		// 注入 Context
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, ContextKeyIP, clientIP)
-		ctx = context.WithValue(ctx, ContextKeyUserAgent, userAgent)
-		ctx = context.WithValue(ctx, ContextKeyDeviceId, deviceId)
+		ctx = context.WithValue(ctx, ContextKeyClientInfo, &ClientInfo{
+			IP:        clientIP,
+			UserAgent: userAgent,
+			DeviceID:  deviceId,
+		})
 
 		next(w, r.WithContext(ctx))
 	}
@@ -67,4 +70,14 @@ func getClientIP(r *http.Request) string {
 func generateDeviceFingerprint(ip, userAgent string) string {
 	raw := fmt.Sprintf("%s|%s", ip, userAgent)
 	return fmt.Sprintf("%x", md5.Sum([]byte(raw)))
+}
+
+// GetClientInfo 获取 ClientInfo
+func GetClientInfo(ctx context.Context) *ClientInfo {
+	val, ok := ctx.Value(ContextKeyClientInfo).(*ClientInfo)
+	if !ok {
+		logx.WithContext(ctx).Error("上下文信息缺失")
+		panic("missing client info")
+	}
+	return val
 }

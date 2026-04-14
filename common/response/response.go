@@ -13,7 +13,7 @@ const (
 	RequestError  = 400
 )
 
-// 成功码
+// SuccessCode 成功码
 const (
 	SuccessCode = 0 // 成功
 )
