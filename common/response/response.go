@@ -35,11 +35,13 @@ const (
 	ErrCodeTokenExpired     = 12003 // Token 已过期
 	ErrCodeTokenMissing     = 12004 // 缺少 Token
 	ErrCodePermissionDenied = 12005 // 权限不足
-	ErrCodePasswordWrong    = 12006 // 密码错误
+	ErrCodePasswordWrong    = 12006 // 账号或密码错误
 	ErrCodeCaptchaWrong     = 12007 // 验证码错误
 	ErrCodeCaptchaExpired   = 12008 // 验证码已过期
 	ErrCodePhoneNotExist    = 12009 // 手机号未注册
 	ErrCodePhoneRegistered  = 12010 // 手机号已注册
+	ErrCodeTooFrequent      = 12011 // 访问过于频繁
+	ErrCodePasswordNotMatch = 12012 // 两次输入密码不一致
 )
 
 // 用户模块 (2xxxx)
@@ -177,7 +179,6 @@ func ClientError(ctx context.Context, w http.ResponseWriter, bizCode int, errMsg
 func LogicError(ctx context.Context, w http.ResponseWriter, err error) {
 	var bizError *BizError
 	if errors.As(err, &bizError) {
-		// TODO： 记录日志
 		logx.WithContext(ctx).Errorf("Business Warning: code=%d, msg=%v", bizError.Code, bizError.Msg)
 		httpx.WriteJsonCtx(ctx, w, http.StatusBadRequest, Response{
 			Code: bizError.Code,
