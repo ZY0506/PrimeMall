@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS `user_punish_log` (
     `end_time`    DATETIME                 DEFAULT NULL COMMENT '处罚结束时间',
     `created_at`  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_phone` (`phone`),
     KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
@@ -82,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `user_punish_log` (
 CREATE TABLE IF NOT EXISTS `user_login_log` (
     `id`           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '日志ID',
     `user_id`      BIGINT UNSIGNED NOT NULL DEFAULT '0' COMMENT '用户ID',
-    `login_type`   VARCHAR(32)     NOT NULL DEFAULT '' COMMENT '登录方式：password-密码登录，sms-短信登录，wechat-微信登录',
+    `login_type`   VARCHAR(32)     NOT NULL DEFAULT '' COMMENT '登录方式：password-密码登录，captcha-短信登录',
     `login_ip`     VARCHAR(64)     NOT NULL DEFAULT '' COMMENT '登录IP地址',
     `user_agent`   VARCHAR(500)    NOT NULL DEFAULT '' COMMENT '用户代理（浏览器信息）',
     `status`       TINYINT         NOT NULL DEFAULT '1' COMMENT '登录状态：1-成功，2-失败',

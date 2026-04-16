@@ -30,18 +30,19 @@ const (
 
 // 认证与授权错误 (12xxx)
 const (
-	ErrCodeUnauthorized     = 12001 // 未认证，请先登录
-	ErrCodeTokenInvalid     = 12002 // Token 无效
-	ErrCodeTokenExpired     = 12003 // Token 已过期
-	ErrCodeTokenMissing     = 12004 // 缺少 Token
-	ErrCodePermissionDenied = 12005 // 权限不足
-	ErrCodePasswordWrong    = 12006 // 账号或密码错误
-	ErrCodeCaptchaWrong     = 12007 // 验证码错误
-	ErrCodeCaptchaExpired   = 12008 // 验证码已过期
-	ErrCodePhoneNotExist    = 12009 // 手机号未注册
-	ErrCodePhoneRegistered  = 12010 // 手机号已注册
-	ErrCodeTooFrequent      = 12011 // 访问过于频繁
-	ErrCodePasswordNotMatch = 12012 // 两次输入密码不一致
+	ErrCodeUnauthorized      = 12001 // 未认证，请先登录
+	ErrCodeTokenInvalid      = 12002 // Token 无效
+	ErrCodeTokenExpired      = 12003 // Token 已过期
+	ErrCodeTokenMissing      = 12004 // 缺少 Token
+	ErrCodePermissionDenied  = 12005 // 权限不足
+	ErrCodePasswordWrong     = 12006 // 账号或密码错误
+	ErrCodeCaptchaWrong      = 12007 // 验证码错误
+	ErrCodeCaptchaExpired    = 12008 // 验证码已过期
+	ErrCodePhoneNotExist     = 12009 // 手机号未注册
+	ErrCodePhoneRegistered   = 12010 // 手机号已注册
+	ErrCodeTooFrequent       = 12011 // 访问过于频繁
+	ErrCodePasswordNotMatch  = 12012 // 两次输入密码不一致
+	ErrCodeSameAsOldPassword = 12013 // 新密码与旧密码一致
 )
 
 // 用户模块 (2xxxx)

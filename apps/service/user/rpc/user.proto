@@ -1,6 +1,8 @@
 syntax = "proto3";
 import "google/protobuf/timestamp.proto";
 
+// goctl rpc protoc .\apps\service\user\rpc\user.proto --go_out=apps/service/user/rpc/types --go-grpc_out apps/service/user/rpc/types --zrpc_out=apps/service/user/rpc/ -m
+
 package user;
 option go_package = "./user";
 
@@ -78,9 +80,6 @@ message IdPathReq {
 message CaptchaReq {
   string phone = 1;
   string scene = 2;  // login, register, reset_pwd
-  string device_id = 3;
-  string ip = 4;
-  string user_agent = 5;
   string idempotency_key = 6;
 }
 

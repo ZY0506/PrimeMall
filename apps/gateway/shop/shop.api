@@ -76,6 +76,9 @@ type (
 		RefreshToken  string `json:"refresh_token"` // 刷新令牌
 		RefreshExpire string `json:"refresh_expire"` // 刷新令牌有效期截止时间，RFC3339格式
 	}
+	RefreshTokenReq {
+		RefreshToken string `json:"refresh_token"` // 刷新令牌
+	}
 	ResetPasswordReq {
 		Phone          string `json:"phone"` // 手机号
 		Code           string `json:"code"` // 验证码
@@ -193,7 +196,7 @@ service shop-api {
 
 	@doc "token刷新"
 	@handler refreshToken
-	post /token/refresh returns (LoginResp)
+	post /token/refresh (RefreshTokenReq) returns (LoginResp)
 
 	@doc "OSS上传回调（服务端自行幂等）"
 	@handler ossCallback
