@@ -7,6 +7,9 @@ const (
 	SCENE_LOGIN     = "login"
 	SCENE_REGISTER  = "register"
 	SCENE_RESET_PWD = "reset_pwd"
+
+	LOGIN_BY_PASSWORD = "password"
+	LOGIN_BY_CAPTCHA  = "captcha"
 )
 
 // 验证码
@@ -42,4 +45,9 @@ const (
 const (
 	RTOKEN_BLACKLIST_KEY = "rToken_blacklist:"
 	ATOKEN_BLACKLIST_KEY = "aToken_blacklist:"
+)
+
+const (
+	LOGIN_STATUS_SUCCESS = int64(1)
+	LOGIN_STATUS_FAIL    = int64(1)
 )
