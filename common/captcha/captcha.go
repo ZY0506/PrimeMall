@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"github.com/ZY0506/PrimeMall/common/constants"
+	"github.com/ZY0506/PrimeMall/common/errorx"
 	"github.com/ZY0506/PrimeMall/common/response"
 	"github.com/go-redis/redis/v8"
 	"github.com/zeromicro/go-zero/core/logx"
@@ -32,7 +33,7 @@ func (s *Service) Send(ctx context.Context, phone, scene string, sendFunc func(p
 		return err
 	}
 	if !ok {
-		return response.NewBizError(response.ErrCodeTooFrequent, "操作过于频繁")
+		return errorx.NewBizError(response.ErrCodeTooFrequent, "操作过于频繁")
 	}
 
 	// 生成验证码（crypto/rand）

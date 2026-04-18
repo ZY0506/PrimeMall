@@ -9,14 +9,15 @@ import (
 	"strings"
 )
 
-type Middleware struct{}
-
-func NewMiddleware() *Middleware {
-	return &Middleware{}
+type ClientInfoMiddleware struct {
 }
 
-// ClientInfoHandle 获取客户端信息
-func (m *Middleware) ClientInfoHandle(next http.HandlerFunc) http.HandlerFunc {
+func NewClientInfoMiddleware() *ClientInfoMiddleware {
+	return &ClientInfoMiddleware{}
+}
+
+// Handle 获取客户端信息
+func (m *ClientInfoMiddleware) Handle(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		clientIP := getClientIP(r)
 		userAgent := r.Header.Get("User-Agent")

@@ -4,9 +4,10 @@ import "time"
 
 // 场景
 const (
-	SCENE_LOGIN     = "login"
-	SCENE_REGISTER  = "register"
-	SCENE_RESET_PWD = "reset_pwd"
+	SCENE_LOGIN      = "login"
+	SCENE_REGISTER   = "register"
+	SCENE_RESET_PWD  = "reset_pwd"
+	SCENE_UPDATE_PWD = "update_pwd"
 
 	LOGIN_BY_PASSWORD = "password"
 	LOGIN_BY_CAPTCHA  = "captcha"
@@ -37,7 +38,7 @@ const (
 // 用户性别
 const (
 	USER_GENDER_UNKNOWN = iota
-	USER_GENDER_MALE
+	USER_GENDER_MALE    // 男
 	USER_GENDER_FEMALE
 )
 
@@ -49,5 +50,5 @@ const (
 
 const (
 	LOGIN_STATUS_SUCCESS = int64(1)
-	LOGIN_STATUS_FAIL    = int64(1)
+	LOGIN_STATUS_FAIL    = int64(2)
 )
