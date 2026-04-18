@@ -3,8 +3,10 @@ package response
 import (
 	"context"
 	"errors"
+	"github.com/ZY0506/PrimeMall/apps/service/user/rpc/types/user"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
+	"google.golang.org/grpc/status"
 	"net/http"
 )
 
@@ -186,12 +188,29 @@ func LogicError(ctx context.Context, w http.ResponseWriter, err error) {
 			Msg:  bizError.Msg,
 			Data: nil,
 		})
+		return
 	} else {
-		logx.WithContext(ctx).Errorf("InternalError: error=%v", err)
-		httpx.WriteJsonCtx(ctx, w, http.StatusInternalServerError, Response{
-			Code: InternalError,
-			Msg:  "Internal Error",
-			Data: nil,
-		})
+		st, ok := status.FromError(err)
+		if ok {
+			for _, detail := range st.Details() {
+				switch e := detail.(type) {
+				case *user.ErrDetail:
+					// 解析到rpc业务错误
+					httpx.WriteJsonCtx(ctx, w, http.StatusOK, Response{
+						Code: int(e.Code),
+						Msg:  e.Msg,
+						Data: nil,
+					})
+					return
+				}
+			}
+		}
 	}
+	logx.WithContext(ctx).Errorf("InternalError: error=%v", err)
+	httpx.WriteJsonCtx(ctx, w, http.StatusInternalServerError, Response{
+		Code: InternalError,
+		Msg:  "Internal Error",
+		Data: nil,
+	})
+	return
 }

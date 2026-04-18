@@ -15,32 +15,32 @@ info (
 type (
 	// 通用路径参数：ID
 	IdPathReq {
-		Id uint64 `path:"id"` // ID
+		Id uint64 `path:"id" validate:"required,min=1"` // ID
 	}
 	// 通用路径参数：订单号
 	OrderSnPathReq {
-		OrderSn string `path:"order_sn"` // 订单号
+		OrderSn string `path:"order_sn" validate:"required"` // 订单号
 	}
 	// 通用路径参数：支付流水号
 	PaymentSnPathReq {
-		PaymentSn string `path:"payment_sn"` // 支付流水号
+		PaymentSn string `path:"payment_sn" validate:"required"` // 支付流水号
 	}
 	// 批量SKU ID请求
 	SkuIdsReq {
-		SkuIds []uint64 `json:"sku_ids"` // SKU ID列表
+		SkuIds []uint64 `json:"sku_ids" validate:"required,min=1,max=100"` // SKU ID列表
 	}
 	// 分页参数（可嵌入使用）
 	Pagination {
-		Page int64 `form:"page,default=1"` // 页码，默认1
-		Size int64 `form:"size,default=10"` // 每页数量，默认10
+		Page int64 `form:"page,default=1" validate:"omitempty,min=1"` // 页码，默认1
+		Size int64 `form:"size,default=10" validate:"omitempty,min=1,max=100"` // 每页数量，默认10
 	}
 	// 地址详细信息结构体
 	AddressDetail {
-		Province      string `json:"province"` // 省份
-		City          string `json:"city"` // 城市
-		District      string `json:"district"` // 区/县
-		DetailAddress string `json:"detail_address"` // 详细地址
-		PostalCode    string `json:"postal_code,optional"` // 邮政编码
+		Province      string `json:"province" validate:"required,min=1,max=50"` // 省份
+		City          string `json:"city" validate:"required,min=1,max=50"` // 城市
+		District      string `json:"district" validate:"required,min=1,max=50"` // 区/县
+		DetailAddress string `json:"detail_address" validate:"required,min=1,max=200"` // 详细地址
+		PostalCode    string `json:"postal_code,optional" validate:"omitempty,min=4,max=10"` // 邮政编码
 	}
 )
 
@@ -50,25 +50,25 @@ type (
 type (
 	// 基础鉴权请求
 	CaptchaReq {
-		Phone          string `json:"phone"` // 手机号
-		Scene          string `json:"scene"` // 场景：login, register, reset_pwd
-		IdempotencyKey string `json:"idempotency_key"` // 幂等键（客户端UUID）
+		Phone          string `json:"phone" validate:"required,len=11"` // 手机号
+		Scene          string `json:"scene" validate:"required,oneof=login register reset_pwd update_pwd"` // 场景：login, register, reset_pwd, update_pwd
+		IdempotencyKey string `json:"idempotency_key" validate:"required"` // 幂等键（客户端UUID）
 	}
 	LoginReq {
-		Phone    string `json:"phone"` // 手机号
-		Password string `json:"password"` // 密码
+		Phone    string `json:"phone" validate:"required,len=11"` // 手机号
+		Password string `json:"password" validate:"required,min=8,max=20"` // 密码
 	}
 	MobileLoginReq {
-		Phone string `json:"phone"` // 手机号
-		Code  string `json:"code"` // 验证码
+		Phone string `json:"phone" validate:"required,len=11"` // 手机号
+		Code  string `json:"code" validate:"required,len=6"` // 验证码
 	}
 	RegisterReq {
-		Phone           string `json:"phone"` // 手机号
-		Password        string `json:"password"` // 密码
-		ConfirmPassword string `json:"confirm_password"` // 确认密码
-		Code            string `json:"code"` // 验证码
-		Nickname        string `json:"nickname,optional"` // 昵称（可选）
-		IdempotencyKey  string `json:"idempotency_key"` // 幂等键
+		Phone           string `json:"phone" validate:"required,len=11"` // 手机号
+		Password        string `json:"password" validate:"required,min=8,max=20"` // 密码
+		ConfirmPassword string `json:"confirm_password" validate:"required,eqfield=Password"` // 确认密码
+		Code            string `json:"code" validate:"required,len=6"` // 验证码
+		Nickname        string `json:"nickname,optional" validate:"omitempty"` // 昵称（可选）
+		IdempotencyKey  string `json:"idempotency_key" validate:"required"` // 幂等键
 	}
 	LoginResp {
 		AccessToken   string `json:"access_token"` // 访问令牌
@@ -77,13 +77,13 @@ type (
 		RefreshExpire string `json:"refresh_expire"` // 刷新令牌有效期截止时间，RFC3339格式
 	}
 	RefreshTokenReq {
-		RefreshToken string `json:"refresh_token"` // 刷新令牌
+		RefreshToken string `json:"refresh_token" validate:"required"` // 刷新令牌
 	}
 	ResetPasswordReq {
-		Phone          string `json:"phone"` // 手机号
-		Code           string `json:"code"` // 验证码
-		NewPassword    string `json:"new_password"` // 新密码
-		IdempotencyKey string `json:"idempotency_key"` // 幂等键
+		Phone          string `json:"phone" validate:"required,len=11"` // 手机号
+		Code           string `json:"code" validate:"required,len=6"` // 验证码
+		NewPassword    string `json:"new_password" validate:"required,min=8,max=20"` // 新密码
+		IdempotencyKey string `json:"idempotency_key" validate:"required"` // 幂等键
 	}
 	// 用户资料响应
 	UserInfoResp {
@@ -91,38 +91,38 @@ type (
 		Phone      string `json:"phone"` // 手机号
 		Nickname   string `json:"nickname"` // 昵称
 		Avatar     string `json:"avatar"` // 头像URL
-		Gender     int64  `json:"gender"` // 性别：0-未知，1-男，2-女
+		Gender     int64  `json:"gender,oneof=0;1;2"` // 性别：0-未知，1-男，2-女
 		Birthday   string `json:"birthday"` // 生日，RFC3339日期格式（例如 2006-01-02）
 		Status     int64  `json:"status"` // 账号状态：1-正常，2-限制下单，3-封禁
 		StatusDesc string `json:"status_desc"` // 状态描述
 	}
 	UpdateUserInfoReq {
-		Nickname string `json:"nickname,optional"` // 昵称（可选）
-		Avatar   string `json:"avatar,optional"` // 头像URL（可选）
-		Gender   int64  `json:"gender,optional"` // 性别：0-未知，1-男，2-女（可选）
-		Birthday string `json:"birthday,optional"` // 生日，RFC3339日期格式（例如 2006-01-02，可选）
+		Nickname string `json:"nickname,optional" validate:"omitempty,min=1,max=30"` // 昵称（可选）
+		Avatar   string `json:"avatar,optional" validate:"omitempty,min=1,max=255"` // 头像URL（可选）
+		Gender   int64  `json:"gender,optional" validate:"omitempty,oneof=0 1 2"` // 性别：0-未知，1-男，2-女（可选）
+		Birthday string `json:"birthday,optional" validate:"omitempty,datetime=2006-01-02"` // 生日，RFC3339日期格式（例如 2006-01-02，可选）
 	}
 	UpdatePasswordReq {
-		OldPassword     string `json:"old_password"` // 旧密码
-		NewPassword     string `json:"new_password"` // 新密码
-		ConfirmPassword string `json:"confirm_password"` // 确认密码
+		OldPassword     string `json:"old_password" validate:"required,min=8,max=20"` // 旧密码
+		NewPassword     string `json:"new_password" validate:"required,min=8,max=20,nefield=OldPassword"` // 新密码
+		ConfirmPassword string `json:"confirm_password" validate:"required,eqfield=NewPassword"` // 确认密码
 	}
 	UpdatePhoneReq {
-		OldPhoneCode   string `json:"old_phone_code,optional"` // 原手机验证码（已登录时可选）
-		NewPhone       string `json:"new_phone"` // 新手机号
-		NewPhoneCode   string `json:"new_phone_code"` // 新手机验证码
-		IdempotencyKey string `json:"idempotency_key"` // 幂等键
+		OldPhoneCode   string `json:"old_phone_code,optional" validate:"omitempty,len=6"` // 原手机验证码（已登录时可选）
+		NewPhone       string `json:"new_phone" validate:"required,len=11"` // 新手机号
+		NewPhoneCode   string `json:"new_phone_code" validate:"required,len=6"` // 新手机验证码
+		IdempotencyKey string `json:"idempotency_key" validate:"required"` // 幂等键
 	}
 	DeleteAccountReq {
-		Password string `json:"password"` // 密码验证
+		Password string `json:"password" validate:"required,min=8,max=20"` // 密码验证
 	}
 	// 收货地址（使用 AddressDetail 嵌套）
 	AddressItem {
-		ReceiverName  string        `json:"receiver_name"` // 收货人姓名
-		ReceiverPhone string        `json:"receiver_phone"` // 收货人电话
-		IsDefault     int64         `json:"is_default"` // 是否默认地址：0-否，1-是
-		Tag           string        `json:"tag,optional"` // 地址标签：HOME-家，OFFICE-公司，SCHOOL-学校
-		Detail        AddressDetail `json:"detail"` // 地址详细信息
+		ReceiverName  string        `json:"receiver_name" validate:"required,min=1,max=50"` // 收货人姓名
+		ReceiverPhone string        `json:"receiver_phone" validate:"required,len=11"` // 收货人电话
+		IsDefault     int64         `json:"is_default" validate:"oneof=0 1"` // 是否默认地址：0-否，1-是
+		Tag           string        `json:"tag,optional" validate:"omitempty,oneof=HOME OFFICE SCHOOL"` // 地址标签：HOME-家，OFFICE-公司，SCHOOL-学校
+		Detail        AddressDetail `json:"detail"` // 地址详细信息（内部字段已校验）
 	}
 	// 地址添加请求
 	AddAddressReq {
@@ -130,7 +130,7 @@ type (
 	}
 	// 地址更新请求
 	UpdateAddressReq {
-		Id uint64 `json:"id"` // 地址ID
+		Id uint64 `json:"id" validate:"required,min=1"` // 地址ID
 		AddressItem
 	}
 	// 地址列表请求（分页）
@@ -144,7 +144,7 @@ type (
 	}
 	// 获取上传凭证
 	OssTokenReq {
-		FileName string `json:"file_name"` // 原始文件名（用于提取扩展名）
+		FileName string `json:"file_name" validate:"required,min=1,max=255"` // 原始文件名（用于提取扩展名）
 	}
 	OssTokenResp {
 		AccessKeyId string `json:"accessid"` // 阿里云 AccessKeyId
@@ -157,11 +157,11 @@ type (
 	}
 	// OSS 回调请求（JSON 格式）
 	OssCallbackReq {
-		Bucket   string `json:"bucket"` // 阿里云 Bucket
-		Object   string `json:"object"` // 阿里云 OSS Object
-		Etag     string `json:"etag"` // 阿里云 OSS Etag
-		Size     int64  `json:"size"` // 阿里云 OSS 文件大小
-		MimeType string `json:"mimeType"` // 阿里云 OSS MimeType
+		Bucket   string `json:"bucket" validate:"required,min=1,max=100"` // 阿里云 Bucket
+		Object   string `json:"object" validate:"required,min=1,max=255"` // 阿里云 OSS Object
+		Etag     string `json:"etag" validate:"required"` // 阿里云 OSS Etag
+		Size     int64  `json:"size" validate:"required,min=1"` // 阿里云 OSS 文件大小
+		MimeType string `json:"mimeType" validate:"required,min=1,max=100"` // 阿里云 OSS MimeType
 	}
 	OssCallbackResp {
 		Status string `json:"Status"` // 状态：OK
@@ -205,9 +205,10 @@ service shop-api {
 
 // 需登录的用户个人资料模块
 @server (
-	jwt:    JwtAuth
-	group:  user/profile
-	prefix: /api/v1/user
+	jwt:        JwtAuth
+	middleware: TokenBlacklistMiddleware
+	group:      user/profile
+	prefix:     /api/v1/user
 )
 service shop-api {
 	@doc "获取个人资料"
@@ -236,7 +237,7 @@ service shop-api {
 
 	@doc "退出登录"
 	@handler logout
-	post /logout
+	post /logout (RefreshTokenReq)
 }
 
 // 需登录的地址管理模块
@@ -295,14 +296,14 @@ type (
 	}
 	// 商品列表请求
 	ProductListReq {
-		CategoryId uint64 `form:"category_id,optional"` // 分类ID
-		Brand      string `form:"brand,optional"` // 品牌名称（模糊匹配）
-		MinPrice   int64  `form:"min_price,optional"` // 最低价格（单位：分）
-		MaxPrice   int64  `form:"max_price,optional"` // 最高价格（单位：分）
-		Keyword    string `form:"keyword,optional"` // 简单关键词搜索（大数据量建议使用独立搜索服务）
-		Attrs      string `form:"attrs,optional"` // 属性过滤，格式 "颜色:红色,内存:64G"
+		CategoryId uint64 `form:"category_id,optional" validate:"omitempty,min=1"` // 分类ID
+		Brand      string `form:"brand,optional" validate:"omitempty,min=1,max=100"` // 品牌名称（模糊匹配）
+		MinPrice   int64  `form:"min_price,optional" validate:"omitempty,min=0"` // 最低价格（单位：分）
+		MaxPrice   int64  `form:"max_price,optional" validate:"omitempty,min=0,gtefield=MinPrice"` // 最高价格（单位：分）
+		Keyword    string `form:"keyword,optional" validate:"omitempty,min=1,max=100"` // 简单关键词搜索（大数据量建议使用独立搜索服务）
+		Attrs      string `form:"attrs,optional" validate:"omitempty,min=1,max=500"` // 属性过滤，格式 "颜色:红色,内存:64G"
 		IsNew      bool   `form:"is_new,optional"` // 是否新品（按创建时间<7天）
-		Sort       string `form:"sort,optional"` // 排序: price_asc, price_desc, sales_desc, new_desc
+		Sort       string `form:"sort,optional" validate:"omitempty,oneof=price_asc price_desc sales_desc new_desc"` // 排序: price_asc, price_desc, sales_desc, new_desc
 		Pagination
 	}
 	// 商品列表项
@@ -355,9 +356,9 @@ type (
 	}
 	// 个性化推荐请求
 	RecommendReq {
-		Scene     string `form:"scene,optional"` // 场景：home(首页), cart(购物车), detail(详情页)
-		Limit     int64  `form:"limit,default=10"` // 返回数量
-		CurrentId uint64 `form:"current_id,optional"` // 当前商品ID（详情页推荐时使用）
+		Scene     string `form:"scene,optional" validate:"omitempty,oneof=home cart detail"` // 场景：home(首页), cart(购物车), detail(详情页)
+		Limit     int64  `form:"limit,default=10" validate:"omitempty,min=1,max=50"` // 返回数量
+		CurrentId uint64 `form:"current_id,optional" validate:"omitempty,min=1"` // 当前商品ID（详情页推荐时使用）
 	}
 	// 批量SKU查询响应
 	BatchSkuResp {
@@ -431,32 +432,32 @@ type (
 		TotalAmount int64      `json:"total_amount"` // 勾选商品总金额（单位：分）
 	}
 	UpdateCartReq {
-		SkuId          uint64 `json:"sku_id"` // SKU ID
-		Quantity       int64  `json:"quantity"` // 数量，若为0则从购物车移除
-		IdempotencyKey string `json:"idempotency_key"` // 幂等键
+		SkuId          uint64 `json:"sku_id" validate:"required,min=1"` // SKU ID
+		Quantity       int64  `json:"quantity" validate:"required,min=0"` // 数量，若为0则从购物车移除
+		IdempotencyKey string `json:"idempotency_key" validate:"required"` // 幂等键
 	}
 	SelectCartReq {
-		SkuId    uint64 `json:"sku_id"` // SKU ID
+		SkuId    uint64 `json:"sku_id" validate:"required,min=1"` // SKU ID
 		Selected bool   `json:"selected"` // 是否勾选
 	}
 	// 下单商品项
 	OrderItemReq {
-		SkuId    uint64 `json:"sku_id"` // SKU ID
-		Quantity int64  `json:"quantity"` // 购买数量
+		SkuId    uint64 `json:"sku_id" validate:"required,min=1"` // SKU ID
+		Quantity int64  `json:"quantity" validate:"required,min=1"` // 购买数量
 	}
 	SettlementTokenResp {
 		Token      string `json:"settlement_token"` // 结算令牌，有效期5分钟
 		ExpireTime string `json:"expire_time"` // 过期时间，RFC3339格式
 	}
 	PreOrderReq {
-		Items     []OrderItemReq `json:"items"` // 下单商品列表
-		AddressId uint64         `json:"address_id,optional"` // 地址ID（可选）
-		CouponId  uint64         `json:"coupon_id,optional"` // 优惠券ID（可选）
+		Items     []OrderItemReq `json:"items" validate:"required,min=1,max=50"` // 下单商品列表
+		AddressId uint64         `json:"address_id,optional" validate:"omitempty,min=1"` // 地址ID（可选）
+		CouponId  uint64         `json:"coupon_id,optional" validate:"omitempty,min=1"` // 优惠券ID（可选）
 	}
 	// 地址快照（使用 AddressDetail）
 	AddressSnapshot {
-		ReceiverName  string        `json:"receiver_name"` // 收货人姓名
-		ReceiverPhone string        `json:"receiver_phone"` // 收货人电话
+		ReceiverName  string        `json:"receiver_name" validate:"required,min=1,max=50"` // 收货人姓名
+		ReceiverPhone string        `json:"receiver_phone" validate:"required,len=11"` // 收货人电话
 		Detail        AddressDetail `json:"detail"` // 地址详细信息
 	}
 	PreOrderResp {
@@ -469,13 +470,13 @@ type (
 		PayAmount     int64           `json:"pay_amount"` // 实际支付金额（单位：分）
 	}
 	CreateOrderReq {
-		SettlementToken string `json:"settlement_token"` // 结算令牌
-		AddressId       uint64 `json:"address_id"` // 最终使用的地址ID
-		CouponId        uint64 `json:"coupon_id,optional"` // 优惠券ID（可选）
-		PayType         int64  `json:"pay_type,optional"` // 支付方式：1-微信，2-支付宝
-		PayAmount       int64  `json:"pay_amount"` // 前端传回的应付金额（分），后端必须重新计算并校验
-		Remark          string `json:"remark,optional"` // 订单备注
-		IdempotencyKey  string `json:"idempotency_key"` // 幂等键（前端生成）
+		SettlementToken string `json:"settlement_token" validate:"required"` // 结算令牌
+		AddressId       uint64 `json:"address_id" validate:"required,min=1"` // 最终使用的地址ID
+		CouponId        uint64 `json:"coupon_id,optional" validate:"omitempty,min=1"` // 优惠券ID（可选）
+		PayType         int64  `json:"pay_type,optional" validate:"omitempty,oneof=1 2"` // 支付方式：1-微信，2-支付宝
+		PayAmount       int64  `json:"pay_amount" validate:"required,min=1"` // 前端传回的应付金额（分），后端必须重新计算并校验
+		Remark          string `json:"remark,optional" validate:"omitempty,max=200"` // 订单备注
+		IdempotencyKey  string `json:"idempotency_key" validate:"required"` // 幂等键（前端生成）
 	}
 	CreateOrderResp {
 		OrderSn   string `json:"order_sn"` // 订单号
@@ -500,7 +501,7 @@ type (
 		Items      []OrderItemSnapshot `json:"items"` // 商品快照列表
 	}
 	OrderListReq {
-		Status int64 `form:"status,default=0"` // 0:全部 10,20,30,40,50,60
+		Status int64 `form:"status,default=0" validate:"omitempty,oneof=0 10 20 30 40 50 60"` // 0:全部 10,20,30,40,50,60
 		Pagination
 	}
 	OrderListResp {
@@ -518,7 +519,7 @@ type (
 		Remark        string          `json:"remark,optional"` // 订单备注
 	}
 	CancelOrderReq {
-		CancelReason string `json:"cancel_reason,optional"` // 取消原因
+		CancelReason string `json:"cancel_reason,optional" validate:"omitempty,max=200"` // 取消原因
 	}
 	// 物流轨迹节点
 	DeliveryTrackItem {
@@ -537,14 +538,14 @@ type (
 	}
 	// 售后申请
 	AfterSaleReq {
-		OrderSn        string   `json:"order_sn"` // 订单号
-		SkuId          uint64   `json:"sku_id"` // SKU ID
-		Quantity       int64    `json:"quantity"` // 退款数量（支持部分退款）
-		Type           int64    `json:"type"` // 1:仅退款 2:退货退款
-		Reason         string   `json:"reason"` // 售后原因
-		ApplyAmount    int64    `json:"apply_amount"` // 申请退款金额（单位：分）
-		Images         []string `json:"images,optional"` // 凭证图片URL列表
-		IdempotencyKey string   `json:"idempotency_key"` // 幂等键
+		OrderSn        string   `json:"order_sn" validate:"required"` // 订单号
+		SkuId          uint64   `json:"sku_id" validate:"required,min=1"` // SKU ID
+		Quantity       int64    `json:"quantity" validate:"required,min=1"` // 退款数量（支持部分退款）
+		Type           int64    `json:"type" validate:"required,oneof=1 2"` // 1:仅退款 2:退货退款
+		Reason         string   `json:"reason" validate:"required,min=1,max=200"` // 售后原因
+		ApplyAmount    int64    `json:"apply_amount" validate:"required,min=1"` // 申请退款金额（单位：分）
+		Images         []string `json:"images,optional" validate:"omitempty,max=9,dive,min=1,max=255"` // 凭证图片URL列表，最多9张
+		IdempotencyKey string   `json:"idempotency_key" validate:"required"` // 幂等键
 	}
 	AfterSaleResp {
 		AfterSaleId uint64 `json:"after_sale_id"` // 售后单ID
@@ -556,8 +557,8 @@ type (
 	}
 	// 售后列表
 	AfterSaleListReq {
-		Status  int64  `form:"status,optional"` // 售后单状态: 1待审核 2待退货 3退款中 4已完成 5已拒绝，不传则查全部
-		OrderSn string `form:"order_sn,optional"` // 按订单号模糊搜索
+		Status  int64  `form:"status,optional" validate:"omitempty,oneof=1 2 3 4 5"` // 售后单状态: 1待审核 2待退货 3退款中 4已完成 5已拒绝，不传则查全部
+		OrderSn string `form:"order_sn,optional" validate:"omitempty"` // 按订单号模糊搜索
 		Pagination
 	}
 	AfterSaleListItem {
@@ -582,9 +583,10 @@ type (
 
 // 购物车模块（需登录）
 @server (
-	jwt:    JwtAuth
-	group:  order/cart
-	prefix: /api/v1/order/cart
+	jwt:        JwtAuth
+	middleware: TokenBlacklistMiddleware
+	group:      order/cart
+	prefix:     /api/v1/order/cart
 )
 service shop-api {
 	@doc "添加/更新购物车商品（数量为0则删除，幂等）"
@@ -642,9 +644,10 @@ service shop-api {
 
 // 物流模块（需登录）
 @server (
-	jwt:    JwtAuth
-	group:  order/delivery
-	prefix: /api/v1/order/delivery
+	jwt:        JwtAuth
+	middleware: TokenBlacklistMiddleware
+	group:      order/delivery
+	prefix:     /api/v1/order/delivery
 )
 service shop-api {
 	@doc "查询物流轨迹"
@@ -682,12 +685,12 @@ service shop-api {
 type (
 	// 发起支付请求
 	CreatePaymentReq {
-		OrderSn        string `json:"order_sn"` // 订单号
-		Channel        string `json:"channel"` // 支付渠道: alipay, wechat
-		PayType        string `json:"pay_type"` // 支付场景: APP, H5, JSAPI, QR
-		Amount         int64  `json:"amount"` // 应付金额（分），用于后端校验
-		OpenId         string `json:"openid,optional"` // 微信JSAPI支付时必传
-		IdempotencyKey string `json:"idempotency_key"` // 幂等键
+		OrderSn        string `json:"order_sn" validate:"required"` // 订单号
+		Channel        string `json:"channel" validate:"required,oneof=alipay wechat"` // 支付渠道: alipay, wechat
+		PayType        string `json:"pay_type" validate:"required,oneof=APP H5 JSAPI QR"` // 支付场景: APP, H5, JSAPI, QR
+		Amount         int64  `json:"amount" validate:"required,min=1"` // 应付金额（分），用于后端校验
+		OpenId         string `json:"openid,optional" validate:"required_if=PayType JSAPI"` // 微信JSAPI支付时必传
+		IdempotencyKey string `json:"idempotency_key" validate:"required"` // 幂等键
 	}
 	CreatePaymentResp {
 		PaymentSn string `json:"payment_sn"` // 支付流水号
@@ -707,13 +710,13 @@ type (
 	}
 	// 退款申请（由订单服务售后调用）
 	RefundApplyReq {
-		OrderSn        string   `json:"order_sn"` // 订单号
-		PaymentSn      string   `json:"payment_sn,optional"` // 支付流水号（可选，不传则自动查找）
-		Amount         int64    `json:"amount"` // 退款金额（分）
-		Reason         string   `json:"reason"` // 退款原因
-		Type           int64    `json:"type"` // 1:仅退款 2:退货退款
-		Images         []string `json:"images,optional"` // 退款凭证图片
-		IdempotencyKey string   `json:"idempotency_key"` // 幂等键
+		OrderSn        string   `json:"order_sn" validate:"required"` // 订单号
+		PaymentSn      string   `json:"payment_sn,optional" validate:"omitempty"` // 支付流水号（可选，不传则自动查找）
+		Amount         int64    `json:"amount" validate:"required,min=1"` // 退款金额（分）
+		Reason         string   `json:"reason" validate:"required,min=1,max=200"` // 退款原因
+		Type           int64    `json:"type" validate:"required,oneof=1 2"` // 1:仅退款 2:退货退款
+		Images         []string `json:"images,optional" validate:"omitempty,max=9,dive,min=1,max=255"` // 退款凭证图片
+		IdempotencyKey string   `json:"idempotency_key" validate:"required"` // 幂等键
 	}
 	RefundApplyResp {
 		RefundSn   string `json:"refund_sn"` // 退款单号
@@ -740,9 +743,10 @@ type (
 
 // 支付模块（需登录）
 @server (
-	jwt:    JwtAuth
-	group:  payment/core
-	prefix: /api/v1/payment
+	jwt:        JwtAuth
+	middleware: TokenBlacklistMiddleware
+	group:      payment/core
+	prefix:     /api/v1/payment
 )
 service shop-api {
 	@doc "创建支付单（获取第三方支付拉起参数，幂等）"
@@ -827,15 +831,15 @@ type (
 		List  []Coupon `json:"list"` // 优惠券列表
 	}
 	ClaimCouponReq {
-		CouponId       uint64 `json:"coupon_id"` // 优惠券ID
-		IdempotencyKey string `json:"idempotency_key"` // 幂等键
+		CouponId       uint64 `json:"coupon_id" validate:"required,min=1"` // 优惠券ID
+		IdempotencyKey string `json:"idempotency_key" validate:"required"` // 幂等键
 	}
 	ClaimCouponResp {
 		UserCouponId uint64 `json:"user_coupon_id"` // 用户优惠券记录ID
 		ExpireTime   string `json:"expire_time"` // 领取后的过期时间，RFC3339格式
 	}
 	MyCouponListReq {
-		Status int64 `form:"status,default=0"` // 0-未使用，1-已使用，2-已过期
+		Status int64 `form:"status,default=0" validate:"omitempty,oneof=0 1 2"` // 0-未使用，1-已使用，2-已过期
 		Pagination
 	}
 	MyCouponListResp {
@@ -843,7 +847,7 @@ type (
 		List  []UserCoupon `json:"list"` // 用户优惠券列表
 	}
 	AvailableCouponsReq {
-		OrderAmount int64 `json:"order_amount"` // 当前订单总金额（单位：分）
+		OrderAmount int64 `json:"order_amount" validate:"required,min=0"` // 当前订单总金额（单位：分）
 	}
 	AvailableCouponsResp {
 		Available   []UserCoupon `json:"available"` // 可使用的优惠券
@@ -853,8 +857,8 @@ type (
 	// 注意：以下接口仅供内部服务调用，普通用户不应直接访问。
 	// 后续将通过 IP 白名单、独立 JWT 或 mTLS 等方式限制访问来源。
 	UseCouponReq {
-		UserCouponId uint64 `json:"user_coupon_id"` // 用户优惠券记录ID
-		OrderSn      string `json:"order_sn"` // 订单号
+		UserCouponId uint64 `json:"user_coupon_id" validate:"required,min=1"` // 用户优惠券记录ID
+		OrderSn      string `json:"order_sn" validate:"required"` // 订单号
 	}
 	UseCouponResp {
 		Success        bool   `json:"success"` // 是否成功
@@ -862,8 +866,8 @@ type (
 		ErrorMsg       string `json:"error_msg,optional"` // 错误信息
 	}
 	UnlockCouponReq {
-		UserCouponId uint64 `json:"user_coupon_id"` // 用户优惠券记录ID
-		OrderSn      string `json:"order_sn"` // 订单号
+		UserCouponId uint64 `json:"user_coupon_id" validate:"required,min=1"` // 用户优惠券记录ID
+		OrderSn      string `json:"order_sn" validate:"require"` // 订单号
 	}
 	UnlockCouponResp {
 		Success  bool   `json:"success"` // 是否成功
@@ -873,9 +877,10 @@ type (
 
 // C端优惠券接口（需登录）
 @server (
-	jwt:    JwtAuth
-	group:  marketing/coupon
-	prefix: /api/v1/marketing/coupon
+	jwt:        JwtAuth
+	middleware: TokenBlacklistMiddleware
+	group:      marketing/coupon
+	prefix:     /api/v1/marketing/coupon
 )
 service shop-api {
 	@doc "领券中心：获取全场可领取优惠券"
@@ -898,9 +903,10 @@ service shop-api {
 // 内部接口（仅供订单服务等可信调用方使用）
 // 当前使用 JwtAuth，但应配置专用 client 凭证或后续改为 IP 白名单/独立 JWT 签发者。
 @server (
-	jwt:    JwtAuth
-	group:  marketing/internal_api
-	prefix: /internal/v1/coupon
+	jwt:        JwtAuth
+	middleware: TokenBlacklistMiddleware
+	group:      marketing/internal_api
+	prefix:     /internal/v1/coupon
 )
 service shop-api {
 	@doc "订单服务：使用优惠券（锁定并扣减）"

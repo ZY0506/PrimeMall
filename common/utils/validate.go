@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/ZY0506/PrimeMall/common/constants"
 	"regexp"
 	"strings"
 )
@@ -66,4 +67,8 @@ func ValidatePassword(pwd string) bool {
 	//
 	//// 必须包含字母 + 数字
 	//return hasLetter && hasNumber
+}
+
+func ValidateScene(scene string) bool {
+	return scene == constants.SCENE_RESET_PWD || scene == constants.SCENE_LOGIN || scene == constants.SCENE_REGISTER
 }

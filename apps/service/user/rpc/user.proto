@@ -62,7 +62,10 @@ service UserInternal {
 // ------------------------------ 公共消息 ------------------------------
 message EmptyReq {}
 message EmptyResp {}
-
+message ErrDetail{
+  int32 code=1;
+  string msg=2;
+}
 // ------------------------------ 枚举 ------------------------------
 enum UserStatus {
   USER_STATUS_UNKNOWN = 0;    // 未知
@@ -110,11 +113,15 @@ message ResetPasswordReq {
 }
 
 message LogoutReq {
-  string jti = 1;
+  string access_jti = 1;
+  int64 access_expire = 2;
+  string refresh_jti = 3;
+  int64 refresh_expire = 4;
 }
 
 message RefreshTokenReq{
-  string jti = 1;
+  string refresh_jti = 1;
+  int64 refresh_expire = 2;
 }
 
 message UpdatePasswordReq {
