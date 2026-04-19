@@ -1,8 +1,0 @@
-syntax = "v1"
-
-info(
-    title: "PrimeMall-搜索服务"
-    desc: "搜索历史、热搜词、搜索同步记录"
-    author: "烤冷面"
-    version: "v1.0"
-)
