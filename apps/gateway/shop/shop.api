@@ -51,7 +51,7 @@ type (
 	// 基础鉴权请求
 	CaptchaReq {
 		Phone          string `json:"phone" validate:"required,len=11"` // 手机号
-		Scene          string `json:"scene" validate:"required,oneof=login register reset_pwd update_pwd"` // 场景：login, register, reset_pwd, update_pwd
+		Scene          string `json:"scene" validate:"required,oneof=login register reset_pwd update_pwd update_phone"` // 场景：login, register, reset_pwd, update_pwd, update_phone
 		IdempotencyKey string `json:"idempotency_key" validate:"required"` // 幂等键（客户端UUID）
 	}
 	LoginReq {
@@ -114,10 +114,12 @@ type (
 		IdempotencyKey string `json:"idempotency_key" validate:"required"` // 幂等键
 	}
 	DeleteAccountReq {
-		Password string `json:"password" validate:"required,min=8,max=20"` // 密码验证
+		Password     string `json:"password" validate:"required,min=8,max=20"` // 密码验证
+		RefreshToken string `json:"refresh_token" validate:"required"` // 刷新令牌
 	}
 	// 收货地址（使用 AddressDetail 嵌套）
 	AddressItem {
+		Id            uint64        `json:"id" validate:"required,min=1"` // 地址ID
 		ReceiverName  string        `json:"receiver_name" validate:"required,min=1,max=50"` // 收货人姓名
 		ReceiverPhone string        `json:"receiver_phone" validate:"required,len=11"` // 收货人电话
 		IsDefault     int64         `json:"is_default" validate:"oneof=0 1"` // 是否默认地址：0-否，1-是
@@ -126,11 +128,14 @@ type (
 	}
 	// 地址添加请求
 	AddAddressReq {
-		AddressItem
+		ReceiverName  string        `json:"receiver_name" validate:"required,min=1,max=50"` // 收货人姓名
+		ReceiverPhone string        `json:"receiver_phone" validate:"required,len=11"` // 收货人电话
+		IsDefault     int64         `json:"is_default" validate:"oneof=0 1"` // 是否默认地址：0-否，1-是
+		Tag           string        `json:"tag,optional" validate:"omitempty,oneof=HOME OFFICE SCHOOL"` // 地址标签：HOME-家，OFFICE-公司，SCHOOL-学校
+		Detail        AddressDetail `json:"detail"` // 地址详细信息（内部字段已校验）
 	}
 	// 地址更新请求
 	UpdateAddressReq {
-		Id uint64 `json:"id" validate:"required,min=1"` // 地址ID
 		AddressItem
 	}
 	// 地址列表请求（分页）

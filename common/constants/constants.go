@@ -4,10 +4,11 @@ import "time"
 
 // 场景
 const (
-	SCENE_LOGIN      = "login"
-	SCENE_REGISTER   = "register"
-	SCENE_RESET_PWD  = "reset_pwd"
-	SCENE_UPDATE_PWD = "update_pwd"
+	SCENE_LOGIN        = "login"
+	SCENE_REGISTER     = "register"
+	SCENE_RESET_PWD    = "reset_pwd"
+	SCENE_UPDATE_PWD   = "update_pwd"
+	SCENE_UPDATE_PHONE = "update_phone"
 
 	LOGIN_BY_PASSWORD = "password"
 	LOGIN_BY_CAPTCHA  = "captcha"
@@ -44,11 +45,19 @@ const (
 
 // token黑名单
 const (
-	RTOKEN_BLACKLIST_KEY = "rToken_blacklist:"
-	ATOKEN_BLACKLIST_KEY = "aToken_blacklist:"
+	RTOKEN_BLACKLIST_KEY = "jwt:blacklist:refresh:"
+	ATOKEN_BLACKLIST_KEY = "jwt:blacklist:access:"
 )
 
+// 登录状态
 const (
 	LOGIN_STATUS_SUCCESS = int64(1)
 	LOGIN_STATUS_FAIL    = int64(2)
+)
+
+// 地址tag
+const (
+	TAG_HOME   = "HOME"
+	TAG_OFFICE = "OFFICE"
+	TAG_SCHOOL = "SCHOOL"
 )
