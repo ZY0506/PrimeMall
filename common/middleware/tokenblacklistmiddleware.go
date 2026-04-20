@@ -26,7 +26,7 @@ func (m *TokenBlacklistMiddleware) Handle(next http.HandlerFunc) http.HandlerFun
 		ctx := r.Context()
 
 		// 从 ctx 里拿 jti
-		jti, ok := ctx.Value("jti").(string)
+		jti, ok := ctx.Value("token_id").(string)
 		if !ok || jti == "" {
 			httpx.WriteJsonCtx(ctx, w, http.StatusUnauthorized, response.Response{
 				Code: response.ErrCodeTokenInvalid,

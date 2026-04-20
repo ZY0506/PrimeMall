@@ -82,7 +82,7 @@ message IdPathReq {
 // ------------------------------ 认证相关 ------------------------------
 message CaptchaReq {
   string phone = 1;
-  string scene = 2;  // login, register, reset_pwd
+  string scene = 2;  // login, register, reset_pwd, update_pwd, update_phone
   string idempotency_key = 6;
 }
 
@@ -114,14 +114,11 @@ message ResetPasswordReq {
 
 message LogoutReq {
   string access_jti = 1;
-  int64 access_expire = 2;
-  string refresh_jti = 3;
-  int64 refresh_expire = 4;
+  string refresh_jti = 2;
 }
 
 message RefreshTokenReq{
   string refresh_jti = 1;
-  int64 refresh_expire = 2;
 }
 
 message UpdatePasswordReq {
@@ -139,6 +136,8 @@ message UpdatePhoneReq {
 
 message DeleteAccountReq {
   string password = 1;            // 密码验证
+  string access_jti = 2;
+  string refresh_jti = 3;
 }
 
 message LoginResp {

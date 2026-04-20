@@ -3,12 +3,12 @@ package jwt
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"github.com/google/uuid"
 	"time"
 )
 
 type Claims struct {
 	UserId uint64 `json:"user_id"`
+	JTI    string `json:"token_id"`
 }
 
 type MyClaims struct {
@@ -24,7 +24,7 @@ func GenToken(data Claims, mySecret []byte, expire int64, issuer string) (token 
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Duration(expire) * time.Second).Unix(), // 过期时间
 			Issuer:    issuer,                                                     // 签发人
-			Id:        uuid.New().String(),
+			Id:        data.JTI,
 		},
 	}
 	// 加密并获得完整的编码后的字符串token
