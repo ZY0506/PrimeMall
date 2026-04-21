@@ -1,5 +1,197 @@
 syntax = "proto3";
-
 package product;
 
-option go_package = "./product";
+option go_package = "./product;product";
+
+import "google/protobuf/empty.proto";
+
+// goctl rpc protoc .\apps\service\product\rpc\product.proto --go_out=apps/service/product/rpc/types --go-grpc_out apps/service/product/rpc/types --zrpc_out=apps/service/product/rpc/
+
+// ==================== RPC ====================
+
+service ProductRpc {
+  // 分类
+  rpc CategoryTree(google.protobuf.Empty) returns (CategoryTreeResp);
+  rpc CategoryInfo(IdReq) returns (CategoryResp);
+
+  // 商品
+  rpc ListProducts(ProductListReq) returns (ProductListResp);
+  rpc ProductDetail(IdReq) returns (ProductDetailResp);
+
+  // 推荐（后续可拆服务）
+  rpc Recommend(RecommendReq) returns (ProductListResp);
+
+  // SKU
+  rpc BatchGetSkus(SkuIdsReq) returns (BatchSkuResp);
+}
+
+// ==================== 通用结构 ====================
+
+// ID 请求
+message IdReq {
+  uint64 id = 1;
+}
+
+// 分页请求
+message PageReq {
+  int64 page = 1; // 默认1
+  int64 size = 2; // 默认10
+}
+
+// 分页返回
+message PageResp {
+  int64 total = 1;
+  int64 page = 2;
+  int64 size = 3;
+}
+
+// 批量 SKU
+message SkuIdsReq {
+  repeated uint64 sku_ids = 1;
+}
+
+// ==================== 枚举定义 ====================
+
+// 商品状态
+enum ProductStatus {
+  PRODUCT_STATUS_UNKNOWN = 0;
+  PRODUCT_STATUS_ON_SALE = 1;
+  PRODUCT_STATUS_OFF_SALE = 2;
+}
+
+// 排序方式
+enum SortType {
+  SORT_DEFAULT = 0;
+  SORT_PRICE_ASC = 1;
+  SORT_PRICE_DESC = 2;
+  SORT_SALES_DESC = 3;
+  SORT_NEW_DESC = 4;
+}
+
+// 推荐场景
+enum RecommendScene {
+  SCENE_UNKNOWN = 0;
+  SCENE_HOME = 1;
+  SCENE_CART = 2;
+  SCENE_DETAIL = 3;
+}
+
+// ==================== 分类 ====================
+message Category {
+  uint64 id = 1;
+  uint64 parent_id = 2;
+  string name = 3;
+  string icon = 4;
+  int32 sort = 5;
+  int32 level = 6;
+  repeated Category children = 7;
+}
+
+message CategoryTreeResp {
+  repeated Category list = 1;
+}
+
+message CategoryResp {
+  Category category = 1;
+}
+
+// ==================== 商品筛选 ====================
+// 属性过滤（替代 string attrs）
+message AttrFilter {
+  string name = 1;
+  repeated string values = 2;
+}
+
+// 商品列表请求
+message ProductListReq {
+  uint64 category_id = 1;
+  string keyword = 2;
+  string brand = 3;
+  int64 min_price = 4; // 单位：分
+  int64 max_price = 5;
+  repeated AttrFilter attrs = 6;
+  bool is_new = 7;
+  SortType sort = 8;
+  PageReq page = 9;
+}
+
+// ==================== 商品列表 ====================
+
+message ProductItem {
+  uint64 id = 1;
+  string name = 2;
+  string brand = 3;
+  string cover = 4; // 主图
+  int64 price = 5;  // 最低价（分）
+  int64 sales = 6;
+  int64 show_sales = 7;
+}
+
+message ProductListResp {
+  PageResp page = 1;
+  repeated ProductItem list = 2;
+}
+
+// ==================== SKU ====================
+// 规格结构（替代 JSON）
+message SpecItem {
+  string version = 1;
+  string color = 2;
+}
+
+message SkuItem {
+  uint64 id = 1;
+  string code = 2;
+  int64 price = 3;        // 分
+  int64 market_price = 4; // 分
+  int64 stock = 5;
+  repeated SpecItem specs = 6;
+  int64 weight = 14; // 单位：克
+  string cover = 7;
+  repeated string images = 8;
+}
+
+// SKU 精简版
+message SkuSimple {
+  uint64 id = 1;
+  int64 price = 2;
+  int64 stock = 3;
+}
+
+// ==================== 商品详情 ====================
+// 聚合属性（用于前端筛选）
+message AttributeItem {
+  string name = 1;
+  repeated string values = 2;
+}
+
+message ProductDetailResp {
+  uint64 id = 1;
+  uint64 category_id = 2;
+  string name = 3;
+  string brand = 4;
+  string description = 5;
+  string content = 6;
+  string cover = 7;
+  repeated string images = 8;
+  string video_url = 9;
+  int64 price = 10;
+  int64 sales = 11;
+  int64 show_sales = 12;
+  ProductStatus status = 13;
+  uint64 freight_template_id = 15;
+  repeated SkuItem skus = 16;
+  repeated AttributeItem attributes = 17;
+}
+
+// ==================== 推荐 ====================
+message RecommendReq {
+  RecommendScene scene = 1;
+  uint64 current_id = 2;
+  int64 limit = 3;
+}
+
+// ==================== SKU 批量 ====================
+message BatchSkuResp {
+  repeated SkuSimple list = 1;
+}

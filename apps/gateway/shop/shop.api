@@ -120,11 +120,11 @@ type (
 	// 收货地址（使用 AddressDetail 嵌套）
 	AddressItem {
 		Id            uint64        `json:"id" validate:"required,min=1"` // 地址ID
-		ReceiverName  string        `json:"receiver_name" validate:"required,min=1,max=50"` // 收货人姓名
-		ReceiverPhone string        `json:"receiver_phone" validate:"required,len=11"` // 收货人电话
-		IsDefault     int64         `json:"is_default" validate:"oneof=0 1"` // 是否默认地址：0-否，1-是
+		ReceiverName  string        `json:"receiver_name,optional" validate:"omitempty,min=1,max=50"` // 收货人姓名
+		ReceiverPhone string        `json:"receiver_phone,optional" validate:"omitempty,len=11"` // 收货人电话
+		IsDefault     int64         `json:"is_default,optional" validate:"omitempty,oneof=0 1"` // 是否默认地址：0-否，1-是
 		Tag           string        `json:"tag,optional" validate:"omitempty,oneof=HOME OFFICE SCHOOL"` // 地址标签：HOME-家，OFFICE-公司，SCHOOL-学校
-		Detail        AddressDetail `json:"detail"` // 地址详细信息（内部字段已校验）
+		Detail        AddressDetail `json:"detail,optional" validate:"omitempty"` // 地址详细信息（内部字段已校验）
 	}
 	// 地址添加请求
 	AddAddressReq {
