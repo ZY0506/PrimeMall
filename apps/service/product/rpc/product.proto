@@ -1,9 +1,7 @@
 syntax = "proto3";
 package product;
 
-option go_package = "./product;product";
-
-import "google/protobuf/empty.proto";
+option go_package = "./product";
 
 // goctl rpc protoc .\apps\service\product\rpc\product.proto --go_out=apps/service/product/rpc/types --go-grpc_out apps/service/product/rpc/types --zrpc_out=apps/service/product/rpc/
 
@@ -11,7 +9,7 @@ import "google/protobuf/empty.proto";
 
 service ProductRpc {
   // 分类
-  rpc CategoryTree(google.protobuf.Empty) returns (CategoryTreeResp);
+  rpc CategoryTree(Empty) returns (CategoryTreeResp);
   rpc CategoryInfo(IdReq) returns (CategoryResp);
 
   // 商品
@@ -26,7 +24,7 @@ service ProductRpc {
 }
 
 // ==================== 通用结构 ====================
-
+message Empty{}
 // ID 请求
 message IdReq {
   uint64 id = 1;
@@ -82,8 +80,8 @@ message Category {
   uint64 parent_id = 2;
   string name = 3;
   string icon = 4;
-  int32 sort = 5;
-  int32 level = 6;
+  int64 sort = 5;
+  int64 level = 6;
   repeated Category children = 7;
 }
 
@@ -135,8 +133,8 @@ message ProductListResp {
 // ==================== SKU ====================
 // 规格结构（替代 JSON）
 message SpecItem {
-  string version = 1;
-  string color = 2;
+  string key = 1;
+  string value = 2;
 }
 
 message SkuItem {
@@ -146,8 +144,7 @@ message SkuItem {
   int64 market_price = 4; // 分
   int64 stock = 5;
   repeated SpecItem specs = 6;
-  int64 weight = 14; // 单位：克
-  string cover = 7;
+  int64 weight = 7; // 单位：克
   repeated string images = 8;
 }
 
