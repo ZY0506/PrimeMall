@@ -70,20 +70,24 @@ const (
 	ErrCodeCategoryNotFound     = 30007 // 分类不存在
 	ErrCodeCategoryHasChildren  = 30008 // 分类含有子分类，无法删除
 	ErrCodeProductInvalidStatus = 30009 // 商品状态非法
+	ErrCodePictureNotFound      = 30009 // 图片不存在
 )
 
 // 订单模块 (4xxxx)
 const (
-	ErrCodeOrderNotFound          = 40001 // 订单不存在
-	ErrCodeOrderStatusInvalid     = 40002 // 订单状态不允许当前操作
-	ErrCodeOrderCancelFailed      = 40003 // 订单取消失败（非待支付状态）
-	ErrCodeOrderConfirmFailed     = 40004 // 确认收货失败
-	ErrCodeOrderExpired           = 40005 // 订单已过期
-	ErrCodeOrderItemMismatch      = 40006 // 订单商品信息不匹配
-	ErrCodeSettlementTokenInvalid = 40007 // 结算令牌无效或已过期
-	ErrCodeIdempotentConflict     = 40008 // 重复提交订单（幂等冲突）
-	ErrCodeOrderAmountMismatch    = 40009 // 订单金额校验失败
-	ErrCodeAddressNotBelongUser   = 40010 // 地址不属于当前用户
+	ErrCodeOrderNotFound            = 40001 // 订单不存在
+	ErrCodeOrderStatusInvalid       = 40002 // 订单状态不允许当前操作
+	ErrCodeOrderCancelFailed        = 40003 // 订单取消失败（非待支付状态）
+	ErrCodeOrderConfirmFailed       = 40004 // 确认收货失败
+	ErrCodeOrderExpired             = 40005 // 订单已过期
+	ErrCodeOrderItemMismatch        = 40006 // 订单商品信息不匹配
+	ErrCodeSettlementTokenInvalid   = 40007 // 结算令牌无效或已过期
+	ErrCodeIdempotentConflict       = 40008 // 重复提交订单（幂等冲突）
+	ErrCodeOrderAmountMismatch      = 40009 // 订单金额校验失败
+	ErrCodeAddressNotBelongUser     = 40010 // 地址不属于当前用户
+	ErrCodeFreightTemplateNotFound  = 40011 // 运费模板不存在
+	ErrCodeFreightCalculationFailed = 40012 // 运费计算失败
+
 )
 
 // 支付模块 (5xxxx)

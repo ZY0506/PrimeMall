@@ -46,7 +46,6 @@ CREATE TABLE IF NOT EXISTS `product_spu` (
     `status`              TINYINT         NOT NULL DEFAULT '1' COMMENT '上架状态：1-上架，2-下架',
     `sales_count`         INT             NOT NULL DEFAULT '0' COMMENT '实际销量',
     `virtual_sales`       INT             NOT NULL DEFAULT '0' COMMENT '虚拟销量（用于展示）',
-    `weight`              DECIMAL(10,2)            DEFAULT '0.00' COMMENT '商品重量（kg）',
     `freight_template_id` BIGINT UNSIGNED          DEFAULT '0' COMMENT '运费模板ID：0-使用默认模板',
     `created_at`          DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at`          DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',

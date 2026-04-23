@@ -3,7 +3,7 @@
 -- 数据库: shop_product
 -- 说明: 商品分类、SPU、SKU、库存管理
 -- =============================================
-
+-- goctl model mysql ddl --src=./apps/service/product/sql/02-product.sql --dir=./apps/service/product/rpc/internal/model
 CREATE DATABASE IF NOT EXISTS `shop_product`
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
