@@ -57,15 +57,6 @@ enum ProductStatus {
   PRODUCT_STATUS_OFF_SALE = 2;
 }
 
-// 排序方式
-enum SortType {
-  SORT_DEFAULT = 0;
-  SORT_PRICE_ASC = 1;
-  SORT_PRICE_DESC = 2;
-  SORT_SALES_DESC = 3;
-  SORT_NEW_DESC = 4;
-}
-
 // 推荐场景
 enum RecommendScene {
   SCENE_UNKNOWN = 0;
@@ -94,7 +85,7 @@ message CategoryResp {
 }
 
 // ==================== 商品筛选 ====================
-// 属性过滤（替代 string attrs）
+// 属性过滤（替代 string attrs）颜色选“红”或“蓝”，尺寸选“M”或“L”
 message AttrFilter {
   string name = 1;
   repeated string values = 2;
@@ -109,8 +100,9 @@ message ProductListReq {
   int64 max_price = 5;
   repeated AttrFilter attrs = 6;
   bool is_new = 7;
-  SortType sort = 8;
-  PageReq page = 9;
+  string sort_by = 8;
+  string sort_type = 9;
+  PageReq page = 10;
 }
 
 // ==================== 商品列表 ====================
@@ -119,10 +111,11 @@ message ProductItem {
   uint64 id = 1;
   string name = 2;
   string brand = 3;
-  string cover = 4; // 主图
-  int64 price = 5;  // 最低价（分）
-  int64 sales = 6;
-  int64 show_sales = 7;
+  string desc = 4;
+  string cover = 5; // 主图
+  int64 price = 6;  // 最低价（分）
+  int64 sales = 7;
+  int64 show_sales = 8;
 }
 
 message ProductListResp {

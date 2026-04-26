@@ -297,18 +297,19 @@ type (
 		List []Category `json:"list"` // 分类列表
 	}
 	CategoryResp {
-		Category CategoryInfo `json:"category"` // 分类信息
+		Category Category `json:"category"` // 分类信息
 	}
 	// 商品列表请求
 	ProductListReq {
-		CategoryId uint64 `form:"category_id,optional" validate:"omitempty,min=1"` // 分类ID
-		Brand      string `form:"brand,optional" validate:"omitempty,min=1,max=100"` // 品牌名称（模糊匹配）
-		MinPrice   int64  `form:"min_price,optional" validate:"omitempty,min=0"` // 最低价格（单位：分）
-		MaxPrice   int64  `form:"max_price,optional" validate:"omitempty,min=0,gtefield=MinPrice"` // 最高价格（单位：分）
-		Keyword    string `form:"keyword,optional" validate:"omitempty,min=1,max=100"` // 简单关键词搜索（大数据量建议使用独立搜索服务）
-		Attrs      string `form:"attrs,optional" validate:"omitempty,min=1,max=500"` // 属性过滤，格式 "颜色:红色,内存:64G"
-		IsNew      bool   `form:"is_new,optional"` // 是否新品（按创建时间<7天）
-		Sort       string `form:"sort,optional" validate:"omitempty,oneof=price_asc price_desc sales_desc new_desc"` // 排序: price_asc, price_desc, sales_desc, new_desc
+		CategoryId uint64            `form:"category_id,optional" validate:"omitempty,min=1"` // 分类ID
+		Brand      string            `form:"brand,optional" validate:"omitempty,min=1,max=100"` // 品牌名称（模糊匹配）
+		MinPrice   int64             `form:"min_price,optional" validate:"omitempty,min=0"` // 最低价格（单位：分）
+		MaxPrice   int64             `form:"max_price,optional" validate:"omitempty,min=0,gtefield=MinPrice"` // 最高价格（单位：分）
+		Keyword    string            `form:"keyword,optional" validate:"omitempty,min=1,max=100"` // 简单关键词搜索（大数据量建议使用独立搜索服务）
+		Attrs      map[string]string `form:"attrs,optional" validate:"omitempty,min=1,max=500"` // 属性过滤，格式 "颜色:红色,内存:64G"
+		IsNew      bool              `form:"is_new,optional"` // 是否新品（按创建时间<7天）
+		SortBy     string            `form:"sort_by,optional" validate:"omitempty,oneof=price sales created_at"` // 排序字段
+		SortType   string            `form:"sort_type,optional" validate:"omitempty,oneof=asc desc"` // 排序方向
 		Pagination
 	}
 	// 商品列表项
@@ -347,13 +348,18 @@ type (
 		Skus              []SkuItem       `json:"skus"` // SKU列表
 		Attributes        []AttributeItem `json:"attributes"` // 聚合属性（用于前端筛选）
 	}
+	SpecItem {
+		Name   string `json:"name"`
+		Values string `json:"values"`
+	}
 	SkuItem {
-		Id       uint64 `json:"id"` // SKU ID
-		Name     string `json:"name"` // 规格名称，如"红色 64G"
-		Pic      string `json:"pic"` // SKU图片URL
-		Price    int64  `json:"price"` // 价格（单位：分）
-		Stock    int64  `json:"stock"` // 库存数量
-		SpecData string `json:"spec_data"` // 原始JSON，如{"颜色":"红色","容量":"64G"}
+		Id       uint64     `json:"id"` // SKU ID
+		Code     string     `json:"code"`
+		Pic      []string   `json:"pic"` // SKU图片URL
+		Price    int64      `json:"price"` // 价格（单位：分）
+		Stock    int64      `json:"stock"` // 库存数量
+		SpecData []SpecItem `json:"spec_data"` // 原始JSON，如{"颜色":"红色"}{"容量":"64G"}
+		Weight   int64      `json:"weight"` // 重量（克）
 	}
 	AttributeItem {
 		Name   string   `json:"name"` // 属性名，如"颜色"
