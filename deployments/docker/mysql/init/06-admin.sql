@@ -5,8 +5,8 @@
 -- =============================================
 
 CREATE DATABASE IF NOT EXISTS `shop_admin`
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
 
 USE `shop_admin`;
 

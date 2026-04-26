@@ -26,6 +26,12 @@ const (
 const (
 	IDEMPOTENCY_KEY   = "idempotency:"
 	IDEMPOTENCY_EXIRE = 30 * time.Second
+	USER_SERVICE      = "user_service:"
+	PRODUCT_SERVICE   = "product_service:"
+	ORDER_SERVICE     = "order_service:"
+	PAYMENT_SERVICE   = "payment_service:"
+	SEARCH_SERVICE    = "search_service:"
+	MARKETING_SERVICE = "marketing_service:"
 )
 
 // 用户状态

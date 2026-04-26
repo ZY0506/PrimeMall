@@ -2,11 +2,12 @@
 -- 服务: 商品服务 (Product Service)
 -- 数据库: shop_product
 -- 说明: 商品分类、SPU、SKU、库存管理
+-- 金额字段统一使用 BIGINT 类型，单位为分（避免浮点数精度问题）
 -- =============================================
-
+-- goctl model mysql ddl --src=./apps/service/product/sql/02-product.sql --dir=./apps/service/product/rpc/internal/model
 CREATE DATABASE IF NOT EXISTS `shop_product`
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
 
 USE `shop_product`;
 
@@ -26,9 +27,9 @@ CREATE TABLE IF NOT EXISTS `category` (
     PRIMARY KEY (`id`),
     KEY `idx_parent_id` (`parent_id`)
 ) ENGINE=InnoDB
-  DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_unicode_ci
-  COMMENT='商品分类表';
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci
+COMMENT='商品分类表';
 
 -- =============================================
 -- 商品SPU表（标准产品单位）
@@ -53,9 +54,9 @@ CREATE TABLE IF NOT EXISTS `product_spu` (
     KEY `idx_category_id` (`category_id`),
     KEY `idx_status` (`status`)
 ) ENGINE=InnoDB
-  DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_unicode_ci
-  COMMENT='商品SPU表';
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci
+COMMENT='商品SPU表';
 
 -- =============================================
 -- 商品SKU表（库存量单位）
@@ -64,14 +65,15 @@ CREATE TABLE IF NOT EXISTS `product_sku` (
     `id`           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'SKU ID',
     `spu_id`       BIGINT UNSIGNED NOT NULL COMMENT '所属SPU ID',
     `sku_code`     VARCHAR(64)     NOT NULL DEFAULT '' COMMENT 'SKU编码（唯一标识）',
-    `price`        DECIMAL(10,2)   NOT NULL COMMENT '销售价格',
-    `market_price` DECIMAL(10,2)   NOT NULL COMMENT '市场价（划线价）',
-    `cost_price`   DECIMAL(10,2)   NOT NULL DEFAULT '0.00' COMMENT '成本价',
+    `price`        BIGINT          NOT NULL COMMENT '销售价格',
+    `market_price` BIGINT          NOT NULL COMMENT '市场价（划线价）',
+    `cost_price`   BIGINT          NOT NULL DEFAULT '0' COMMENT '成本价',
     `stock`        INT             NOT NULL DEFAULT '0' COMMENT '库存数量',
+    `locked_stock` INT             NOT NULL DEFAULT '0' COMMENT '锁定库存数量',
     `version`      INT UNSIGNED    NOT NULL DEFAULT '0' COMMENT '乐观锁版本号（用于并发控制）',
     `spec_data`    JSON            NOT NULL COMMENT '规格数据（JSON格式）：{颜色:红色, 尺寸:XL}',
     `images`       JSON                     DEFAULT NULL COMMENT 'SKU专属图片列表（JSON数组）',
-    `weight`       DECIMAL(10,2)            DEFAULT '0.00' COMMENT 'SKU重量（kg）',
+    `weight`       BIGINT                   DEFAULT '0' COMMENT 'SKU重量（kg）',
     `status`       TINYINT         NOT NULL DEFAULT '1' COMMENT '状态：1-启用，2-禁用',
     `created_at`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -80,9 +82,9 @@ CREATE TABLE IF NOT EXISTS `product_sku` (
     KEY `idx_spu_id` (`spu_id`),
     KEY `idx_price` (`price`)
 ) ENGINE=InnoDB
-  DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_unicode_ci
-  COMMENT='商品SKU表';
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci
+COMMENT='商品SKU表';
 
 -- =============================================
 -- 库存变动流水表
@@ -101,9 +103,9 @@ CREATE TABLE IF NOT EXISTS `stock_log` (
     UNIQUE KEY `uk_order_sku_type` (`order_sn`, `sku_id`, `change_type`),
     KEY `idx_sku_id` (`sku_id`)
 ) ENGINE=InnoDB
-  DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_unicode_ci
-  COMMENT='库存变动流水表';
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci
+COMMENT='库存变动流水表';
 
 -- =============================================
 -- 运费模板表
@@ -112,10 +114,10 @@ CREATE TABLE IF NOT EXISTS `freight_template` (
     `id`                        BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '模板ID',
     `name`                      VARCHAR(64)     NOT NULL DEFAULT '' COMMENT '模板名称',
     `type`                      TINYINT         NOT NULL DEFAULT '1' COMMENT '计费方式：1-按件数，2-按重量',
-    `default_fee`               DECIMAL(10,2)   NOT NULL DEFAULT '0.00' COMMENT '基础运费',
+    `default_fee`               BIGINT          NOT NULL DEFAULT '0' COMMENT '基础运费',
     `default_quantity`          INT             NOT NULL DEFAULT '1' COMMENT '基础数量（首件/首重）',
-    `extra_fee`                 DECIMAL(10,2)   NOT NULL DEFAULT '0.00' COMMENT '续件/续重费用',
-    `free_threshold_amount`     DECIMAL(10,2)            DEFAULT '0.00' COMMENT '满额包邮阈值：0-不包邮',
+    `extra_fee`                 BIGINT          NOT NULL DEFAULT '0' COMMENT '续件/续重费用',
+    `free_threshold_amount`     BIGINT                   DEFAULT '0' COMMENT '满额包邮阈值：0-不包邮',
     `free_threshold_quantity`   INT                      DEFAULT '0' COMMENT '满件包邮阈值：0-不包邮',
     `is_default`                TINYINT         NOT NULL DEFAULT '0' COMMENT '是否默认模板：0-否，1-是',
     `status`                    TINYINT         NOT NULL DEFAULT '1' COMMENT '状态：1-启用，2-禁用',
@@ -123,6 +125,6 @@ CREATE TABLE IF NOT EXISTS `freight_template` (
     `updated_at`                DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB
-  DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_unicode_ci
-  COMMENT='运费模板表';
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci
+COMMENT='运费模板表';

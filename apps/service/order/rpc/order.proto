@@ -3,3 +3,206 @@ syntax = "proto3";
 package order;
 
 option go_package = "./order";
+
+// goctl rpc protoc .\apps\service\order\rpc\order.proto --go_out=apps/service/order/rpc/types --go-grpc_out apps/service/order/rpc/types --zrpc_out=apps/service/order/rpc/
+
+// ========================
+// service
+// ========================
+
+service OrderService {
+  // 预下单
+  rpc PreOrder(PreOrderRequest) returns (PreOrderResponse);
+
+  // 创建订单
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
+
+  // 订单
+  rpc OrderList(OrderListRequest) returns (OrderListResponse);
+  rpc OrderDetail(OrderDetailRequest) returns (OrderDetailResponse);
+
+  // 操作
+  rpc CancelOrder(OrderDetailRequest) returns (Empty);
+  rpc ConfirmReceipt(OrderDetailRequest) returns (Empty);
+
+  // 售后
+  rpc ApplyAfterSale(AfterSaleRequest) returns (AfterSaleResponse);
+}
+
+// ========================
+// 枚举定义（非常关键）
+// ========================
+
+// 订单状态
+enum OrderStatus {
+  ORDER_STATUS_UNKNOWN = 0;
+  ORDER_STATUS_PENDING_PAY = 10;   // 待支付
+  ORDER_STATUS_PAID = 20;          // 已支付
+  ORDER_STATUS_SHIPPED = 30;       // 已发货
+  ORDER_STATUS_COMPLETED = 40;     // 已完成
+  ORDER_STATUS_CANCELED = 50;      // 已取消
+  ORDER_STATUS_AFTER_SALE = 60;    // 售后中
+}
+
+// 售后状态
+enum AfterSaleStatus {
+  AFTER_SALE_UNKNOWN = 0;
+  AFTER_SALE_PENDING = 1;
+  AFTER_SALE_RETURNING = 2;
+  AFTER_SALE_REFUNDING = 3;
+  AFTER_SALE_DONE = 4;
+  AFTER_SALE_REJECTED = 5;
+}
+
+message Empty {}
+
+// ========================
+// 基础结构
+// ========================
+
+message AddressDetail {
+  string province = 1;
+  string city = 2;
+  string district = 3;
+  string detail_address = 4;
+  string postal_code = 5;
+}
+
+message AddressSnapshot {
+  string receiver_name = 1;
+  string receiver_phone = 2;
+  AddressDetail detail = 3;
+}
+
+// 商品项（下单）
+message OrderItem {
+  uint64 sku_id = 1;
+  uint64 spu_id = 2;
+  string product_name = 3;
+  string sku_name = 4;
+  string pic = 5;
+  int64 price = 6;      // 分
+  int64 quantity = 7;
+  int64 total_amount = 8;
+}
+
+// ========================
+// 预下单
+// ========================
+// 1. 查询商品价格
+// 2. 锁库存（关键）
+// 3. 计算总价
+// 4. 生成 token
+// 5. 存 Redis
+message PreOrderRequest {
+  repeated OrderItemSimple items = 1;
+  uint64 address_id = 2;
+  uint64 coupon_id = 3;
+}
+
+message OrderItemSimple {
+  uint64 sku_id = 1;
+  int64 quantity = 2;
+}
+
+message PreOrderResponse {
+  string settlement_token = 1;
+
+  repeated OrderItem items = 2;
+  AddressSnapshot address = 3;
+
+  int64 total_amount = 4;
+  int64 freight_amount = 5;
+  int64 coupon_amount = 6;
+  int64 pay_amount = 7;
+}
+
+// ========================
+// 创建订单
+// ========================
+
+message CreateOrderRequest {
+  string settlement_token = 1;
+  uint64 address_id = 2;
+  uint64 coupon_id = 3;
+
+  int64 pay_type = 4;
+  int64 pay_amount = 5;
+
+  string remark = 6;
+  string idempotency_key = 7;
+}
+
+message CreateOrderResponse {
+  string order_sn = 1;
+  int64 pay_amount = 2;
+}
+
+// ========================
+// 订单
+// ========================
+
+message OrderListRequest {
+  OrderStatus status = 1;
+  int64 page = 2;
+  int64 size = 3;
+}
+
+message OrderListItem {
+  string order_sn = 1;
+  OrderStatus status = 2;
+  int64 pay_amount = 3;
+  string create_time = 4;
+
+  repeated OrderItem items = 5;
+}
+
+message OrderListResponse {
+  int64 total = 1;
+  repeated OrderListItem list = 2;
+}
+
+message OrderDetailRequest {
+  string order_sn = 1;
+}
+
+message OrderDetailResponse {
+  OrderListItem base = 1;
+
+  AddressSnapshot address = 2;
+
+  int64 freight_amount = 3;
+  int64 coupon_amount = 4;
+
+  string delivery_sn = 5;
+  string delivery_corp = 6;
+
+  string expire_time = 7;
+  string remark = 8;
+}
+
+// ========================
+// 售后
+// ========================
+
+message AfterSaleRequest {
+  string order_sn = 1;
+  uint64 sku_id = 2;
+  int64 quantity = 3;
+
+  int64 type = 4;
+  string reason = 5;
+
+  int64 apply_amount = 6;
+  repeated string images = 7;
+
+  string idempotency_key = 8;
+}
+
+message AfterSaleResponse {
+  uint64 after_sale_id = 1;
+  AfterSaleStatus status = 2;
+  int64 apply_amount = 3;
+  string audit_remark = 4;
+  string created_at = 5;
+}

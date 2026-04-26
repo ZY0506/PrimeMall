@@ -2,11 +2,12 @@
 -- 服务: 支付服务 (Payment Service)
 -- 数据库: shop_payment
 -- 说明: 支付记录、支付回调、退款记录
+-- 金额字段统一使用 BIGINT 类型，单位为分（避免浮点数精度问题）
 -- =============================================
 
 CREATE DATABASE IF NOT EXISTS `shop_payment`
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
 
 USE `shop_payment`;
 
@@ -18,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `payment` (
     `payment_sn`       VARCHAR(64)     NOT NULL COMMENT '支付流水号（业务唯一标识）',
     `order_sn`         VARCHAR(64)     NOT NULL COMMENT '订单号',
     `user_id`          BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
-    `amount`           DECIMAL(10,2)   NOT NULL COMMENT '支付金额',
+    `amount`           BIGINT          NOT NULL COMMENT '支付金额（单位：分）',
     `channel`          VARCHAR(32)     NOT NULL COMMENT '支付渠道：wechat-微信支付，alipay-支付宝',
     `channel_order_sn` VARCHAR(128)             DEFAULT '' COMMENT '第三方支付平台订单号',
     `transaction_id`   VARCHAR(128)             DEFAULT '' COMMENT '第三方支付交易流水号',
@@ -68,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `refund` (
     `payment_sn`     VARCHAR(64)     NOT NULL COMMENT '支付流水号',
     `order_sn`       VARCHAR(64)     NOT NULL COMMENT '订单号',
     `user_id`        BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
-    `amount`         DECIMAL(10,2)   NOT NULL COMMENT '退款金额',
+    `amount`         BIGINT          NOT NULL COMMENT '退款金额（单位：分）',
     `reason`         VARCHAR(255)    NOT NULL COMMENT '退款原因',
     `status`         TINYINT         NOT NULL DEFAULT '0' COMMENT '退款状态：0-处理中，1-退款成功，2-退款失败',
     `transaction_id` VARCHAR(128)             DEFAULT '' COMMENT '第三方退款交易流水号',
