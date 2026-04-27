@@ -6,8 +6,8 @@
 -- =============================================
 -- goctl model mysql ddl --src=./apps/service/product/sql/02-product.sql --dir=./apps/service/product/rpc/internal/model
 CREATE DATABASE IF NOT EXISTS `shop_product`
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
 
 USE `shop_product`;
 
@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS `category` (
     `status`      TINYINT         NOT NULL DEFAULT '1' COMMENT '状态：1-启用，2-禁用',
     `created_at`  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at`  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `delete_at`   DATETIME                 DEFAULT NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_parent_id` (`parent_id`)
 ) ENGINE=InnoDB
@@ -50,6 +51,7 @@ CREATE TABLE IF NOT EXISTS `product_spu` (
     `freight_template_id` BIGINT UNSIGNED          DEFAULT '0' COMMENT '运费模板ID：0-使用默认模板',
     `created_at`          DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at`          DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `delete_at`           DATETIME                 DEFAULT NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     KEY `idx_category_id` (`category_id`),
     KEY `idx_status` (`status`)
@@ -60,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `product_spu` (
 
 -- =============================================
 -- 商品SKU表（库存量单位）
--- =============================================
+- =============================================
 CREATE TABLE IF NOT EXISTS `product_sku` (
     `id`           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'SKU ID',
     `spu_id`       BIGINT UNSIGNED NOT NULL COMMENT '所属SPU ID',
@@ -71,12 +73,13 @@ CREATE TABLE IF NOT EXISTS `product_sku` (
     `stock`        INT             NOT NULL DEFAULT '0' COMMENT '库存数量',
     `locked_stock` INT             NOT NULL DEFAULT '0' COMMENT '锁定库存数量',
     `version`      INT UNSIGNED    NOT NULL DEFAULT '0' COMMENT '乐观锁版本号（用于并发控制）',
-    `spec_data`    JSON            NOT NULL COMMENT '规格数据（JSON格式）：{颜色:红色, 尺寸:XL}',
+    `spec_data`    JSON            NOT NULL COMMENT '规格数据（JSON格式）：{颜色:红色},{尺寸:XL}',
     `images`       JSON                     DEFAULT NULL COMMENT 'SKU专属图片列表（JSON数组）',
     `weight`       BIGINT                   DEFAULT '0' COMMENT 'SKU重量（kg）',
     `status`       TINYINT         NOT NULL DEFAULT '1' COMMENT '状态：1-启用，2-禁用',
     `created_at`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted_at`   DATETIME                 DEFAULT NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
     UNIQUE KEY `uk_sku_code` (`sku_code`),
     KEY `idx_spu_id` (`spu_id`),
@@ -123,6 +126,7 @@ CREATE TABLE IF NOT EXISTS `freight_template` (
     `status`                    TINYINT         NOT NULL DEFAULT '1' COMMENT '状态：1-启用，2-禁用',
     `created_at`                DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at`                DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `delete_at`                 DATETIME                 DEFAULT NULL COMMENT '删除时间',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4

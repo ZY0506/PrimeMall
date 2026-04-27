@@ -71,6 +71,7 @@ const (
 	ErrCodeCategoryHasChildren  = 30008 // 分类含有子分类，无法删除
 	ErrCodeProductInvalidStatus = 30009 // 商品状态非法
 	ErrCodePictureNotFound      = 30009 // 图片不存在
+	ErrCodeCategoryDisabled     = 30010 // 分类被禁用
 )
 
 // 订单模块 (4xxxx)

@@ -5,7 +5,7 @@
 -- 修正: 增加 order_type 字段，统一普通订单和秒杀订单
 -- 金额字段统一使用 BIGINT 类型，单位为分（避免浮点数精度问题）
 -- =============================================
-
+-- goctl model mysql ddl --src=./apps/service/order/sql/03-order.sql --dir=./apps/service/order/rpc/internal/model
 CREATE DATABASE IF NOT EXISTS `shop_order`
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
