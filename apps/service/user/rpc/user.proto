@@ -53,19 +53,15 @@ service User {
 service UserInternal {
   // 根据用户ID获取用户基本信息（用于订单、购物车等）
   rpc GetUserById(GetUserByIdReq) returns (UserBasicInfo);
-  // 批量获取用户基本信息
-  rpc BatchGetUserById(BatchGetUserByIdReq) returns (BatchUserBasicInfoResp);
   // 校验用户状态（是否被封禁/限制下单）
   rpc CheckUserStatus(CheckUserStatusReq) returns (CheckUserStatusResp);
+  // 获取地址信息
+  rpc GetAddressById(IdPathReq) returns (AddressItem);
 }
 
 // ------------------------------ 公共消息 ------------------------------
 message EmptyReq {}
 message EmptyResp {}
-message ErrDetail{
-  int32 code=1;
-  string msg=2;
-}
 // ------------------------------ 枚举 ------------------------------
 enum UserStatus {
   USER_STATUS_UNKNOWN = 0;    // 未知

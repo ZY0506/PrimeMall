@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS `stock_log` (
     `id`           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '流水ID',
     `sku_id`       BIGINT UNSIGNED NOT NULL COMMENT 'SKU ID',
     `order_sn`     VARCHAR(64)     NOT NULL COMMENT '订单号',
-    `change_type`  TINYINT         NOT NULL COMMENT '变动类型：1-预扣库存，2-回滚库存，3-实际扣减，4-退货加回',
+    `change_type`  TINYINT         NOT NULL COMMENT '变动类型：1-锁定库存，2-解锁库存，3-实际扣减，4-回滚库存(退货加回)',
     `quantity`     INT             NOT NULL COMMENT '变动数量（正数增加，负数减少）',
     `before_stock` INT             NOT NULL DEFAULT '0' COMMENT '变动前库存',
     `after_stock`  INT             NOT NULL DEFAULT '0' COMMENT '变动后库存',

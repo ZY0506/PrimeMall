@@ -72,6 +72,7 @@ const (
 	ErrCodeProductInvalidStatus = 30009 // 商品状态非法
 	ErrCodePictureNotFound      = 30009 // 图片不存在
 	ErrCodeCategoryDisabled     = 30010 // 分类被禁用
+	ErrCodeInvalidQuantity      = 30011 // 数量非法
 )
 
 // 订单模块 (4xxxx)
@@ -88,6 +89,7 @@ const (
 	ErrCodeAddressNotBelongUser     = 40010 // 地址不属于当前用户
 	ErrCodeFreightTemplateNotFound  = 40011 // 运费模板不存在
 	ErrCodeFreightCalculationFailed = 40012 // 运费计算失败
+	ErrCodePreOrderFailed           = 40013 // 预下单失败
 
 )
 

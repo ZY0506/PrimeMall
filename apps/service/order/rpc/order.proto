@@ -30,7 +30,11 @@ service Order {
 }
 
 service OrderAdmin{
-  rpc OrderList(OrderListRequest) returns (OrderListResponse);
+
+}
+
+service OrderInternal{
+
 }
 
 // ========================
