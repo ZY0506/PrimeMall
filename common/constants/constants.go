@@ -73,3 +73,15 @@ const (
 	PRODUCT_STATUS_ON_SALE
 	PRODUCT_STATUS_OFF_SALE
 )
+
+// MAX_RETRY_COUNT 重试机制次数
+const (
+	MAX_RETRY_COUNT = 3
+)
+
+const (
+	STOCK_CHANGE_TYPE_LOCKED   = iota + 1 // 锁定库存
+	STOCK_CHANGE_TYPE_UNLOCKED            // 解锁库存
+	STOCK_CHANGE_TYPE_DEDUCT              // 扣减库存
+	STOCK_CHANGE_TYPE_ROLLBACK            // 回滚库存(订单取消/退款)
+)

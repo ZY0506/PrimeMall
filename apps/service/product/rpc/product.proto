@@ -24,49 +24,49 @@ service Product {
 
 // ==================== RPC（管理后台） ====================
 service ProductAdmin {
-  // ------ 分类管理 ------
+  // 分类管理
   rpc CreateCategory(CreateCategoryReq) returns (IdResp);
   rpc UpdateCategory(UpdateCategoryReq) returns (Empty);
   rpc DeleteCategory(IdReq) returns (Empty);
   rpc ListCategories(ListCategoriesReq) returns (ListCategoriesResp);
-  rpc TreeCategories(Empty) returns (CategoryTreeResp); // 全量树形
+  rpc TreeCategories(Empty) returns (CategoryTreeResp);
 
-  // ------ 商品管理（SPU） ------
+  // 商品管理（SPU）
   rpc CreateProduct(CreateProductReq) returns (IdResp);
   rpc UpdateProduct(UpdateProductReq) returns (Empty);
   rpc DeleteProduct(IdReq) returns (Empty);
   rpc ListProductsAdmin(ListProductsAdminReq) returns (ListProductsAdminResp);
-  rpc GetProductAdmin(IdReq) returns (ProductDetailResp); // 复用详情结构
+  rpc GetProductAdmin(IdReq) returns (ProductDetailResp);
 
-  // ------ SKU管理 ------
+  // SKU管理
   rpc CreateSku(CreateSkuReq) returns (IdResp);
   rpc UpdateSku(UpdateSkuReq) returns (Empty);
   rpc DeleteSku(IdReq) returns (Empty);
   rpc ListSkusByProduct(ListSkusByProductReq) returns (ListSkusResp);
 
-  // ------ 运费模板管理 ------
+  // 运费模板管理
   rpc CreateFreightTemplate(CreateFreightTemplateReq) returns (IdResp);
   rpc UpdateFreightTemplate(UpdateFreightTemplateReq) returns (Empty);
   rpc DeleteFreightTemplate(IdReq) returns (Empty);
   rpc ListFreightTemplates(PageReq) returns (ListFreightTemplatesResp);
   rpc GetFreightTemplate(IdReq) returns (FreightTemplate);
 
-  // ------ 库存日志 ------
-  rpc RecordStockLog(RecordStockLogReq) returns (IdResp);   // 一般由系统内部调用，但admin可手动记录
+  // 库存管理（管理员手动调整）
+  rpc AdjustStock(AdjustStockReq) returns (StockChangeResp);
   rpc ListStockLogs(ListStockLogsReq) returns (ListStockLogsResp);
 }
 
-// ==================== RPC（内部服务调用，如订单服务） ====================
+// ==================== RPC（内部服务调用） ====================
 service ProductInternal {
-  // 扣减库存（订单支付/创建订单时）
-  rpc DeductStock(DeductStockReq) returns (StockChangeResp);
-  // 回滚库存（订单取消/退款）
-  rpc RollbackStock(RollbackStockReq) returns (StockChangeResp);
-  // 锁定库存（创建订单预占）
+  // 锁定库存（下单预占）
   rpc LockStock(LockStockReq) returns (StockChangeResp);
   // 解锁库存（超时未支付）
   rpc UnlockStock(UnlockStockReq) returns (StockChangeResp);
-  // 批量查询库存（订单服务校验）
+  // 扣减库存（支付成功）
+  rpc DeductStock(DeductStockReq) returns (StockChangeResp);
+  // 回滚库存（订单取消/退款）
+  rpc RollbackStock(RollbackStockReq) returns (StockChangeResp);
+  // 批量查询库存（订单服务校验，返回可用库存）
   rpc BatchGetStock(SkuIdsReq) returns (BatchStockResp);
 }
 
@@ -110,13 +110,13 @@ enum RecommendScene {
   SCENE_DETAIL = 3;
 }
 
-// 库存操作类型（用于日志）
+// 库存操作类型（与 stock_log.change_type 对应）
 enum StockOpType {
   STOCK_OP_UNKNOWN = 0;
-  STOCK_OP_DEDUCT = 1;   // 扣减
-  STOCK_OP_ROLLBACK = 2; // 回滚
-  STOCK_OP_LOCK = 3;     // 锁定
-  STOCK_OP_UNLOCK = 4;   // 解锁
+  STOCK_OP_LOCK = 1;     // 预扣库存（下单锁定）
+  STOCK_OP_UNLOCK = 2;   // 回滚/解锁（取消订单超时解锁）
+  STOCK_OP_DEDUCT = 3;   // 实际扣减（支付成功）
+  STOCK_OP_RETURN = 4;   // 退货加回
   STOCK_OP_ADMIN = 5;    // 管理员调整
 }
 
@@ -128,7 +128,8 @@ message Category {
   string icon = 4;
   int64 sort = 5;
   int64 level = 6;
-  repeated Category children = 7;
+  int64 status = 7;            // 1-启用 2-禁用
+  repeated Category children = 8;
 }
 
 message CategoryTreeResp {
@@ -139,9 +140,8 @@ message CategoryResp {
   Category category = 1;
 }
 
-// Admin 分类列表请求
 message ListCategoriesReq {
-  uint64 parent_id = 1; // 0表示根分类
+  uint64 parent_id = 1;
   PageReq page = 2;
 }
 
@@ -162,6 +162,7 @@ message UpdateCategoryReq {
   string name = 2;
   string icon = 3;
   int64 sort = 4;
+  int64 status = 5;
 }
 
 // ==================== 商品筛选 ====================
@@ -184,7 +185,7 @@ message ProductListReq {
   PageReq page = 10;
 }
 
-// 后台商品列表请求（增加了更多筛选）
+// 后台商品列表请求
 message ListProductsAdminReq {
   uint64 category_id = 1;
   string keyword = 2;
@@ -197,14 +198,14 @@ message ListProductsAdminReq {
   PageReq page = 9;
 }
 
-// 后台商品列表项（比前台多一些字段）
+// 后台商品列表项
 message ProductAdminItem {
   uint64 id = 1;
   string name = 2;
   string brand = 3;
-  string cover = 4;
-  int64 price = 5;
-  int64 sales = 6;
+  string cover = 4;            // main_pic
+  int64 price = 5;             // 最低售价
+  int64 sales_count = 6;       // 实际销量
   ProductStatus status = 7;
   int64 created_at = 8;
   int64 updated_at = 9;
@@ -215,19 +216,19 @@ message ListProductsAdminResp {
   repeated ProductAdminItem list = 2;
 }
 
-// 创建商品请求
+// 创建商品请求（SPU）
 message CreateProductReq {
   uint64 category_id = 1;
   string name = 2;
   string brand = 3;
-  string description = 4;
-  string content = 5;
-  string cover = 6;
-  repeated string images = 7;
+  string description = 4;      // 简短描述
+  string content = 5;          // 详情HTML
+  string cover = 6;            // 主图
+  repeated string images = 7;  // 副图列表
   string video_url = 8;
   uint64 freight_template_id = 9;
-  repeated AttributeItem attributes = 10;
-  repeated SkuItem skus = 11; // SKU列表
+  repeated AttributeItem attributes = 10; // 扩展属性（非表字段）
+  repeated SkuItem skus = 11;             // SKU列表
 }
 
 // 更新商品请求
@@ -244,19 +245,18 @@ message UpdateProductReq {
   uint64 freight_template_id = 10;
   ProductStatus status = 11;
   repeated AttributeItem attributes = 12;
-  // 注意：SKU更新独立接口，这里不包含
 }
 
-// ==================== 商品列表项 ====================
+// ==================== 商品列表项（前台） ====================
 message ProductItem {
   uint64 id = 1;
   string name = 2;
   string brand = 3;
   string desc = 4;
   string cover = 5;
-  int64 price = 6;
-  int64 sales = 7;
-  int64 show_sales = 8;
+  int64 price = 6;        // 最低价（分）
+  int64 sales = 7;        // 展示销量（虚拟+实际）
+  int64 show_sales = 8;   // 同 sales，兼容旧版
 }
 
 message ProductListResp {
@@ -272,54 +272,70 @@ message SpecItem {
 
 message SkuItem {
   uint64 id = 1;
-  string code = 2;
-  int64 price = 3;
-  int64 market_price = 4;
-  int64 stock = 5;
-  repeated SpecItem specs = 6;
-  int64 weight = 7;
-  repeated string images = 8;
+  uint64 spu_id = 2;                  // 所属SPU ID
+  string sku_code = 3;                // SKU编码（唯一）
+  int64 price = 4;                    // 销售价（分）
+  int64 market_price = 5;             // 市场价（分）
+  int64 cost_price = 6;               // 成本价（分）
+  int64 stock = 7;                    // 物理库存总数（总库存）
+  int64 locked_stock = 8;             // 锁定库存数量
+  uint32 version = 9;                 // 乐观锁版本号
+  repeated SpecItem specs = 10;       // 规格 JSON 结构化
+  repeated string images = 11;        // SKU专属图片
+  int64 weight = 12;                  // 重量（克）
+  int64 status = 13;                  // 1-启用 2-禁用
+  // 兼容旧字段（已废弃，建议使用 sku_code）
+  string code = 14 [deprecated = true];
 }
 
 message SkuSimple {
   uint64 id = 1;
   int64 price = 2;
-  int64 stock = 3;
+  int64 stock = 3;        // 可用库存 = stock - locked_stock
 }
 
 // 创建SKU请求
 message CreateSkuReq {
-  uint64 product_id = 1;
-  string code = 2;
+  uint64 spu_id = 1;
+  string sku_code = 2;
   int64 price = 3;
   int64 market_price = 4;
-  int64 stock = 5;
-  repeated SpecItem specs = 6;
-  int64 weight = 7;
+  int64 cost_price = 5;
+  int64 stock = 6;                // 初始物理库存
+  repeated SpecItem specs = 7;
   repeated string images = 8;
+  int64 weight = 9;
 }
 
 // 更新SKU请求
 message UpdateSkuReq {
   uint64 id = 1;
-  string code = 2;
+  string sku_code = 2;
   int64 price = 3;
   int64 market_price = 4;
-  int64 stock = 5;
-  repeated SpecItem specs = 6;
-  int64 weight = 7;
+  int64 cost_price = 5;
+  int64 stock = 6;               // 管理员调整物理库存时使用
+  repeated SpecItem specs = 7;
   repeated string images = 8;
+  int64 weight = 9;
+  int64 status = 10;
+  uint32 version = 11;           // 乐观锁版本
 }
 
 // 按商品ID查询SKU列表
 message ListSkusByProductReq {
-  uint64 product_id = 1;
+  uint64 spu_id = 1;
   PageReq page = 2;
 }
 
 message ListSkusResp {
   PageResp page = 1;
   repeated SkuItem list = 2;
+}
+
+// 批量获取SKU（前台）
+message BatchSkuResp {
+  repeated SkuSimple list = 1;
 }
 
 // ==================== 商品详情 ====================
@@ -333,18 +349,20 @@ message ProductDetailResp {
   uint64 category_id = 2;
   string name = 3;
   string brand = 4;
-  string description = 5;
-  string content = 6;
-  string cover = 7;
-  repeated string images = 8;
+  string description = 5;      // 简短描述
+  string content = 6;          // 详情HTML
+  string cover = 7;            // 主图
+  repeated string images = 8;  // 副图
   string video_url = 9;
-  int64 price = 10;
-  int64 sales = 11;
+  int64 price = 10;            // 最低售价
+  int64 sales = 11;            // 展示销量
   int64 show_sales = 12;
   ProductStatus status = 13;
   uint64 freight_template_id = 15;
   repeated SkuItem skus = 16;
   repeated AttributeItem attributes = 17;
+  int64 sales_count = 18;      // 实际销量
+  int64 virtual_sales = 19;    // 虚拟销量
 }
 
 // ==================== 推荐 ====================
@@ -354,53 +372,44 @@ message RecommendReq {
   int64 limit = 3;
 }
 
-// ==================== SKU 批量 ====================
-message BatchSkuResp {
-  repeated SkuSimple list = 1;
-}
-
 // ==================== 运费模板 ====================
 message FreightTemplate {
   uint64 id = 1;
   string name = 2;
-  int32 type = 3;               // 1:按件数 2:按重量 3:按体积
-  int64 first_unit = 4;         // 首件/首重(克)/首体积
-  int64 first_fee = 5;          // 首费(分)
-  int64 additional_unit = 6;    // 续件/续重/续体积
-  int64 additional_fee = 7;     // 续费(分)
-  repeated FreightAreaRule area_rules = 8; // 区域运费规则
-  int64 created_at = 9;
-  int64 updated_at = 10;
-}
-
-message FreightAreaRule {
-  uint64 id = 1;
-  string region = 2;            // 区域标识，如"440000"或"广东"
-  int64 first_unit = 3;
-  int64 first_fee = 4;
-  int64 additional_unit = 5;
-  int64 additional_fee = 6;
+  int64 type = 3;                       // 1-按件数 2-按重量
+  int64 default_fee = 4;                // 基础运费（分）
+  int64 default_quantity = 5;           // 首件/首重数量
+  int64 extra_fee = 6;                  // 续件/续重费用（分）
+  int64 free_threshold_amount = 7;      // 满额包邮阈值（分），0表示不包邮
+  int64 free_threshold_quantity = 8;    // 满件包邮阈值，0表示不包邮
+  int64 is_default = 9;                 // 是否默认模板 0-否 1-是
+  int64 status = 10;                    // 1-启用 2-禁用
+  int64 created_at = 11;
+  int64 updated_at = 12;
 }
 
 message CreateFreightTemplateReq {
   string name = 1;
-  int32 type = 2;
-  int64 first_unit = 3;
-  int64 first_fee = 4;
-  int64 additional_unit = 5;
-  int64 additional_fee = 6;
-  repeated FreightAreaRule area_rules = 7;
+  int64 type = 2;
+  int64 default_fee = 3;
+  int64 default_quantity = 4;
+  int64 extra_fee = 5;
+  int64 free_threshold_amount = 6;
+  int64 free_threshold_quantity = 7;
+  int64 is_default = 8;
 }
 
 message UpdateFreightTemplateReq {
   uint64 id = 1;
   string name = 2;
-  int32 type = 3;
-  int64 first_unit = 4;
-  int64 first_fee = 5;
-  int64 additional_unit = 6;
-  int64 additional_fee = 7;
-  repeated FreightAreaRule area_rules = 8;
+  int64 type = 3;
+  int64 default_fee = 4;
+  int64 default_quantity = 5;
+  int64 extra_fee = 6;
+  int64 free_threshold_amount = 7;
+  int64 free_threshold_quantity = 8;
+  int64 is_default = 9;
+  int64 status = 10;
 }
 
 message ListFreightTemplatesResp {
@@ -412,31 +421,33 @@ message ListFreightTemplatesResp {
 message StockLog {
   uint64 id = 1;
   uint64 sku_id = 2;
-  int64 before_stock = 3;
-  int64 after_stock = 4;
-  int64 change_quantity = 5;    // 正数增加，负数减少
-  StockOpType op_type = 6;
-  string reason = 7;             // 操作原因
-  string operator = 8;           // 操作人ID或系统标识
+  string order_sn = 3;
+  StockOpType change_type = 4;
+  int64 quantity = 5;          // 变动数量（正负）
+  int64 before_stock = 6;      // 变动前总库存
+  int64 after_stock = 7;       // 变动后总库存
+  string remark = 8;
   int64 created_at = 9;
 }
 
 message RecordStockLogReq {
   uint64 sku_id = 1;
-  int64 before_stock = 2;
-  int64 after_stock = 3;
-  int64 change_quantity = 4;
-  StockOpType op_type = 5;
-  string reason = 6;
-  string operator = 7;
+  string order_sn = 2;
+  StockOpType change_type = 3;
+  int64 quantity = 4;
+  int64 before_stock = 5;
+  int64 after_stock = 6;
+  string remark = 7;
+  string operator = 8;         // 操作人（管理员调整时使用）
 }
 
 message ListStockLogsReq {
-  uint64 sku_id = 1;   // 可选，为0表示查所有
-  StockOpType op_type = 2; // 可选
-  string start_time = 3;   // 时间戳
-  string end_time = 4;
-  PageReq page = 5;
+  uint64 sku_id = 1;           // 0 表示所有
+  StockOpType change_type = 2; // 0 表示所有
+  string order_sn = 3;
+  string start_time = 4;       // 时间戳（秒）
+  string end_time = 5;
+  PageReq page = 6;
 }
 
 message ListStockLogsResp {
@@ -450,16 +461,6 @@ message SkuStockItem {
   int64 quantity = 2;   // 数量
 }
 
-message DeductStockReq {
-  repeated SkuStockItem items = 1;
-  string order_sn = 2;      // 关联订单号，用于追溯
-}
-
-message RollbackStockReq {
-  repeated SkuStockItem items = 1;
-  string order_sn = 2;
-}
-
 message LockStockReq {
   repeated SkuStockItem items = 1;
   string order_sn = 2;
@@ -470,9 +471,25 @@ message UnlockStockReq {
   string order_sn = 2;
 }
 
+message DeductStockReq {
+  repeated SkuStockItem items = 1;
+  string order_sn = 2;
+}
+
+message RollbackStockReq {
+  repeated SkuStockItem items = 1;
+  string order_sn = 2;
+}
+
+// 管理员调整库存
+message AdjustStockReq {
+  repeated SkuStockItem items = 1;
+  string reason = 2;
+  string operator = 3;
+}
+
 message StockChangeResp {
   bool success = 1;
-  string message = 2;
   repeated SkuStockResult results = 3;
 }
 
@@ -480,9 +497,10 @@ message SkuStockResult {
   uint64 sku_id = 1;
   bool success = 2;
   string message = 3;
-  int64 current_stock = 4; // 变更后库存
+  int64 current_stock = 4;      // 变更后的物理库存
+  int64 current_locked = 5;     // 变更后的锁定库存
 }
 
 message BatchStockResp {
-  map<uint64, int64> stocks = 1; // sku_id -> stock
+  map<uint64, int64> stocks = 1; // sku_id -> 可用库存 (stock - locked_stock)
 }
