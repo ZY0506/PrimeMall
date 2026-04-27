@@ -10,7 +10,7 @@ option go_package = "./order";
 // service
 // ========================
 
-service OrderService {
+service Order {
   // 预下单
   rpc PreOrder(PreOrderRequest) returns (PreOrderResponse);
 
@@ -27,6 +27,10 @@ service OrderService {
 
   // 售后
   rpc ApplyAfterSale(AfterSaleRequest) returns (AfterSaleResponse);
+}
+
+service OrderAdmin{
+  rpc OrderList(OrderListRequest) returns (OrderListResponse);
 }
 
 // ========================
@@ -89,11 +93,6 @@ message OrderItem {
 // ========================
 // 预下单
 // ========================
-// 1. 查询商品价格
-// 2. 锁库存（关键）
-// 3. 计算总价
-// 4. 生成 token
-// 5. 存 Redis
 message PreOrderRequest {
   repeated OrderItemSimple items = 1;
   uint64 address_id = 2;
