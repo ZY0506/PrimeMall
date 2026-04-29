@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/ZY0506/PrimeMall/common/response"
-	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/grpc/metadata"
 	"strconv"
 )
@@ -35,7 +34,6 @@ func GetUserIdFromCtx(ctx context.Context) (uint64, error) {
 	}
 	uid, err := strconv.ParseUint(uids[0], 10, 64)
 	if err != nil {
-		logx.WithContext(ctx).Errorf("参数转换失败，error:%v", err)
 		return 0, response.NewBizError(response.ErrCodeInvalidParam, "参数错误")
 	}
 	return uid, nil
@@ -75,7 +73,6 @@ func PutUserIdToCtx(ctx context.Context, uid uint64) (context.Context, error) {
 func ParseAndPutUserIdToCtx(ctx context.Context) (context.Context, error) {
 	uid, ok := ctx.Value(ContextKeyUserId).(json.Number)
 	if !ok {
-		logx.WithContext(ctx).Error("获取用户ID失败")
 		return ctx, response.NewBizError(response.ErrCodeMissingParam, "缺少必要参数")
 	}
 	userId, _ := uid.Int64()

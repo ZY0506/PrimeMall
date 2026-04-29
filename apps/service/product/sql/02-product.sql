@@ -62,10 +62,11 @@ CREATE TABLE IF NOT EXISTS `product_spu` (
 
 -- =============================================
 -- 商品SKU表（库存量单位）
-- =============================================
+-- =============================================
 CREATE TABLE IF NOT EXISTS `product_sku` (
     `id`           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'SKU ID',
     `spu_id`       BIGINT UNSIGNED NOT NULL COMMENT '所属SPU ID',
+    `spu_sname`    VARCHAR(128)    NOT NULL DEFAULT '' COMMENT 'SPU名称',
     `sku_code`     VARCHAR(64)     NOT NULL DEFAULT '' COMMENT 'SKU编码（唯一标识）',
     `price`        BIGINT          NOT NULL COMMENT '销售价格',
     `market_price` BIGINT          NOT NULL COMMENT '市场价（划线价）',

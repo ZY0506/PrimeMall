@@ -62,6 +62,10 @@ service UserInternal {
 // ------------------------------ 公共消息 ------------------------------
 message EmptyReq {}
 message EmptyResp {}
+message ErrDetail{
+  int32 code = 1;
+  string msg = 2;
+}
 // ------------------------------ 枚举 ------------------------------
 enum UserStatus {
   USER_STATUS_UNKNOWN = 0;    // 未知
@@ -244,7 +248,7 @@ message BatchUserBasicInfoResp {
 
 message CheckUserStatusReq {
   uint64 user_id = 1;
-  // 需要检查的权限类型：1-下单权限，2-登录权限
+  // 需要检查的权限类型：2-下单权限，3-登录权限
   int64 check_type = 2;
 }
 

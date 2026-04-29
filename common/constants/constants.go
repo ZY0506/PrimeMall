@@ -85,3 +85,30 @@ const (
 	STOCK_CHANGE_TYPE_DEDUCT              // 扣减库存
 	STOCK_CHANGE_TYPE_ROLLBACK            // 回滚库存(订单取消/退款)
 )
+
+// 前缀（订单部分）
+const (
+	PREFIX_ORDER_SN         = "PM"
+	PREFIX_SETTLEMENT_TOKEN = "SToken"
+	SETTLEMENT_TOKEN_KEY    = "order:settlement_token:"
+	SETTLEMENT_TOKEN_EXPIRE = 60 * time.Second
+	ORDER_CACHE_KEY         = "order:info:"
+	ORDER_CACHE_EXPIRE      = 15 * 60 * time.Second
+)
+
+// 订单类型
+const (
+	ORDER_TYPE_NORMAL = iota + 1
+	ORDER_TYPE_SECKILL
+	ORDER_TYPE_GROUPON
+)
+
+// 订单状态
+const (
+	ORDER_STATUS_PENDING_PAY = 10 //待支付
+	ORDER_STATUS_PAID        = 20 //已支付
+	ORDER_STATUS_SHIPPED     = 30 //已发货
+	ORDER_STATUS_COMPLETED   = 40 // 已完成
+	ORDER_STATUS_CANCELED    = 50 // 已取消
+	ORDER_STATUS_AFTER_SALE  = 60 // 售后中
+)

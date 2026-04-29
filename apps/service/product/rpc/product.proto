@@ -68,6 +68,12 @@ service ProductInternal {
   rpc RollbackStock(RollbackStockReq) returns (StockChangeResp);
   // 批量查询库存（订单服务校验，返回可用库存）
   rpc BatchGetStock(SkuIdsReq) returns (BatchStockResp);
+  // 计算价格
+  rpc CalculateSkusPrice(CalculatePriceReq) returns (CalculatePriceResp);
+  // 批量获取Sku
+  rpc GetSkuListByIds(SkuIdsReq) returns (SkuListResp);
+  // 计算运费
+  rpc CalculateFreight(CalculateFreightReq) returns (CalculatePriceResp);
 }
 
 // ==================== 通用结构 ====================
@@ -273,19 +279,18 @@ message SpecItem {
 message SkuItem {
   uint64 id = 1;
   uint64 spu_id = 2;                  // 所属SPU ID
-  string sku_code = 3;                // SKU编码（唯一）
-  int64 price = 4;                    // 销售价（分）
-  int64 market_price = 5;             // 市场价（分）
-  int64 cost_price = 6;               // 成本价（分）
-  int64 stock = 7;                    // 物理库存总数（总库存）
-  int64 locked_stock = 8;             // 锁定库存数量
-  uint32 version = 9;                 // 乐观锁版本号
-  repeated SpecItem specs = 10;       // 规格 JSON 结构化
-  repeated string images = 11;        // SKU专属图片
-  int64 weight = 12;                  // 重量（克）
-  int64 status = 13;                  // 1-启用 2-禁用
-  // 兼容旧字段（已废弃，建议使用 sku_code）
-  string code = 14 [deprecated = true];
+  string spu_name = 3;
+  string sku_code = 4;                // SKU编码（唯一）
+  int64 price = 5;                    // 销售价（分）
+  int64 market_price = 6;             // 市场价（分）
+  int64 cost_price = 7;               // 成本价（分）
+  int64 stock = 8;                    // 物理库存总数（总库存）
+  int64 locked_stock = 9;             // 锁定库存数量
+  uint32 version = 10;                 // 乐观锁版本号
+  repeated SpecItem specs = 11;       // 规格 JSON 结构化
+  repeated string images = 12;        // SKU专属图片
+  int64 weight = 13;                  // 重量（克）
+  int64 status = 14;                  // 1-启用 2-禁用
 }
 
 message SkuSimple {
@@ -481,11 +486,21 @@ message RollbackStockReq {
   string order_sn = 2;
 }
 
+message CalculatePriceReq{
+  uint64 addressId = 1;
+  repeated SkuStockItem items = 2;
+}
+
 // 管理员调整库存
 message AdjustStockReq {
   repeated SkuStockItem items = 1;
   string reason = 2;
   string operator = 3;
+}
+
+message CalculateFreightReq {
+  uint64 address_id = 1;            // 地址ID（用于获取省市区）
+  repeated SkuStockItem items = 2;   // 商品列表
 }
 
 message StockChangeResp {
@@ -501,6 +516,14 @@ message SkuStockResult {
   int64 current_locked = 5;     // 变更后的锁定库存
 }
 
+message CalculatePriceResp{
+  int64 total_price = 1;
+}
+
 message BatchStockResp {
   map<uint64, int64> stocks = 1; // sku_id -> 可用库存 (stock - locked_stock)
+}
+
+message SkuListResp{
+  repeated SkuItem sku_items = 1;
 }
