@@ -1,7 +1,7 @@
 package snowflakes
 
 import (
-	"context"
+	"fmt"
 	"github.com/bwmarrin/snowflake"
 )
 
@@ -21,6 +21,10 @@ func NewGenerator(nodeID int64) (*Generator, error) {
 }
 
 // NextID 生成雪花ID
-func (s *Generator) NextID(ctx *context.Context) (id uint64, err error) {
+func (s *Generator) NextID() (id uint64, err error) {
 	return uint64(s.node.Generate()), nil
+}
+
+func (s *Generator) GenWithPrefix(prefix string) (string, error) {
+	return fmt.Sprintf("%s_%d", prefix, s.node.Generate()), nil
 }
