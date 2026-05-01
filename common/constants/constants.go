@@ -80,10 +80,11 @@ const (
 )
 
 const (
-	STOCK_CHANGE_TYPE_LOCKED   = iota + 1 // 锁定库存
-	STOCK_CHANGE_TYPE_UNLOCKED            // 解锁库存
-	STOCK_CHANGE_TYPE_DEDUCT              // 扣减库存
-	STOCK_CHANGE_TYPE_ROLLBACK            // 回滚库存(订单取消/退款)
+	STOCK_CHANGE_TYPE_LOCKED        = iota + 1 // 锁定库存
+	STOCK_CHANGE_TYPE_UNLOCKED                 // 解锁库存
+	STOCK_CHANGE_TYPE_DEDUCT                   // 扣减库存
+	STOCK_CHANGE_TYPE_ROLLBACK                 // 回滚库存(订单取消/退款)
+	STOCK_CHANGE_TYPE_REVERT_DEDUCT            // 恢复库存
 )
 
 // 前缀（订单部分）
@@ -111,4 +112,12 @@ const (
 	ORDER_STATUS_COMPLETED   = 40 // 已完成
 	ORDER_STATUS_CANCELED    = 50 // 已取消
 	ORDER_STATUS_AFTER_SALE  = 60 // 售后中
+)
+
+// 存储订单信息的key
+const (
+	ORDER_SN      = "order_sn"
+	ORDER_USER_ID = "userId"
+	ORDER_INFO    = "order_info"
+	ORDER_ITEMS   = "order_items"
 )

@@ -3,7 +3,7 @@ package product;
 
 option go_package = "./product";
 
-// goctl rpc protoc .\apps\service\product\rpc\product.proto --go_out=apps/service/product/rpc/types --go-grpc_out apps/service/product/rpc/types --zrpc_out=apps/service/product/rpc/
+// goctl rpc protoc .\apps\service\product\rpc\product.proto --go_out=apps/service/product/rpc/types --go-grpc_out apps/service/product/rpc/types --zrpc_out=apps/service/product/rpc/ -m
 
 // ==================== RPC（对外/公共） ====================
 service Product {
@@ -59,13 +59,15 @@ service ProductAdmin {
 // ==================== RPC（内部服务调用） ====================
 service ProductInternal {
   // 锁定库存（下单预占）
-  rpc LockStock(LockStockReq) returns (StockChangeResp);
+  rpc LockStock(UpdateStockReq) returns (StockChangeResp);
   // 解锁库存（超时未支付）
-  rpc UnlockStock(UnlockStockReq) returns (StockChangeResp);
+  rpc UnlockStock(UpdateStockReq) returns (StockChangeResp);
   // 扣减库存（支付成功）
-  rpc DeductStock(DeductStockReq) returns (StockChangeResp);
+  rpc DeductStock(UpdateStockReq) returns (StockChangeResp);
   // 回滚库存（订单取消/退款）
-  rpc RollbackStock(RollbackStockReq) returns (StockChangeResp);
+  rpc RollbackStock(UpdateStockReq) returns (StockChangeResp);
+  // 回滚库存（订单取消/退款）
+  rpc RevertDeductStock(UpdateStockReq) returns (StockChangeResp);
   // 批量查询库存（订单服务校验，返回可用库存）
   rpc BatchGetStock(SkuIdsReq) returns (BatchStockResp);
   // 计算价格
@@ -466,22 +468,7 @@ message SkuStockItem {
   int64 quantity = 2;   // 数量
 }
 
-message LockStockReq {
-  repeated SkuStockItem items = 1;
-  string order_sn = 2;
-}
-
-message UnlockStockReq {
-  repeated SkuStockItem items = 1;
-  string order_sn = 2;
-}
-
-message DeductStockReq {
-  repeated SkuStockItem items = 1;
-  string order_sn = 2;
-}
-
-message RollbackStockReq {
+message UpdateStockReq {
   repeated SkuStockItem items = 1;
   string order_sn = 2;
 }

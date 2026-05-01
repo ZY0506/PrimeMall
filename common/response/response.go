@@ -90,6 +90,8 @@ const (
 	ErrCodeFreightTemplateNotFound  = 40011 // 运费模板不存在
 	ErrCodeFreightCalculationFailed = 40012 // 运费计算失败
 	ErrCodePreOrderFailed           = 40013 // 预下单失败
+	ErrCodeOrderFailed              = 40014 // 下单失败
+	ErrCodeOrderInfoInvalid         = 40015 // 订单信息不匹配
 
 )
 

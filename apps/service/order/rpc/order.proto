@@ -4,7 +4,9 @@ package order;
 
 option go_package = "./order";
 
-// goctl rpc protoc .\apps\service\order\rpc\order.proto --go_out=apps/service/order/rpc/types --go-grpc_out apps/service/order/rpc/types --zrpc_out=apps/service/order/rpc/
+import "google/protobuf/timestamp.proto";
+
+// goctl rpc protoc .\apps\service\order\rpc\order.proto --go_out=apps/service/order/rpc/types --go-grpc_out apps/service/order/rpc/types --zrpc_out=apps/service/order/rpc/ -m
 
 // ========================
 // service
@@ -27,6 +29,30 @@ service Order {
 
   // 售后
   rpc ApplyAfterSale(AfterSaleRequest) returns (AfterSaleResponse);
+}
+
+// ========================
+// 购物车服务（核心补充）
+// ========================
+service Cart {
+
+  // 添加/更新商品（数量=0删除）
+  rpc UpdateCart(UpdateCartRequest) returns (Empty);
+
+  // 修改选中状态（单个商品）
+  rpc SelectCart(SelectCartRequest) returns (Empty);
+
+  // 批量修改选中状态（支持全选/全不选）
+  rpc BatchSelectCart(BatchSelectCartRequest) returns (Empty);
+
+  // 获取购物车列表
+  rpc CartList(CartListRequest) returns (CartListResponse);
+
+  // 批量删除
+  rpc RemoveCart(RemoveCartRequest) returns (Empty);
+
+  // 清空购物车
+  rpc ClearCart(ClearCartRequest) returns (Empty);
 }
 
 service OrderAdmin{
@@ -60,6 +86,20 @@ enum AfterSaleStatus {
   AFTER_SALE_REFUNDING = 3;
   AFTER_SALE_DONE = 4;
   AFTER_SALE_REJECTED = 5;
+}
+
+// 支付方式
+enum PayType {
+  PAY_TYPE_UNKNOWN = 0;
+  PAY_TYPE_WECHAT = 1;   // 微信支付
+  PAY_TYPE_ALIPAY = 2;   // 支付宝支付
+}
+
+// 售后类型
+enum AfterSaleType {
+  AFTER_SALE_TYPE_UNKNOWN = 0;
+  AFTER_SALE_TYPE_REFUND_ONLY = 1;    // 仅退款
+  AFTER_SALE_TYPE_RETURN_REFUND = 2;  // 退货退款
 }
 
 message Empty {}
@@ -129,7 +169,7 @@ message CreateOrderRequest {
   uint64 address_id = 2;
   uint64 coupon_id = 3;
 
-  int64 pay_type = 4;
+  PayType pay_type = 4;          // 改为枚举类型
   int64 pay_amount = 5;
 
   string remark = 6;
@@ -155,7 +195,7 @@ message OrderListItem {
   string order_sn = 1;
   OrderStatus status = 2;
   int64 pay_amount = 3;
-  string create_time = 4;
+  google.protobuf.Timestamp create_time = 4;   // 改为 Timestamp
 
   repeated OrderItem items = 5;
 }
@@ -180,7 +220,7 @@ message OrderDetailResponse {
   string delivery_sn = 5;
   string delivery_corp = 6;
 
-  string expire_time = 7;
+  google.protobuf.Timestamp expire_time = 7;   // 改为 Timestamp
   string remark = 8;
 }
 
@@ -193,7 +233,7 @@ message AfterSaleRequest {
   uint64 sku_id = 2;
   int64 quantity = 3;
 
-  int64 type = 4;
+  AfterSaleType type = 4;        // 改为枚举类型
   string reason = 5;
 
   int64 apply_amount = 6;
@@ -207,5 +247,65 @@ message AfterSaleResponse {
   AfterSaleStatus status = 2;
   int64 apply_amount = 3;
   string audit_remark = 4;
-  string created_at = 5;
+  google.protobuf.Timestamp created_at = 5;   // 改为 Timestamp
+}
+
+message CartItem {
+  uint64 id = 1;
+  uint64 sku_id = 2;
+  uint64 spu_id = 3;
+
+  string product_name = 4;
+  string sku_name = 5;
+  string pic = 6;
+
+  int64 price = 7;
+  int64 quantity = 8;
+
+  bool selected = 9;
+
+  int64 stock = 10;
+  int64 status = 11;
+}
+
+message UpdateCartRequest {
+  uint64 user_id = 1;
+
+  uint64 sku_id = 2;
+  int64 quantity = 3;
+
+  string idempotency_key = 4;
+}
+
+message SelectCartRequest {
+  uint64 user_id = 1;
+
+  uint64 sku_id = 2;
+  bool selected = 3;
+}
+
+// 批量修改购物车选中状态（支持全选/全不选）
+message BatchSelectCartRequest {
+  uint64 user_id = 1;
+  bool selected = 2;                // true: 选中, false: 取消选中
+  bool all = 3;                     // true: 作用于购物车所有商品，忽略 sku_ids
+  repeated uint64 sku_ids = 4;      // 当 all=false 时，仅修改这些 sku 的选中状态
+}
+
+message CartListRequest {
+  uint64 user_id = 1;
+}
+
+message RemoveCartRequest {
+  uint64 user_id = 1;
+  repeated uint64 sku_ids = 2;
+}
+
+message ClearCartRequest {
+  uint64 user_id = 1;
+}
+
+message CartListResponse {
+  repeated CartItem items = 1;
+  int64 total_amount = 2;
 }
