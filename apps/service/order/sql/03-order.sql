@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS `cart` (
 -- 订单主表
 -- =============================================
 CREATE TABLE IF NOT EXISTS `order_info` (
-    `id`                    BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '订单ID',
+    `id`                    BIGINT UNSIGNED NOT NULL COMMENT '订单ID',
     `order_sn`              VARCHAR(64)     NOT NULL COMMENT '订单号（业务唯一标识）',
     `order_type`            TINYINT         NOT NULL DEFAULT '1' COMMENT '订单类型：1-普通订单，2-秒杀订单，3-拼团订单',
     `idempotency_key`       VARCHAR(64)     NOT NULL COMMENT '幂等键（防止重复提交）',
@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS `order_info` (
     `pay_amount`            BIGINT          NOT NULL DEFAULT '0' COMMENT '实付金额（单位：分）',
     `remark`                VARCHAR(500)             DEFAULT '' COMMENT '订单备注（用户留言）',
     `pay_time`              DATETIME                 DEFAULT NULL COMMENT '支付时间',
+    `pay_type`              TINYINT                  DEFAULT '1' COMMENT '支付类型：1-微信支付，2-支付宝支付，3-其他支付',
     `delivery_time`         DATETIME                 DEFAULT NULL COMMENT '发货时间',
     `receive_time`          DATETIME                 DEFAULT NULL COMMENT '确认收货时间',
     `cancel_time`           DATETIME                 DEFAULT NULL COMMENT '取消时间',
@@ -72,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `order_info` (
 -- 订单商品表
 -- =============================================
 CREATE TABLE IF NOT EXISTS `order_item` (
-    `id`           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '订单商品ID',
+    `id`           BIGINT UNSIGNED NOT NULL COMMENT '订单商品ID',
     `order_id`     BIGINT UNSIGNED NOT NULL COMMENT '订单ID',
     `order_sn`     VARCHAR(64)     NOT NULL COMMENT '订单号',
     `sku_id`       BIGINT UNSIGNED NOT NULL COMMENT 'SKU ID',
