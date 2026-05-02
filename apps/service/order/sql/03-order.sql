@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `cart` (
     `user_id`    BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
     `sku_id`     BIGINT UNSIGNED NOT NULL COMMENT 'SKU ID',
     `count`      INT UNSIGNED    NOT NULL DEFAULT '1' COMMENT '商品数量',
-    `selected`   TINYINT         NOT NULL DEFAULT '1' COMMENT '是否选中：0-未选中，1-已选中',
+    `selected`   BOOL            NOT NULL DEFAULT '1' COMMENT '是否选中：false-未选中，true-已选中',
     `created_at` DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at` DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),

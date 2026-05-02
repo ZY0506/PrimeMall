@@ -35,7 +35,6 @@ service Order {
 // 购物车服务（核心补充）
 // ========================
 service Cart {
-
   // 添加/更新商品（数量=0删除）
   rpc UpdateCart(UpdateCartRequest) returns (Empty);
 
@@ -46,13 +45,13 @@ service Cart {
   rpc BatchSelectCart(BatchSelectCartRequest) returns (Empty);
 
   // 获取购物车列表
-  rpc CartList(CartListRequest) returns (CartListResponse);
+  rpc CartList(Empty) returns (CartListResponse);
 
   // 批量删除
   rpc RemoveCart(RemoveCartRequest) returns (Empty);
 
   // 清空购物车
-  rpc ClearCart(ClearCartRequest) returns (Empty);
+  rpc ClearCart(Empty) returns (Empty);
 }
 
 service OrderAdmin{
@@ -265,44 +264,29 @@ message CartItem {
   bool selected = 9;
 
   int64 stock = 10;
-  int64 status = 11;
+  int64 status = 11;  // 0-下架
 }
 
 message UpdateCartRequest {
-  uint64 user_id = 1;
-
-  uint64 sku_id = 2;
-  int64 quantity = 3;
-
-  string idempotency_key = 4;
+  uint64 sku_id = 1;
+  int64 quantity = 2;
+  string idempotency_key = 3;
 }
 
 message SelectCartRequest {
-  uint64 user_id = 1;
-
-  uint64 sku_id = 2;
-  bool selected = 3;
+  uint64 sku_id = 1;
+  bool selected = 2;
 }
 
 // 批量修改购物车选中状态（支持全选/全不选）
 message BatchSelectCartRequest {
-  uint64 user_id = 1;
-  bool selected = 2;                // true: 选中, false: 取消选中
-  bool all = 3;                     // true: 作用于购物车所有商品，忽略 sku_ids
-  repeated uint64 sku_ids = 4;      // 当 all=false 时，仅修改这些 sku 的选中状态
-}
-
-message CartListRequest {
-  uint64 user_id = 1;
+  bool selected = 1;                // true: 选中, false: 取消选中
+  bool all = 2;                     // true: 作用于购物车所有商品，忽略 sku_ids
+  repeated uint64 sku_ids = 3;      // 当 all=false 时，仅修改这些 sku 的选中状态
 }
 
 message RemoveCartRequest {
-  uint64 user_id = 1;
-  repeated uint64 sku_ids = 2;
-}
-
-message ClearCartRequest {
-  uint64 user_id = 1;
+  repeated uint64 sku_ids = 1;
 }
 
 message CartListResponse {
