@@ -76,6 +76,7 @@ service ProductInternal {
   rpc GetSkuListByIds(SkuIdsReq) returns (SkuListResp);
   // 计算运费
   rpc CalculateFreight(CalculateFreightReq) returns (CalculatePriceResp);
+
 }
 
 // ==================== 通用结构 ====================
@@ -293,6 +294,8 @@ message SkuItem {
   repeated string images = 12;        // SKU专属图片
   int64 weight = 13;                  // 重量（克）
   int64 status = 14;                  // 1-启用 2-禁用
+
+  int64 spu_status = 15;              // spu状态 0-下架
 }
 
 message SkuSimple {
