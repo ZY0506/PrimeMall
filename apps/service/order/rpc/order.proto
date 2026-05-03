@@ -194,7 +194,7 @@ message OrderListItem {
   string order_sn = 1;
   OrderStatus status = 2;
   int64 pay_amount = 3;
-  google.protobuf.Timestamp create_time = 4;   // 改为 Timestamp
+  google.protobuf.Timestamp create_time = 4;
 
   repeated OrderItem items = 5;
 }
@@ -219,7 +219,7 @@ message OrderDetailResponse {
   string delivery_sn = 5;
   string delivery_corp = 6;
 
-  google.protobuf.Timestamp expire_time = 7;   // 改为 Timestamp
+  google.protobuf.Timestamp expire_time = 7;
   string remark = 8;
 }
 

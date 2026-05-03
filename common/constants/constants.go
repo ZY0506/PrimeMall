@@ -121,3 +121,7 @@ const (
 	ORDER_INFO    = "order_info"
 	ORDER_ITEMS   = "order_items"
 )
+
+const (
+	ORDER_EXPIRE = 15 * 60 * time.Second
+)
