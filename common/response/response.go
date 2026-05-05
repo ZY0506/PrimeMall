@@ -147,6 +147,8 @@ const (
 	ErrCodeAfterSaleTimeExceed    = 90004 // 超出售后申请时限
 	ErrCodeAfterSaleReasonInvalid = 90005 // 售后原因无效
 	ErrCodeAfterSaleImageRequired = 90006 // 请上传凭证图片
+	ErrCodeAmountInvalid          = 90007 // 金额无效
+	ErrCodeQuantityInvalid        = 90008 // 数量无效
 )
 
 type Response struct {

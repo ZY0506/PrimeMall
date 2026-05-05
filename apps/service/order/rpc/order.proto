@@ -28,7 +28,11 @@ service Order {
   rpc ConfirmReceipt(OrderDetailRequest) returns (Empty);
 
   // 售后
-  rpc ApplyAfterSale(AfterSaleRequest) returns (AfterSaleResponse);
+  rpc ApplyAfterSale(AfterSaleRequest) returns (Empty);
+  rpc CancelAfterSale(CancelAfterSaleRequest) returns (Empty);
+  rpc AfterSaleList(AfterSaleListRequest) returns (AfterSaleListResponse);
+  rpc AfterSaleDetail(AfterSaleDetailRequest) returns (AfterSaleDetailResponse);
+  rpc SubmitReturnLogistics(SubmitReturnLogisticsRequest) returns (Empty);
 }
 
 // ========================
@@ -79,12 +83,13 @@ enum OrderStatus {
 
 // 售后状态
 enum AfterSaleStatus {
-  AFTER_SALE_UNKNOWN = 0;
-  AFTER_SALE_PENDING = 1;
-  AFTER_SALE_RETURNING = 2;
-  AFTER_SALE_REFUNDING = 3;
-  AFTER_SALE_DONE = 4;
-  AFTER_SALE_REJECTED = 5;
+  AFTER_SALE_STATUS_UNKNOWN = 0;
+  AFTER_SALE_STATUS_PENDING   = 10; // 待审核
+  AFTER_SALE_STATUS_RETURNING = 20; // 待退货
+  AFTER_SALE_STATUS_REFUNDING = 30; // 退款中
+  AFTER_SALE_STATUS_COMPLETED = 40; // 已完成
+  AFTER_SALE_STATUS_REFUSED   = 50; // 拒绝
+  AFTER_SALE_STATUS_CANCELED  = 60; // 已取消
 }
 
 // 支付方式
@@ -221,6 +226,10 @@ message OrderDetailResponse {
 
   google.protobuf.Timestamp expire_time = 7;
   string remark = 8;
+  google.protobuf.Timestamp pay_time = 9;
+  google.protobuf.Timestamp delivery_time = 10;
+  google.protobuf.Timestamp finish_time = 11;
+  google.protobuf.Timestamp cancel_time = 12;
 }
 
 // ========================
@@ -232,7 +241,7 @@ message AfterSaleRequest {
   uint64 sku_id = 2;
   int64 quantity = 3;
 
-  AfterSaleType type = 4;        // 改为枚举类型
+  AfterSaleType type = 4;
   string reason = 5;
 
   int64 apply_amount = 6;
@@ -241,14 +250,14 @@ message AfterSaleRequest {
   string idempotency_key = 8;
 }
 
-message AfterSaleResponse {
+message CancelAfterSaleRequest {
   uint64 after_sale_id = 1;
-  AfterSaleStatus status = 2;
-  int64 apply_amount = 3;
-  string audit_remark = 4;
-  google.protobuf.Timestamp created_at = 5;   // 改为 Timestamp
 }
 
+
+// ========================
+// 购物车
+// ========================
 message CartItem {
   uint64 id = 1;
   uint64 sku_id = 2;
@@ -292,4 +301,58 @@ message RemoveCartRequest {
 message CartListResponse {
   repeated CartItem items = 1;
   int64 total_amount = 2;
+}
+
+message AfterSaleListRequest {
+  int64 page = 1;
+  int64 size = 2;
+}
+
+message AfterSaleListItem {
+  uint64 after_sale_id = 1;
+  string order_sn = 2;
+  AfterSaleType type = 3;
+  AfterSaleStatus status = 4;
+  int64 refund_amount = 5;
+  string spu_name = 6;  // spu 名称
+  string sku_name = 7;  // sku 名称
+  string pic = 8;
+}
+
+message AfterSaleListResponse {
+  int64 total = 1;
+  repeated AfterSaleListItem list = 2;
+}
+
+message AfterSaleDetailRequest {
+  uint64 after_sale_id = 1;
+}
+
+message AfterSaleDetailResponse {
+  uint64 after_sale_id = 1;
+  string order_sn = 2;
+  AfterSaleType type = 3;
+  AfterSaleStatus status = 4;
+  int64 apply_amount = 5;
+  string reason = 6;
+  repeated string images = 7;
+  string audit_remark = 8;               // 审核意见
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp audit_time = 10;
+  // 退货物流信息（用户填写）
+  string return_tracking_sn = 12;
+  string return_tracking_corp = 13;
+  // 商家收货确认
+  google.protobuf.Timestamp receive_time = 14;
+  // 退款信息
+  int64 refund_amount = 15;
+  google.protobuf.Timestamp refund_time = 16;
+  // 关联的商品信息（原订单中的 sku 快照）
+  OrderItem product_item = 17;
+}
+
+message SubmitReturnLogisticsRequest {
+  uint64 after_sale_id = 1;
+  string logistics_company = 2;
+  string tracking_no = 3;
 }
