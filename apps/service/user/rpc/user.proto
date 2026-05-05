@@ -56,7 +56,7 @@ service UserInternal {
   // 校验用户状态（是否被封禁/限制下单）
   rpc CheckUserStatus(CheckUserStatusReq) returns (CheckUserStatusResp);
   // 获取地址信息
-  rpc GetAddressById(IdPathReq) returns (AddressItem);
+  rpc GetAddressById(GetAddressReq) returns (AddressItem);
 }
 
 // ------------------------------ 公共消息 ------------------------------
@@ -255,4 +255,9 @@ message CheckUserStatusReq {
 message CheckUserStatusResp {
   bool allowed = 1;               // 是否允许操作
   string reason = 2;              // 禁止原因
+}
+
+message GetAddressReq {
+  uint64 address_id = 1;
+  uint64 user_id = 2;
 }

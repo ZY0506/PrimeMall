@@ -106,9 +106,9 @@ const (
 
 // 订单状态
 const (
-	ORDER_STATUS_PENDING_PAY = 10 //待支付
-	ORDER_STATUS_PAID        = 20 //已支付
-	ORDER_STATUS_SHIPPED     = 30 //已发货
+	ORDER_STATUS_PENDING_PAY = 10 // 待支付
+	ORDER_STATUS_PAID        = 20 // 已支付
+	ORDER_STATUS_SHIPPED     = 30 // 已发货
 	ORDER_STATUS_COMPLETED   = 40 // 已完成
 	ORDER_STATUS_CANCELED    = 50 // 已取消
 	ORDER_STATUS_AFTER_SALE  = 60 // 售后中
@@ -122,6 +122,26 @@ const (
 	ORDER_ITEMS   = "order_items"
 )
 
+// ORDER_EXPIRE 订单过期时间
 const (
 	ORDER_EXPIRE = 15 * 60 * time.Second
+)
+
+// 售后
+const (
+	PREFIX_AFTER_SALE_SN        = "AS"
+	AFTER_SALE_STATUS_PENDING   = 10 // 待审核
+	AFTER_SALE_STATUS_RETURNING = 20 // 待退货
+	AFTER_SALE_STATUS_REFUNDING = 30 // 退款中
+	AFTER_SALE_STATUS_COMPLETED = 40 // 已完成
+	AFTER_SALE_STATUS_REFUSED   = 50 // 拒绝
+	AFTER_SALE_STATUS_CANCELED  = 60 // 已取消
+)
+
+// 退款状态
+const (
+	REFUND_STATUS_PENDING_REFUND = 0  // 未退款
+	REFUND_STATUS_REFUNDING      = 10 // 退款中
+	REFUND_STATUS_REFUNDED       = 20 // 退款成功
+	REFUND_STATUS_REFUND_FAILED  = 30 // 退款失败
 )
