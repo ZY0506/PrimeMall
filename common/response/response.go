@@ -149,6 +149,7 @@ const (
 	ErrCodeAfterSaleImageRequired = 90006 // 请上传凭证图片
 	ErrCodeAmountInvalid          = 90007 // 金额无效
 	ErrCodeQuantityInvalid        = 90008 // 数量无效
+	ErrCodeAfterSaleTypeInvalid   = 90009 // 仅退货退款订单可提交物流信息
 )
 
 type Response struct {
