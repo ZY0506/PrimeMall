@@ -69,9 +69,15 @@ const (
 )
 
 const (
-	PRODUCT_STATUS_UNKNOWN = iota
-	PRODUCT_STATUS_ON_SALE
-	PRODUCT_STATUS_OFF_SALE
+	PRODUCT_SPU_STATUS_UNKNOWN = iota
+	PRODUCT_SPU_STATUS_ON_SALE
+	PRODUCT_SPU_STATUS_OFF_SALE
+)
+
+const (
+	PRODUCT_SKU_STATUS_UNKNOWN = iota
+	PRODUCT_SKU_STATUS_ENABLED
+	PRODUCT_SKU_STATUS_DISABLED
 )
 
 // MAX_RETRY_COUNT 重试机制次数
@@ -92,9 +98,7 @@ const (
 	PREFIX_ORDER_SN         = "PM"
 	PREFIX_SETTLEMENT_TOKEN = "SToken"
 	SETTLEMENT_TOKEN_KEY    = "order:settlement_token:"
-	SETTLEMENT_TOKEN_EXPIRE = 60 * time.Second
-	ORDER_CACHE_KEY         = "order:info:"
-	ORDER_CACHE_EXPIRE      = 15 * 60 * time.Second
+	SETTLEMENT_TOKEN_EXPIRE = 15 * 60 * time.Second
 )
 
 // 订单类型
@@ -122,9 +126,9 @@ const (
 	ORDER_ITEMS   = "order_items"
 )
 
-// ORDER_EXPIRE 订单过期时间
+// ORDER_EXPIRE_TIME 订单过期时间
 const (
-	ORDER_EXPIRE = 15 * 60 * time.Second
+	ORDER_EXPIRE_TIME = 15 * 60 * time.Second
 )
 
 // 售后

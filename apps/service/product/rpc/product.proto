@@ -70,13 +70,10 @@ service ProductInternal {
   rpc RevertDeductStock(UpdateStockReq) returns (StockChangeResp);
   // 批量查询库存（订单服务校验，返回可用库存）
   rpc BatchGetStock(SkuIdsReq) returns (BatchStockResp);
-  // 计算价格
-  rpc CalculateSkusPrice(CalculatePriceReq) returns (CalculatePriceResp);
   // 批量获取Sku
   rpc GetSkuListByIds(SkuIdsReq) returns (SkuListResp);
   // 计算运费
   rpc CalculateFreight(CalculateFreightReq) returns (CalculatePriceResp);
-
 }
 
 // ==================== 通用结构 ====================
@@ -474,11 +471,6 @@ message SkuStockItem {
 message UpdateStockReq {
   repeated SkuStockItem items = 1;
   string order_sn = 2;
-}
-
-message CalculatePriceReq{
-  uint64 addressId = 1;
-  repeated SkuStockItem items = 2;
 }
 
 // 管理员调整库存
