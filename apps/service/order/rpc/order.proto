@@ -29,7 +29,7 @@ service Order {
   rpc OrderDetail(OrderDetailRequest) returns (OrderDetailResponse);
 
   // 取消订单：仅待支付订单可取消
-  rpc CancelOrder(OrderDetailRequest) returns (Empty);
+  rpc CancelOrder(CancelOrderRequest) returns (Empty);
 
   // 确认收货：已发货订单确认完成
   rpc ConfirmReceipt(OrderDetailRequest) returns (Empty);
@@ -113,11 +113,24 @@ enum OrderStatus {
 enum AfterSaleStatus {
   AFTER_SALE_STATUS_UNKNOWN = 0;        // 未知状态
   AFTER_SALE_STATUS_PENDING   = 10;     // 待审核
-  AFTER_SALE_STATUS_RETURNING = 20;     // 待用户退货
+  AFTER_SALE_STATUS_RETURNING = 20;     // 待商家收货
   AFTER_SALE_STATUS_REFUNDING = 30;     // 退款中
   AFTER_SALE_STATUS_COMPLETED = 40;     // 售后完成
   AFTER_SALE_STATUS_REFUSED   = 50;     // 审核拒绝
   AFTER_SALE_STATUS_CANCELED  = 60;     // 用户取消售后
+}
+
+/**
+ * 取消订单原因类型
+ */
+// 0-未取消 1-用户主动取消 2-超时未支付取消 3-库存不足 4-管理员取消 5-其他
+enum CancelReasonType {
+  CANCEL_REASON_TYPE_NONE = 0;                // 未取消
+  CANCEL_REASON_TYPE_USER = 1;                // 用户取消
+  CANCEL_REASON_TYPE_TIMEOUT = 2;             // 超时取消
+  CANCEL_REASON_TYPE_INSUFFICIENT_STOCK = 3;  // 库存不足
+  CANCEL_REASON_TYPE_ADMIN = 4;               // 管理员取消
+  CANCEL_REASON_TYPE_OTHER = 5;               // 其他
 }
 
 /**
@@ -221,11 +234,13 @@ message PreOrderResponse {
  * 创建订单请求参数
  */
 message CreateOrderRequest {
-  string settlement_token = 1;        // 【核心】预下单生成的结算令牌，30分钟有效
+  string settlement_token = 1;         // 【核心】预下单生成的结算令牌，30分钟有效
   PayType pay_type = 2;                // 支付方式：1-微信 2-支付宝
   string remark = 3;                   // 订单备注（选填）
   string idempotency_key = 4;          // 幂等键（前端生成唯一ID，防重复提交）
   repeated uint64 cart_sku_ids = 5;    // 购物车已结算SKU列表，下单成功后删除
+  uint64 address_id = 6;               // 收货地址ID
+  uint64 coupon_id = 7;                // 优惠券ID（无则传0）
 }
 
 /**
@@ -293,6 +308,12 @@ message OrderDetailResponse {
   google.protobuf.Timestamp cancel_time = 12;   // 取消时间
 }
 
+message CancelOrderRequest {
+  string order_sn = 1;  // 订单编号
+  CancelReasonType reason_type = 2;
+  string reason = 3;    // 取消原因
+}
+
 // ========================
 // 售后相关接口
 // ========================
@@ -322,8 +343,9 @@ message CancelAfterSaleRequest {
  * 售后列表请求
  */
 message AfterSaleListRequest {
-  int64 page = 1;    // 页码
-  int64 size = 2;    // 每页条数
+  AfterSaleStatus status = 1;
+  int64 page = 2;    // 页码
+  int64 size = 3;    // 每页条数
 }
 
 /**
@@ -334,6 +356,7 @@ message AfterSaleListItem {
   string order_sn = 2;           // 订单编号
   AfterSaleType type = 3;        // 售后类型
   AfterSaleStatus status = 4;    // 售后状态
+  string status_desc = 9;        // 售后状态描述
   int64 refund_amount = 5;       // 退款金额
   string spu_name = 6;           // 商品名称
   string sku_name = 7;           // 商品规格
@@ -363,6 +386,7 @@ message AfterSaleDetailResponse {
   string order_sn = 2;                     // 订单编号
   AfterSaleType type = 3;                   // 售后类型
   AfterSaleStatus status = 4;               // 售后状态
+  string status_desc = 18;                   // 售后状态描述
   int64 apply_amount = 5;                   // 申请退款金额
   string reason = 6;                        // 售后原因
   repeated string images = 7;               // 凭证图片

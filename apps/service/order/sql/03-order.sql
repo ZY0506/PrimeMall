@@ -54,6 +54,8 @@ CREATE TABLE IF NOT EXISTS `order_info` (
     `delivery_corp`         VARCHAR(64)              DEFAULT '' COMMENT '物流公司名称',
     `receive_time`          DATETIME                 DEFAULT NULL COMMENT '确认收货时间',
     `cancel_time`           DATETIME                 DEFAULT NULL COMMENT '取消时间',
+    `cancel_reason_type`    TINYINT                  DEFAULT 0 COMMENT '取消原因类型：0-未取消 1-用户主动取消 2-超时未支付取消 3-库存不足 4-管理员取消 5-其他',
+    `cancel_reason`         VARCHAR(255)             DEFAULT '' COMMENT '取消原因详情（用户填写/系统备注）',
     `seckill_activity_id`   BIGINT UNSIGNED NOT NULL DEFAULT '0' COMMENT '秒杀活动ID：普通订单为0',
     `seckill_price`         BIGINT                   DEFAULT '0' COMMENT '秒杀价格快照（单位：分）',
     `created_at`            DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
