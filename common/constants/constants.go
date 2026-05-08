@@ -118,6 +118,15 @@ const (
 	ORDER_STATUS_AFTER_SALE  = 60 // 售后中
 )
 
+var OrderStatusMap = map[int]string{
+	ORDER_STATUS_PENDING_PAY: "待支付",
+	ORDER_STATUS_PAID:        "已支付",
+	ORDER_STATUS_SHIPPED:     "已发货",
+	ORDER_STATUS_COMPLETED:   "已完成",
+	ORDER_STATUS_CANCELED:    "已取消",
+	ORDER_STATUS_AFTER_SALE:  "售后中",
+}
+
 // 存储订单信息的key
 const (
 	ORDER_SN      = "order_sn"
@@ -141,6 +150,15 @@ const (
 	AFTER_SALE_STATUS_REFUSED   = 50 // 拒绝
 	AFTER_SALE_STATUS_CANCELED  = 60 // 已取消
 )
+
+var AfterSaleStatusMap = map[int]string{
+	AFTER_SALE_STATUS_PENDING:   "待审核",
+	AFTER_SALE_STATUS_RETURN:    "待商家收货",
+	AFTER_SALE_STATUS_REFUNDING: "退款中",
+	AFTER_SALE_STATUS_COMPLETED: "已完成",
+	AFTER_SALE_STATUS_REFUSED:   "拒绝",
+	AFTER_SALE_STATUS_CANCELED:  "已取消",
+}
 
 const (
 	AFTER_SALE_TYPE_REFUND_ONLY   = 1
