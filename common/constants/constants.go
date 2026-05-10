@@ -140,6 +140,15 @@ const (
 	ORDER_EXPIRE_TIME = 15 * 60 * time.Second
 )
 
+const (
+	CANCEL_REASON_TYPE_NONE               = 0 // 未取消
+	CANCEL_REASON_TYPE_USER               = 1 // 用户取消
+	CANCEL_REASON_TYPE_TIMEOUT            = 2 // 超时取消
+	CANCEL_REASON_TYPE_INSUFFICIENT_STOCK = 3 // 库存不足
+	CANCEL_REASON_TYPE_ADMIN              = 4 // 管理员取消
+	CANCEL_REASON_TYPE_OTHER              = 5 // 其他
+)
+
 // 售后
 const (
 	PREFIX_AFTER_SALE_SN        = "AS"
@@ -160,6 +169,7 @@ var AfterSaleStatusMap = map[int]string{
 	AFTER_SALE_STATUS_CANCELED:  "已取消",
 }
 
+// 售后类型
 const (
 	AFTER_SALE_TYPE_REFUND_ONLY   = 1
 	AFTER_SALE_TYPE_RETURN_REFUND = 2
@@ -171,4 +181,12 @@ const (
 	REFUND_STATUS_REFUNDING      = 10 // 退款中
 	REFUND_STATUS_REFUNDED       = 20 // 退款成功
 	REFUND_STATUS_REFUND_FAILED  = 30 // 退款失败
+)
+
+// 消息队列
+const (
+	ORDER_DELAY_QUEUE         = "order.delay.queue"
+	ORDER_DLX_EXCHANGE        = "order.dlx"
+	ORDER_TIMEOUT_ROUTING_KEY = "order.timeout"
+	ORDER_TTL_MS              = 15 * 60 * 1000 // 30分钟
 )

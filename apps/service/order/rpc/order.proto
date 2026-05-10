@@ -251,6 +251,17 @@ message CreateOrderResponse {
   int64 pay_amount = 2;       // 实付金额（单位：分）
 }
 
+/**
+ * 订单超时取消消息
+ */
+message OrderTimeoutMessage {
+  string order_sn = 1;                    // 订单号
+  CancelReasonType cancel_reason_type = 3;           // 取消原因类型
+  string cancel_reason = 4;               // 取消原因
+  repeated OrderItemSimple items = 5;     // 订单项快照(用于解锁库存)
+  uint64 coupon_id = 6;                    // 优惠券ID(可选)
+}
+
 // ========================
 // 订单列表/详情
 // ========================
