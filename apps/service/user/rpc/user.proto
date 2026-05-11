@@ -34,8 +34,6 @@ service User {
   rpc RefreshToken(RefreshTokenReq) returns (LoginResp);
   // 获取OSS上传凭证
   rpc GetOssToken(OssTokenReq) returns (OssTokenResp);
-  // OSS上传回调
-  rpc OssCallback(OssCallbackReq) returns (OssCallbackResp);
 
   // 添加收货地址
   rpc AddAddress(AddAddressReq) returns (EmptyResp);
@@ -179,18 +177,7 @@ message OssTokenResp {
   google.protobuf.Timestamp expire = 5;              // RFC3339格式
   string dir = 6;                 // OSS存储目录（avatar/）
   string object_key = 7;          // OSS存储对象名
-}
-
-message OssCallbackReq {
-  string bucket = 1;
-  string object = 2;
-  string etag = 3;
-  int64 size = 4;
-  string mime_type = 5;
-}
-
-message OssCallbackResp {
-  string status = 1;              // 固定返回 "OK"
+  string callback = 8;          // 回调
 }
 
 // ------------------------------ 地址管理 ------------------------------

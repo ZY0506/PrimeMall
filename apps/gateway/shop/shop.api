@@ -159,6 +159,7 @@ type (
 		Expire      string `json:"expire"` // OSS 签名有效期 （RFC3339格式）
 		Dir         string `json:"dir"` // OSS 存储目录（avatar/）
 		ObjectKey   string `json:"object_key"` // OSS 存储对象名
+		Callback    string `json:"callback"`
 	}
 	// OSS 回调请求（JSON 格式）
 	OssCallbackReq {
@@ -167,9 +168,6 @@ type (
 		Etag     string `json:"etag" validate:"required"` // 阿里云 OSS Etag
 		Size     int64  `json:"size" validate:"required,min=1"` // 阿里云 OSS 文件大小
 		MimeType string `json:"mimeType" validate:"required,min=1,max=100"` // 阿里云 OSS MimeType
-	}
-	OssCallbackResp {
-		Status string `json:"Status"` // 状态：OK
 	}
 )
 
@@ -205,7 +203,7 @@ service shop-api {
 
 	@doc "OSS上传回调（服务端自行幂等）"
 	@handler ossCallback
-	post /upload/avatar/callback (OssCallbackReq) returns (OssCallbackResp)
+	post /upload/avatar/callback (OssCallbackReq)
 }
 
 // 需登录的用户个人资料模块
