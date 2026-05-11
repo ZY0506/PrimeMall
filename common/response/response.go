@@ -28,6 +28,8 @@ const (
 	ErrCodeParamRange       = 11004 // 参数超出范围
 	ErrCodeInvalidPage      = 11005 // 分页参数无效
 	ErrCodeInvalidTimestamp = 11006 // 时间格式无效
+	ErrCodeInvalidObject    = 11007 // object格式错误
+
 )
 
 // 认证与授权错误 (12xxx)

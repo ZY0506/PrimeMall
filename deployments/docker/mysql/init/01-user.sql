@@ -14,7 +14,7 @@ USE `shop_user`;
 -- 用户主表
 -- =============================================
 CREATE TABLE IF NOT EXISTS `user` (
-    `id`              BIGINT UNSIGNED NOT NULL COMMENT '用户ID',
+    `id`              BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '用户ID',
     `phone`           VARCHAR(20)     NOT NULL DEFAULT '' COMMENT '手机号码',
     `password`        VARCHAR(255)    NOT NULL DEFAULT '' COMMENT '登录密码（加密）',
     `nickname`        VARCHAR(64)     NOT NULL DEFAULT '' COMMENT '用户昵称',
