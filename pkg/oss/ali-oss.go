@@ -81,6 +81,7 @@ func GeneratePolicyToken(cfg OssConfig, originalFilename string, userId uint64) 
 			logx.Errorf("marshal callback failed: %v", err)
 			return nil, err
 		}
+		logx.Infof("callbackJSON=%s", string(callbackJSON))
 		callbackBase64 = base64.StdEncoding.EncodeToString(callbackJSON)
 	}
 
