@@ -8,56 +8,230 @@ option go_package = "./user";
 
 // 用户服务（面向客户端）
 service User {
-  // 获取短信验证码
+  // Captcha 获取短信验证码
   rpc Captcha(CaptchaReq) returns (EmptyResp);
-  // 手机号密码登录
+  // Login 手机号密码登录
   rpc Login(LoginReq) returns (LoginResp);
-  // 手机号验证码登录
+  // MobileLogin 手机号验证码登录
   rpc MobileLogin(MobileLoginReq) returns (LoginResp);
-  // 用户注册
+  // Register 用户注册
   rpc Register(RegisterReq) returns (LoginResp);
-  // 忘记密码重置
+  // ResetPassword 忘记密码重置
   rpc ResetPassword(ResetPasswordReq) returns (EmptyResp);
-  // 修改登录密码（已登录）
+  // UpdatePassword 修改登录密码（已登录）
   rpc UpdatePassword(UpdatePasswordReq) returns (EmptyResp);
-  // 修改手机号
+  // UpdatePhone 修改手机号
   rpc UpdatePhone(UpdatePhoneReq) returns (EmptyResp);
-  // 获取个人资料
+  // GetUserInfo 获取个人资料
   rpc GetUserInfo(EmptyReq) returns (UserInfoResp);
-  // 更新个人资料
+  // UpdateUserInfo 更新个人资料
   rpc UpdateUserInfo(UpdateUserInfoReq) returns (EmptyResp);
-  // 注销账号
+  // DeleteAccount 注销账号
   rpc DeleteAccount(DeleteAccountReq) returns (EmptyResp);
-  // 退出登录
+  // Logout 退出登录
   rpc Logout(LogoutReq) returns (EmptyResp);
-  // token刷新
+  // RefreshToken token刷新
   rpc RefreshToken(RefreshTokenReq) returns (LoginResp);
-  // 获取OSS上传凭证
+  // GetOssToken 获取OSS上传凭证
   rpc GetOssToken(OssTokenReq) returns (OssTokenResp);
 
-  // 添加收货地址
+  // AddAddress 添加收货地址
   rpc AddAddress(AddAddressReq) returns (EmptyResp);
-  // 更新收货地址
+  // UpdateAddress 更新收货地址
   rpc UpdateAddress(AddressItem) returns (EmptyResp);
-  // 获取地址列表
+  // ListAddress 获取地址列表
   rpc ListAddress(AddressListReq) returns (AddressListResp);
-  // 设置默认地址
+  // SetDefaultAddress 设置默认地址
   rpc SetDefaultAddress(IdPathReq) returns (EmptyResp);
-  // 删除收货地址
+  // DeleteAddress 删除收货地址
   rpc DeleteAddress(IdPathReq) returns (EmptyResp);
 }
 
 // 内部服务（供其他服务调用）
 service UserInternal {
-  // 根据用户ID获取用户基本信息（用于订单、购物车等）
+  // GetUserById 根据用户ID获取用户基本信息（用于订单、购物车等）
   rpc GetUserById(GetUserByIdReq) returns (UserBasicInfo);
-  // 校验用户状态（是否被封禁/限制下单）
+  // CheckUserStatus 校验用户状态（是否被封禁/限制下单）
   rpc CheckUserStatus(CheckUserStatusReq) returns (CheckUserStatusResp);
-  // 获取地址信息
+  // GetAddressById 获取地址信息
   rpc GetAddressById(GetAddressReq) returns (AddressItem);
 }
 
-// ------------------------------ 公共消息 ------------------------------
+// ------------------------------ 新增：管理员服务 ------------------------------
+service Admin {
+  // ListUsers 获取用户列表（分页、筛选、搜索）
+  rpc ListUsers(ListUsersReq) returns (ListUsersResp);
+  // GetUserDetail 获取用户详情（含扩展信息、最近登录、处罚记录）
+  rpc GetUserDetail(GetUserDetailReq) returns (GetUserDetailResp);
+  // BanUser 封禁用户（限制下单/封禁账号）
+  rpc BanUser(BanUserReq) returns (EmptyResp);
+  // UnbanUser 解封用户（恢复为正常状态）
+  rpc UnbanUser(UnbanUserReq) returns (EmptyResp);
+  // GetUserStatistics 获取用户统计数据
+  rpc GetUserStatistics(GetUserStatisticsReq) returns (GetUserStatisticsResp);
+  // ListLoginLogs 获取登录日志列表
+  rpc ListLoginLogs(ListLoginLogsReq) returns (ListLoginLogsResp);
+  // ListPunishLogs 获取风控处罚日志列表
+  rpc ListPunishLogs(ListPunishLogsReq) returns (ListPunishLogsResp);
+  // AdminResetPassword 重置用户密码（管理员强制重置）
+  rpc AdminResetPassword(AdminResetPasswordReq) returns (EmptyResp);
+}
+
+// ------------------------------ 新增：管理员相关消息 ------------------------------
+
+// 用户列表请求
+message ListUsersReq {
+  int64 page = 1;              // 页码（从1开始）
+  int64 size = 2;              // 每页条数
+  string phone = 3;            // 按手机号模糊搜索
+  string nickname = 4;         // 按昵称模糊搜索
+  UserStatus status = 5;       // 按状态筛选（0-未知表示不过滤）
+  google.protobuf.Timestamp start_time = 6;  // 注册开始时间
+  google.protobuf.Timestamp end_time = 7;    // 注册结束时间
+  SortField sort_field = 8;       // 排序字段（id, created_at, last_login_time）
+  SortOrder sort_order = 9;       // 排序方向（asc, desc）
+}
+
+// 用户列表项（管理员视角）
+message UserListItem {
+  uint64 id = 1;
+  string phone = 2;
+  string nickname = 3;
+  string avatar = 4;
+  int64 gender = 5;            // 0-未知，1-男，2-女
+  google.protobuf.Timestamp birthday = 6;
+  UserStatus status = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp last_login_time = 9;
+  string last_login_ip = 10;
+}
+
+// 用户列表响应
+message ListUsersResp {
+  repeated UserListItem list = 1;
+  int64 total = 2;
+}
+
+// 用户详情请求
+message GetUserDetailReq {
+  uint64 user_id = 1;
+}
+
+// 用户详情响应（含扩展信息、最近登录日志、处罚记录）
+message GetUserDetailResp {
+  UserListItem user_info = 1;                       // 基本信息
+  repeated LoginLogItem recent_login_logs = 2;      // 最近5条登录日志
+  repeated PunishLogItem punish_logs = 3;           // 历史处罚记录
+}
+
+// 封禁请求
+message BanUserReq {
+  uint64 user_id = 1;
+  string action_type = 2;      // BAN_ORDER-限制下单，BAN_LOGIN-封禁账号
+  string reason = 3;           // 封禁原因
+  google.protobuf.Timestamp end_time = 4;  // 处罚结束时间（可为空，表示永久）
+  string operator = 5;         // 操作人（管理员账号）
+}
+
+// 解封请求
+message UnbanUserReq {
+  uint64 user_id = 1;
+  string reason = 2;           // 解封原因
+  string operator = 3;         // 操作人
+}
+
+// 获取统计数据请求
+message GetUserStatisticsReq {
+  google.protobuf.Timestamp start_time = 1;  // 统计开始时间（可选）
+  google.protobuf.Timestamp end_time = 2;    // 统计结束时间（可选）
+}
+
+// 统计数据响应
+message GetUserStatisticsResp {
+  int64 total_users = 1;                    // 总用户数
+  int64 today_new_users = 2;                // 今日新增
+  int64 week_new_users = 3;                 // 本周新增（自然周）
+  int64 month_new_users = 4;                // 本月新增
+  int64 active_users_today = 5;             // 今日活跃（有登录）
+  int64 banned_users = 6;                   // 被封禁用户数（status=3）
+  int64 restricted_users = 7;               // 限制下单用户数（status=2）
+  repeated DailyStat daily_stats = 8;       // 按日统计（用于图表）
+}
+
+// 每日统计数据
+message DailyStat {
+  string date = 1;                          // 日期 YYYY-MM-DD
+  int64 new_users = 2;                      // 当日新增
+  int64 login_users = 3;                    // 当日登录用户数
+}
+
+// 登录日志列表请求
+message ListLoginLogsReq {
+  int64 page = 1;
+  int64 size = 2;
+  uint64 user_id = 3;                       // 可选，筛选指定用户
+  string login_type = 4;                    // 可选，筛选登录方式（password/captcha）
+  int64 status = 5;                         // 可选，筛选状态（1-成功，2-失败）
+  google.protobuf.Timestamp start_time = 6;
+  google.protobuf.Timestamp end_time = 7;
+}
+
+// 登录日志项
+message LoginLogItem {
+  uint64 id = 1;
+  uint64 user_id = 2;
+  string login_type = 3;
+  string login_ip = 4;
+  string user_agent = 5;
+  int64 status = 6;                         // 1-成功，2-失败
+  string fail_reason = 7;
+  google.protobuf.Timestamp created_at = 8;
+}
+
+// 登录日志列表响应
+message ListLoginLogsResp {
+  repeated LoginLogItem list = 1;
+  int64 total = 2;
+}
+
+// 风控日志列表请求
+message ListPunishLogsReq {
+  int64 page = 1;
+  int64 size = 2;
+  uint64 user_id = 3;                       // 可选
+  string action_type = 4;                   // 可选（BAN_LOGIN/BAN_ORDER）
+  string operator = 5;                      // 可选（SYSTEM/ADMIN）
+  google.protobuf.Timestamp start_time = 6;
+  google.protobuf.Timestamp end_time = 7;
+}
+
+// 风控日志项
+message PunishLogItem {
+  uint64 id = 1;
+  uint64 user_id = 2;
+  string phone = 3;
+  string action_type = 4;
+  string reason = 5;
+  string operator = 6;
+  google.protobuf.Timestamp start_time = 7;
+  google.protobuf.Timestamp end_time = 8;
+  google.protobuf.Timestamp created_at = 9;
+}
+
+// 风控日志列表响应
+message ListPunishLogsResp {
+  repeated PunishLogItem list = 1;
+  int64 total = 2;
+}
+
+// 管理员重置密码请求
+message AdminResetPasswordReq {
+  uint64 user_id = 1;
+  string new_password = 2;                  // 新密码（明文，后端需加盐加密）
+  string operator = 3;
+}
+
+// ------------------------------ 以下为原有消息（保持不变） ------------------------------
 message EmptyReq {}
 message EmptyResp {}
 message ErrDetail{
@@ -70,6 +244,21 @@ enum UserStatus {
   USER_STATUS_NORMAL = 1;     // 正常
   USER_STATUS_RESTRICTED = 2; // 限制下单
   USER_STATUS_BANNED = 3;     // 封禁
+}
+
+// 排序字段枚举
+enum SortField {
+  SORT_FIELD_UNKNOWN = 0;   // 未知，服务端可回退默认排序（如 id desc）
+  SORT_FIELD_ID = 1;
+  SORT_FIELD_CREATED_AT = 2;
+  SORT_FIELD_LAST_LOGIN_TIME = 3;
+}
+
+// 排序方向枚举
+enum SortOrder {
+  SORT_ORDER_UNKNOWN = 0;   // 未知，服务端默认降序
+  SORT_ORDER_ASC = 1;       // 升序
+  SORT_ORDER_DESC = 2;      // 降序
 }
 
 // 通用ID路径参数
