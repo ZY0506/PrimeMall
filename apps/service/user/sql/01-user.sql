@@ -4,6 +4,8 @@
 -- 说明: 用户注册登录、个人信息、地址管理、风控
 -- =============================================
 
+-- goctl model mysql ddl --src=./apps/service/user/sql/01-user.sql --dir=./apps/service/user/rpc/internal/model
+
 CREATE DATABASE IF NOT EXISTS `shop_user`
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
@@ -61,16 +63,17 @@ CREATE TABLE IF NOT EXISTS `user_address` (
 -- =============================================
 CREATE TABLE IF NOT EXISTS `user_punish_log` (
     `id`          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '记录ID',
-    `user_id`     BIGINT UNSIGNED NOT NULL DEFAULT '0' COMMENT '用户ID',
+    `user_id`     BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '用户ID',
     `phone`       VARCHAR(20)     NOT NULL DEFAULT '' COMMENT '手机号码',
-    `action_type` VARCHAR(32)     NOT NULL DEFAULT '' COMMENT '处罚类型：BAN_LOGIN-禁止登录，BAN_ORDER-禁止下单',
+    `action_type` TINYINT         NOT NULL DEFAULT 0 COMMENT '处罚类型：1-禁止下单,2-禁止登录',
     `reason`      VARCHAR(255)    NOT NULL DEFAULT '' COMMENT '处罚原因',
-    `operator`    VARCHAR(64)     NOT NULL DEFAULT 'SYSTEM' COMMENT '操作人：SYSTEM-系统自动，ADMIN-管理员',
+    `banned_by`   VARCHAR(64)     NOT NULL DEFAULT 'SYSTEM' COMMENT '操作人：SYSTEM-系统自动，ADMIN-管理员(记录管理员账号)',
+    `unbanned_by` VARCHAR(64)              DEFAULT NULL COMMENT '操作人：SYSTEM-系统自动，ADMIN-管理员',
     `start_time`  DATETIME                 DEFAULT NULL COMMENT '处罚开始时间',
     `end_time`    DATETIME                 DEFAULT NULL COMMENT '处罚结束时间',
     `created_at`  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_phone` (`phone`),
+    KEY `uk_phone` (`phone`),
     KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4

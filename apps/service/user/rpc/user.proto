@@ -127,7 +127,7 @@ message GetUserDetailResp {
 // 封禁请求
 message BanUserReq {
   uint64 user_id = 1;
-  string action_type = 2;      // BAN_ORDER-限制下单，BAN_LOGIN-封禁账号
+  BanType action_type = 2;      // BAN_ORDER-限制下单，BAN_LOGIN-封禁账号
   string reason = 3;           // 封禁原因
   google.protobuf.Timestamp end_time = 4;  // 处罚结束时间（可为空，表示永久）
   string operator = 5;         // 操作人（管理员账号）
@@ -199,7 +199,7 @@ message ListPunishLogsReq {
   int64 page = 1;
   int64 size = 2;
   uint64 user_id = 3;                       // 可选
-  string action_type = 4;                   // 可选（BAN_LOGIN/BAN_ORDER）
+  BanType action_type = 4;                   // 可选
   string operator = 5;                      // 可选（SYSTEM/ADMIN）
   google.protobuf.Timestamp start_time = 6;
   google.protobuf.Timestamp end_time = 7;
@@ -210,7 +210,7 @@ message PunishLogItem {
   uint64 id = 1;
   uint64 user_id = 2;
   string phone = 3;
-  string action_type = 4;
+  BanType action_type = 4;
   string reason = 5;
   string operator = 6;
   google.protobuf.Timestamp start_time = 7;
@@ -260,6 +260,21 @@ enum SortOrder {
   SORT_ORDER_ASC = 1;       // 升序
   SORT_ORDER_DESC = 2;      // 降序
 }
+
+// 封禁操作类型枚举
+enum BanType {
+  BAN_TYPE_UNKNOWN = 0;
+  BAN_TYPE_ORDER = 1;       // 限制下单
+  BAN_TYPE_LOGIN = 2;       // 封禁账号
+}
+
+//
+enum CheckType{
+  CHECK_TYPE_UNKNOWN = 0;
+  CHECK_TYPE_ORDER = 2;
+  CHECK_TYPE_LOGIN = 3;
+}
+
 
 // 通用ID路径参数
 message IdPathReq {
@@ -425,7 +440,7 @@ message BatchUserBasicInfoResp {
 message CheckUserStatusReq {
   uint64 user_id = 1;
   // 需要检查的权限类型：2-下单权限，3-登录权限
-  int64 check_type = 2;
+  CheckType check_type = 2;
 }
 
 message CheckUserStatusResp {
