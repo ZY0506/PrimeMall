@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS `admin` (
     `password`        VARCHAR(255)    NOT NULL COMMENT '登录密码（加密）',
     `real_name`       VARCHAR(64)     NOT NULL DEFAULT '' COMMENT '真实姓名',
     `avatar`          VARCHAR(500)             DEFAULT '' COMMENT '头像URL',
-    `role_id`         BIGINT UNSIGNED NOT NULL DEFAULT '0' COMMENT '角色ID：0-无角色',
-    `status`          TINYINT         NOT NULL DEFAULT '1' COMMENT '状态：1-启用，2-禁用',
+    `role_id`         BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT '角色ID：0-无角色',
+    `status`          TINYINT         NOT NULL DEFAULT 1 COMMENT '状态：1-启用，2-禁用',
     `last_login_time` DATETIME                 DEFAULT NULL COMMENT '最后登录时间',
     `last_login_ip`   VARCHAR(64)              DEFAULT '' COMMENT '最后登录IP',
     `created_at`      DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `admin` (
 CREATE TABLE IF NOT EXISTS `role` (
     `id`          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '角色ID',
     `name`        VARCHAR(64)     NOT NULL COMMENT '角色名称',
-    `permissions` JSON                     DEFAULT NULL COMMENT '权限列表（JSON格式）：["user:view", "order:edit"]',
+    `code`        VARCHAR(64)     NOT NULL COMMENT '角色标识',
     `remark`      VARCHAR(255)             DEFAULT '' COMMENT '备注说明',
     `created_at`  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updated_at`  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -47,6 +47,36 @@ CREATE TABLE IF NOT EXISTS `role` (
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci
   COMMENT='角色表';
+
+-- =============================================
+-- 权限表
+-- =============================================
+CREATE TABLE IF NOT EXISTS `permission` (
+    `id`          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name`        VARCHAR(64)     NOT NULL COMMENT '权限名称',
+    `code`        VARCHAR(128)    NOT NULL COMMENT '权限标识',
+    `module`      VARCHAR(64)              DEFAULT '' COMMENT '所属模块',
+    `created_at`  DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_code` (`code`)
+)ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci
+COMMENT='权限表';
+
+-- =============================================
+-- 角色权限表
+-- =============================================
+CREATE TABLE IF NOT EXISTS `role_permission` (
+    `id`             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `role_id`        BIGINT UNSIGNED NOT NULL,
+    `permission_id`  BIGINT UNSIGNED NOT NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_role_permission` (`role_id`, `permission_id`)
+)ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_unicode_ci
+COMMENT='角色权限表';
 
 -- =============================================
 -- 管理员操作日志表

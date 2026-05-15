@@ -42,6 +42,13 @@ const (
 	USER_STATUS_BANNED            // 封禁
 )
 
+// 封禁类型
+const (
+	BAN_TYPE_UNKNOWN = iota
+	BAN_TYPE_ORDER
+	BAN_TYPE_LOGIN
+)
+
 // 用户性别
 const (
 	USER_GENDER_UNKNOWN = iota

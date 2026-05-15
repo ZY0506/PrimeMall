@@ -51,14 +51,16 @@ const (
 
 // 用户模块 (2xxxx)
 const (
-	ErrCodeUserNotFound     = 20001 // 用户不存在
-	ErrCodeUserDisabled     = 20002 // 账号已被禁用
-	ErrCodeUserLocked       = 20003 // 账号已被锁定
-	ErrCodeUserDeleted      = 20004 // 账号已注销
-	ErrCodeUserRestricted   = 20005 // 账号受限（限制下单等）
-	ErrCodeNicknameExists   = 20006 // 昵称已被占用
-	ErrCodeAvatarUploadFail = 20007 // 头像上传失败
-	ErrCodeOssCallbackFail  = 20008 // OSS 回调处理失败
+	ErrCodeUserNotFound          = 20001 // 用户不存在
+	ErrCodeUserDisabled          = 20002 // 账号已被禁用
+	ErrCodeUserLocked            = 20003 // 账号已被锁定
+	ErrCodeUserDeleted           = 20004 // 账号已注销
+	ErrCodeUserRestricted        = 20005 // 账号受限（限制下单等）
+	ErrCodeNicknameExists        = 20006 // 昵称已被占用
+	ErrCodeAvatarUploadFail      = 20007 // 头像上传失败
+	ErrCodeOssCallbackFail       = 20008 // OSS 回调处理失败
+	ErrCodeUserUnbanned          = 20008 // 账号已解封
+	ErrCodeUserPunishLogNotFound = 20009 // 风控日志不存在
 )
 
 // 商品模块 (3xxxx)

@@ -3,3 +3,299 @@ syntax = "proto3";
 package admin;
 
 option go_package = "./admin";
+
+// goctl rpc protoc .\apps\service\admin\rpc\admin.proto --go_out=apps/service/admin/rpc/types --go-grpc_out apps/service/admin/rpc/types --zrpc_out=apps/service/admin/rpc/
+
+
+// =============================================
+// RPC
+// =============================================
+service Admin {
+  // AdminLogin 管理员登录
+  rpc AdminLogin(AdminLoginReq) returns (AdminLoginResp);
+  // GetCurrentAdmin 获取当前管理员信息
+  rpc GetCurrentAdmin(GetCurrentAdminReq) returns (GetCurrentAdminResp);
+  // CreateAdmin 创建管理员
+  rpc CreateAdmin(CreateAdminReq) returns (IdResp);
+  // UpdateAdmin 更新管理员信息
+  rpc UpdateAdmin(UpdateAdminReq) returns (Empty);
+  // DeleteAdmin 删除管理员
+  rpc DeleteAdmin(DeleteAdminReq) returns (Empty);
+  // GetAdmin 获取管理员详情
+  rpc GetAdmin(GetAdminReq) returns (GetAdminResp);
+  // ListAdmin 获取管理员列表
+  rpc ListAdmin(ListAdminReq) returns (ListAdminResp);
+  // CreateRole 创建角色
+  rpc CreateRole(CreateRoleReq) returns (IdResp);
+  // UpdateRole 更新角色信息
+  rpc UpdateRole(UpdateRoleReq) returns (Empty);
+  // DeleteRole 删除角色
+  rpc DeleteRole(DeleteRoleReq) returns (Empty);
+  // GetRole 获取角色详情
+  rpc GetRole(GetRoleReq) returns (GetRoleResp);
+  // ListRole 获取角色列表
+  rpc ListRole(ListRoleReq) returns (ListRoleResp);
+  // CreatePermission 创建权限
+  rpc CreatePermission(CreatePermissionReq) returns (IdResp);
+  // UpdatePermission 更新权限信息
+  rpc UpdatePermission(UpdatePermissionReq) returns (Empty);
+  // DeletePermission 删除权限
+  rpc DeletePermission(DeletePermissionReq) returns (Empty);
+  // ListPermission 获取权限列表
+  rpc ListPermission(ListPermissionReq) returns (ListPermissionResp);
+  // AssignRolePermissions 分配角色权限
+  rpc AssignRolePermissions(AssignRolePermissionsReq) returns (Empty);
+  // GetRolePermissions 获取角色权限
+  rpc GetRolePermissions(GetRolePermissionsReq) returns (GetRolePermissionsResp);
+  // ListAdminLog 获取管理员日志列表
+  rpc ListAdminLog(ListAdminLogReq) returns (ListAdminLogResp);
+  // CreateAdminLog 创建管理员日志（内部接口）
+  rpc CreateAdminLog(CreateAdminLogReq) returns (Empty);
+}
+
+// =============================================
+// 通用结构
+// =============================================
+
+message Empty {}
+
+message IdReq {
+  uint64 id = 1;
+}
+
+message IdResp {
+  uint64 id = 1;
+}
+
+message PageReq {
+  uint64 page = 1;
+  uint64 page_size = 2;
+}
+
+// =============================================
+// 管理员
+// =============================================
+
+message AdminInfo {
+  uint64 id = 1;
+  string username = 2;
+  string real_name = 3;
+  string avatar = 4;
+  uint64 role_id = 5;
+  string role_name = 6;
+  int32 status = 7;
+  string created_at = 8;
+}
+
+// =============================================
+// 登录
+// =============================================
+
+message AdminLoginReq {
+  string username = 1;
+  string password = 2;
+  string login_ip = 3;
+}
+
+message AdminLoginResp {
+  uint64 admin_id = 1;
+  string token = 2;
+  int64 expire_time = 3;
+}
+
+// =============================================
+// 当前管理员信息
+// =============================================
+
+message GetCurrentAdminReq {
+  uint64 admin_id = 1;
+}
+
+message GetCurrentAdminResp {
+  AdminInfo admin = 1;
+
+  repeated string permissions = 2;
+}
+
+// =============================================
+// 创建管理员
+// =============================================
+
+message CreateAdminReq {
+  string username = 1;
+  string password = 2;
+  string real_name = 3;
+  string avatar = 4;
+  uint64 role_id = 5;
+}
+
+message UpdateAdminReq {
+  uint64 id = 1;
+  string real_name = 2;
+  string avatar = 3;
+  uint64 role_id = 4;
+  int32 status = 5;
+}
+
+message DeleteAdminReq {
+  uint64 id = 1;
+}
+
+message GetAdminReq {
+  uint64 id = 1;
+}
+
+message GetAdminResp {
+  AdminInfo admin = 1;
+}
+
+message ListAdminReq {
+  uint64 page = 1;
+  uint64 page_size = 2;
+  string username = 3;
+  int32 status = 4;
+}
+
+message ListAdminResp {
+  uint64 total = 1;
+  repeated AdminInfo list = 2;
+}
+
+// =============================================
+// 角色
+// =============================================
+
+message RoleInfo {
+  uint64 id = 1;
+  string name = 2;
+  string code = 3;
+  string remark = 4;
+  string created_at = 5;
+}
+
+message CreateRoleReq {
+  string name = 1;
+  string code = 2;
+  string remark = 3;
+}
+
+message UpdateRoleReq {
+  uint64 id = 1;
+  string name = 2;
+  string code = 3;
+  string remark = 4;
+}
+
+message DeleteRoleReq {
+  uint64 id = 1;
+}
+
+message GetRoleReq {
+  uint64 id = 1;
+}
+
+message GetRoleResp {
+  RoleInfo role = 1;
+}
+
+message ListRoleReq {}
+
+message ListRoleResp {
+  repeated RoleInfo list = 1;
+}
+
+// =============================================
+// 权限
+// =============================================
+
+message PermissionInfo {
+  uint64 id = 1;
+  string name = 2;
+  string code = 3;
+  string module = 4;
+}
+
+message CreatePermissionReq {
+  string name = 1;
+  string code = 2;
+  string module = 3;
+}
+
+message UpdatePermissionReq {
+  uint64 id = 1;
+  string name = 2;
+  string code = 3;
+  string module = 4;
+}
+
+message DeletePermissionReq {
+  uint64 id = 1;
+}
+
+message ListPermissionReq {}
+
+message ListPermissionResp {
+  repeated PermissionInfo list = 1;
+}
+
+// =============================================
+// 角色权限
+// =============================================
+
+message AssignRolePermissionsReq {
+  uint64 role_id = 1;
+  repeated uint64 permission_ids = 2;
+}
+
+message GetRolePermissionsReq {
+  uint64 role_id = 1;
+}
+
+message GetRolePermissionsResp {
+  repeated uint64 permission_ids = 1;
+  repeated string permission_codes = 2;
+}
+
+// =============================================
+// 管理员日志
+// =============================================
+
+message AdminLogInfo {
+  uint64 id = 1;
+  uint64 admin_id = 2;
+  string username = 3;
+  string module = 4;
+  string action = 5;
+  string request_method = 6;
+  string request_url = 7;
+  string request_params = 8;
+  string response_result = 9;
+  string ip = 10;
+  int64 duration_ms = 11;
+  string created_at = 12;
+}
+
+message CreateAdminLogReq {
+  uint64 admin_id = 1;
+  string username = 2;
+  string module = 3;
+  string action = 4;
+  string request_method = 5;
+  string request_url = 6;
+  string request_params = 7;
+  string response_result = 8;
+  string ip = 9;
+  int64 duration_ms = 10;
+}
+
+message ListAdminLogReq {
+  uint64 page = 1;
+  uint64 page_size = 2;
+  uint64 admin_id = 3;
+  string module = 4;
+}
+
+message ListAdminLogResp {
+  uint64 total = 1;
+  repeated AdminLogInfo list = 2;
+}
