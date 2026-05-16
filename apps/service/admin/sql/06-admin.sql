@@ -4,6 +4,8 @@
 -- 说明: 管理员账号、角色权限、操作日志、轮播图、公告等CMS内容
 -- =============================================
 
+-- goctl model mysql ddl --src=./apps/service/admin/sql/06-admin.sql --dir=./apps/service/admin/rpc/internal/model
+
 CREATE DATABASE IF NOT EXISTS `shop_admin`
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
