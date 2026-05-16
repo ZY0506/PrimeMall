@@ -143,6 +143,18 @@ const (
 	ErrCodeCartClearFailed         = 80004 // 清空购物车失败
 )
 
+// 管理员模块 (10xxx)
+const (
+	ErrCodeAdminNotFound        = 10001 // 管理员不存在
+	ErrCodeAdminDisabled        = 10002 // 管理员已被禁用
+	ErrCodeAdminUsernameExists  = 10003 // 管理员用户名已存在
+	ErrCodeRoleNotFound         = 10004 // 角色不存在
+	ErrCodeRoleCodeExists       = 10005 // 角色标识已存在
+	ErrCodeRoleHasAdmins        = 10006 // 角色下存在管理员，无法删除
+	ErrCodePermissionNotFound   = 10007 // 权限不存在
+	ErrCodePermissionCodeExists = 10008 // 权限标识已存在
+)
+
 // 售后模块 (9xxxx)
 const (
 	ErrCodeAfterSaleNotFound      = 90001 // 售后单不存在

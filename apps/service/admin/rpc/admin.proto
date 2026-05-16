@@ -4,54 +4,224 @@ package admin;
 
 option go_package = "./admin";
 
-// goctl rpc protoc .\apps\service\admin\rpc\admin.proto --go_out=apps/service/admin/rpc/types --go-grpc_out apps/service/admin/rpc/types --zrpc_out=apps/service/admin/rpc/
+// goctl rpc protoc .\apps\service\admin\rpc\admin.proto --go_out=apps/service/admin/rpc/types --go-grpc_out apps/service/admin/rpc/types --zrpc_out=apps/service/admin/rpc/ -m
 
 
 // =============================================
-// RPC
+// 枚举定义
 // =============================================
+
+// 管理员状态
+enum AdminStatus {
+  ADMIN_STATUS_UNKNOWN = 0;
+  ADMIN_STATUS_NORMAL  = 1;  // 正常
+  ADMIN_STATUS_DISABLED = 2; // 禁用
+}
+
+// 通用开关状态
+enum SwitchStatus {
+  SWITCH_STATUS_UNKNOWN = 0;
+  SWITCH_STATUS_ON      = 1; // 启用
+  SWITCH_STATUS_OFF     = 2; // 禁用
+}
+
+// 日志模块枚举
+enum LogModule {
+  LOG_MODULE_UNKNOWN    = 0;
+  LOG_MODULE_ADMIN      = 1; // 管理员管理
+  LOG_MODULE_USER       = 2; // 用户管理
+  LOG_MODULE_PRODUCT    = 3; // 商品管理
+  LOG_MODULE_ORDER      = 4; // 订单管理
+  LOG_MODULE_AFTERSALE  = 5; // 售后管理
+  LOG_MODULE_COUPON     = 6; // 优惠券管理
+  LOG_MODULE_CATEGORY   = 7; // 分类管理
+  LOG_MODULE_FREIGHT    = 8; // 运费模板管理
+  LOG_MODULE_ROLE       = 9; // 角色管理
+  LOG_MODULE_PERMISSION = 10; // 权限管理
+}
+
+// 后台商品状态
+enum AdminProductStatus {
+  ADMIN_PRODUCT_STATUS_UNKNOWN  = 0;
+  ADMIN_PRODUCT_STATUS_ON_SALE  = 1; // 上架
+  ADMIN_PRODUCT_STATUS_OFF_SALE = 2; // 下架
+}
+
+// 后台订单状态
+enum AdminOrderStatus {
+  ADMIN_ORDER_STATUS_UNKNOWN     = 0;
+  ADMIN_ORDER_STATUS_PENDING_PAY = 10; // 待支付
+  ADMIN_ORDER_STATUS_PAID        = 20; // 已支付
+  ADMIN_ORDER_STATUS_SHIPPED     = 30; // 已发货
+  ADMIN_ORDER_STATUS_COMPLETED   = 40; // 已完成
+  ADMIN_ORDER_STATUS_CANCELED    = 50; // 已取消
+  ADMIN_ORDER_STATUS_AFTER_SALE  = 60; // 售后中
+}
+
+// 后台售后状态
+enum AdminAfterSaleStatus {
+  ADMIN_AFTER_SALE_STATUS_UNKNOWN    = 0;
+  ADMIN_AFTER_SALE_STATUS_PENDING    = 10; // 待审核
+  ADMIN_AFTER_SALE_STATUS_RETURNING  = 20; // 待商家收货
+  ADMIN_AFTER_SALE_STATUS_REFUNDING  = 30; // 退款中
+  ADMIN_AFTER_SALE_STATUS_COMPLETED  = 40; // 售后完成
+  ADMIN_AFTER_SALE_STATUS_REFUSED    = 50; // 审核拒绝
+  ADMIN_AFTER_SALE_STATUS_CANCELED   = 60; // 用户取消售后
+}
+
+// 售后类型
+enum AdminAfterSaleType {
+  ADMIN_AFTER_SALE_TYPE_UNKNOWN       = 0;
+  ADMIN_AFTER_SALE_TYPE_REFUND_ONLY   = 1; // 仅退款
+  ADMIN_AFTER_SALE_TYPE_RETURN_REFUND = 2; // 退货退款
+}
+
+// 售后审核动作
+enum AfterSaleAuditAction {
+  AFTER_SALE_AUDIT_ACTION_UNKNOWN = 0;
+  AFTER_SALE_AUDIT_ACTION_APPROVE = 1; // 同意
+  AFTER_SALE_AUDIT_ACTION_REJECT  = 2; // 拒绝
+}
+
+// 支付方式
+enum AdminPayType {
+  ADMIN_PAY_TYPE_UNKNOWN  = 0;
+  ADMIN_PAY_TYPE_WECHAT   = 1; // 微信支付
+  ADMIN_PAY_TYPE_ALIPAY   = 2; // 支付宝支付
+}
+
+// 优惠券类型
+enum AdminCouponType {
+  ADMIN_COUPON_TYPE_UNKNOWN       = 0;
+  ADMIN_COUPON_TYPE_FULL_REDUCTION = 1; // 满减券
+  ADMIN_COUPON_TYPE_DISCOUNT      = 2; // 折扣券
+  ADMIN_COUPON_TYPE_NO_THRESHOLD  = 3; // 无门槛券
+}
+
+// 运费模板计费类型
+enum FreightCalcType {
+  FREIGHT_CALC_TYPE_UNKNOWN  = 0;
+  FREIGHT_CALC_TYPE_PIECE    = 1; // 按件数
+  FREIGHT_CALC_TYPE_WEIGHT   = 2; // 按重量
+}
+
+
+// =============================================
+// RPC 服务定义
+// =============================================
+
+// ==================== Admin ====================
+// 管理员自身管理（登录、管理员CRUD、角色、权限、日志查询）
 service Admin {
-  // AdminLogin 管理员登录
+  // 登录认证
   rpc AdminLogin(AdminLoginReq) returns (AdminLoginResp);
-  // GetCurrentAdmin 获取当前管理员信息
   rpc GetCurrentAdmin(GetCurrentAdminReq) returns (GetCurrentAdminResp);
-  // CreateAdmin 创建管理员
+  rpc UpdatePassword(UpdatePasswordReq) returns (Empty);
+
+  // 管理员 CRUD
   rpc CreateAdmin(CreateAdminReq) returns (IdResp);
-  // UpdateAdmin 更新管理员信息
   rpc UpdateAdmin(UpdateAdminReq) returns (Empty);
-  // DeleteAdmin 删除管理员
   rpc DeleteAdmin(DeleteAdminReq) returns (Empty);
-  // GetAdmin 获取管理员详情
   rpc GetAdmin(GetAdminReq) returns (GetAdminResp);
-  // ListAdmin 获取管理员列表
   rpc ListAdmin(ListAdminReq) returns (ListAdminResp);
-  // CreateRole 创建角色
+
+  // 角色管理
   rpc CreateRole(CreateRoleReq) returns (IdResp);
-  // UpdateRole 更新角色信息
   rpc UpdateRole(UpdateRoleReq) returns (Empty);
-  // DeleteRole 删除角色
   rpc DeleteRole(DeleteRoleReq) returns (Empty);
-  // GetRole 获取角色详情
   rpc GetRole(GetRoleReq) returns (GetRoleResp);
-  // ListRole 获取角色列表
   rpc ListRole(ListRoleReq) returns (ListRoleResp);
-  // CreatePermission 创建权限
+
+  // 权限管理
   rpc CreatePermission(CreatePermissionReq) returns (IdResp);
-  // UpdatePermission 更新权限信息
   rpc UpdatePermission(UpdatePermissionReq) returns (Empty);
-  // DeletePermission 删除权限
   rpc DeletePermission(DeletePermissionReq) returns (Empty);
-  // ListPermission 获取权限列表
   rpc ListPermission(ListPermissionReq) returns (ListPermissionResp);
-  // AssignRolePermissions 分配角色权限
+
+  // 角色权限
   rpc AssignRolePermissions(AssignRolePermissionsReq) returns (Empty);
-  // GetRolePermissions 获取角色权限
   rpc GetRolePermissions(GetRolePermissionsReq) returns (GetRolePermissionsResp);
-  // ListAdminLog 获取管理员日志列表
+
+  // 操作日志
   rpc ListAdminLog(ListAdminLogReq) returns (ListAdminLogResp);
-  // CreateAdminLog 创建管理员日志（内部接口）
+}
+
+// ==================== AdminInternal ====================
+// 内部服务（供其他服务调用）
+service AdminInternal {
+  // 创建管理员操作日志
   rpc CreateAdminLog(CreateAdminLogReq) returns (Empty);
 }
+
+// ==================== AdminUser ====================
+// 用户管理（聚合 UserRpc）
+service AdminUser {
+  rpc ListUsers(AdminListUsersReq) returns (AdminListUsersResp);
+  rpc GetUserDetail(AdminGetUserDetailReq) returns (AdminGetUserDetailResp);
+  rpc BanUser(AdminBanUserReq) returns (Empty);
+  rpc UnbanUser(AdminUnbanUserReq) returns (Empty);
+}
+
+// ==================== AdminProduct ====================
+// 商品管理（聚合 ProductRpc）
+service AdminProduct {
+  // 分类管理
+  rpc CategoryTree(Empty) returns (AdminCategoryTreeResp);
+  rpc CreateCategory(AdminCreateCategoryReq) returns (IdResp);
+  rpc UpdateCategory(AdminUpdateCategoryReq) returns (Empty);
+  rpc DeleteCategory(IdReq) returns (Empty);
+
+  // 商品管理（SPU + SKU 一起创建）
+  rpc CreateProduct(AdminCreateProductReq) returns (IdResp);
+  rpc UpdateProduct(AdminUpdateProductReq) returns (Empty);
+  rpc DeleteProduct(IdReq) returns (Empty);
+  rpc GetProduct(IdReq) returns (AdminProductDetailResp);
+  rpc ListProducts(AdminListProductsReq) returns (AdminListProductsResp);
+  rpc UpdateProductStatus(AdminUpdateProductStatusReq) returns (Empty);
+
+  // SKU 管理
+  rpc CreateSku(AdminCreateSkuReq) returns (IdResp);
+  rpc UpdateSku(AdminUpdateSkuReq) returns (Empty);
+  rpc DeleteSku(IdReq) returns (Empty);
+  rpc ListSkusByProduct(AdminListSkusReq) returns (AdminListSkusResp);
+
+  // 运费模板管理
+  rpc CreateFreightTemplate(AdminCreateFreightTemplateReq) returns (IdResp);
+  rpc UpdateFreightTemplate(AdminUpdateFreightTemplateReq) returns (Empty);
+  rpc DeleteFreightTemplate(IdReq) returns (Empty);
+  rpc ListFreightTemplates(AdminPageReq) returns (AdminListFreightTemplatesResp);
+  rpc GetFreightTemplate(IdReq) returns (AdminFreightTemplateInfo);
+
+  // 库存管理
+  rpc AdjustStock(AdminAdjustStockReq) returns (AdminStockChangeResp);
+  rpc ListStockLogs(AdminListStockLogsReq) returns (AdminListStockLogsResp);
+}
+
+// ==================== AdminOrder ====================
+// 订单管理（聚合 OrderRpc）
+service AdminOrder {
+  rpc ListOrders(AdminListOrdersReq) returns (AdminListOrdersResp);
+  rpc GetOrder(AdminGetOrderReq) returns (AdminOrderDetailResp);
+  rpc ShipOrder(AdminShipOrderReq) returns (Empty);
+}
+
+// ==================== AdminAfterSale ====================
+// 售后管理（聚合 OrderRpc）
+service AdminAfterSale {
+  rpc ListAfterSales(AdminListAfterSalesReq) returns (AdminListAfterSalesResp);
+  rpc GetAfterSale(AdminGetAfterSaleReq) returns (AdminAfterSaleDetailResp);
+  rpc HandleAfterSale(AdminHandleAfterSaleReq) returns (Empty);
+}
+
+// ==================== AdminCoupon ====================
+// 优惠券管理（聚合 MarketingRpc，预留）
+service AdminCoupon {
+  rpc CreateCoupon(AdminCreateCouponReq) returns (IdResp);
+  rpc UpdateCoupon(AdminUpdateCouponReq) returns (Empty);
+  rpc UpdateCouponStatus(AdminUpdateCouponStatusReq) returns (Empty);
+  rpc ListCoupons(AdminListCouponsReq) returns (AdminListCouponsResp);
+}
+
 
 // =============================================
 // 通用结构
@@ -67,10 +237,11 @@ message IdResp {
   uint64 id = 1;
 }
 
-message PageReq {
-  uint64 page = 1;
-  uint64 page_size = 2;
+message AdminPageReq {
+  int64 page = 1;
+  int64 page_size = 2;
 }
+
 
 // =============================================
 // 管理员
@@ -83,13 +254,9 @@ message AdminInfo {
   string avatar = 4;
   uint64 role_id = 5;
   string role_name = 6;
-  int32 status = 7;
+  AdminStatus status = 7;
   string created_at = 8;
 }
-
-// =============================================
-// 登录
-// =============================================
 
 message AdminLoginReq {
   string username = 1;
@@ -103,23 +270,20 @@ message AdminLoginResp {
   int64 expire_time = 3;
 }
 
-// =============================================
-// 当前管理员信息
-// =============================================
-
 message GetCurrentAdminReq {
   uint64 admin_id = 1;
 }
 
 message GetCurrentAdminResp {
   AdminInfo admin = 1;
-
   repeated string permissions = 2;
 }
 
-// =============================================
-// 创建管理员
-// =============================================
+message UpdatePasswordReq {
+  uint64 admin_id = 1;
+  string old_password = 2;
+  string new_password = 3;
+}
 
 message CreateAdminReq {
   string username = 1;
@@ -134,7 +298,7 @@ message UpdateAdminReq {
   string real_name = 2;
   string avatar = 3;
   uint64 role_id = 4;
-  int32 status = 5;
+  AdminStatus status = 5;
 }
 
 message DeleteAdminReq {
@@ -150,16 +314,17 @@ message GetAdminResp {
 }
 
 message ListAdminReq {
-  uint64 page = 1;
-  uint64 page_size = 2;
+  int64 page = 1;
+  int64 page_size = 2;
   string username = 3;
-  int32 status = 4;
+  AdminStatus status = 4;
 }
 
 message ListAdminResp {
-  uint64 total = 1;
+  int64 total = 1;
   repeated AdminInfo list = 2;
 }
+
 
 // =============================================
 // 角色
@@ -204,6 +369,7 @@ message ListRoleResp {
   repeated RoleInfo list = 1;
 }
 
+
 // =============================================
 // 权限
 // =============================================
@@ -238,6 +404,7 @@ message ListPermissionResp {
   repeated PermissionInfo list = 1;
 }
 
+
 // =============================================
 // 角色权限
 // =============================================
@@ -256,15 +423,16 @@ message GetRolePermissionsResp {
   repeated string permission_codes = 2;
 }
 
+
 // =============================================
-// 管理员日志
+// 管理员操作日志
 // =============================================
 
 message AdminLogInfo {
   uint64 id = 1;
   uint64 admin_id = 2;
   string username = 3;
-  string module = 4;
+  LogModule module = 4;
   string action = 5;
   string request_method = 6;
   string request_url = 7;
@@ -278,7 +446,7 @@ message AdminLogInfo {
 message CreateAdminLogReq {
   uint64 admin_id = 1;
   string username = 2;
-  string module = 3;
+  LogModule module = 3;
   string action = 4;
   string request_method = 5;
   string request_url = 6;
@@ -289,13 +457,554 @@ message CreateAdminLogReq {
 }
 
 message ListAdminLogReq {
-  uint64 page = 1;
-  uint64 page_size = 2;
+  int64 page = 1;
+  int64 page_size = 2;
   uint64 admin_id = 3;
-  string module = 4;
+  LogModule module = 4;
 }
 
 message ListAdminLogResp {
-  uint64 total = 1;
+  int64 total = 1;
   repeated AdminLogInfo list = 2;
+}
+
+
+// =============================================
+// 用户管理（AdminUser）
+// =============================================
+
+message AdminListUsersReq {
+  int64 page = 1;
+  int64 page_size = 2;
+  string keyword = 3;
+  int64 status = 4;
+}
+
+message AdminUserItem {
+  uint64 id = 1;
+  string phone = 2;
+  string nickname = 3;
+  string avatar = 4;
+  int64 status = 5;
+  string status_desc = 6;
+  string created_at = 7;
+}
+
+message AdminListUsersResp {
+  int64 total = 1;
+  repeated AdminUserItem list = 2;
+}
+
+message AdminGetUserDetailReq {
+  uint64 user_id = 1;
+}
+
+message AdminGetUserDetailResp {
+  uint64 id = 1;
+  string phone = 2;
+  string nickname = 3;
+  string avatar = 4;
+  int64 gender = 5;
+  string birthday = 6;
+  int64 status = 7;
+  string status_desc = 8;
+  int64 order_count = 9;
+  int64 total_amount = 10;
+  string last_login_time = 11;
+  string created_at = 12;
+}
+
+message AdminBanUserReq {
+  uint64 user_id = 1;
+  int64 action_type = 2;
+  string reason = 3;
+}
+
+message AdminUnbanUserReq {
+  uint64 user_id = 1;
+  string reason = 2;
+}
+
+
+// =============================================
+// 商品管理（AdminProduct）
+// =============================================
+
+// ---- 分类 ----
+
+message AdminCategoryItem {
+  uint64 id = 1;
+  uint64 parent_id = 2;
+  string name = 3;
+  string icon = 4;
+  int64 sort = 5;
+  int64 level = 6;
+  SwitchStatus status = 7;
+  repeated AdminCategoryItem children = 8;
+}
+
+message AdminCategoryTreeResp {
+  repeated AdminCategoryItem list = 1;
+}
+
+message AdminCreateCategoryReq {
+  uint64 parent_id = 1;
+  string name = 2;
+  string icon = 3;
+  int64 sort = 4;
+}
+
+message AdminUpdateCategoryReq {
+  uint64 id = 1;
+  string name = 2;
+  string icon = 3;
+  int64 sort = 4;
+  SwitchStatus status = 5;
+}
+
+// ---- SKU 规格 ----
+
+message AdminSpecItem {
+  string key = 1;
+  string value = 2;
+}
+
+// ---- 商品（SPU + SKU） ----
+
+message AdminSkuItem {
+  string sku_code = 1;
+  int64 price = 2;
+  int64 market_price = 3;
+  int64 cost_price = 4;
+  int64 stock = 5;
+  repeated AdminSpecItem specs = 6;
+  repeated string images = 7;
+  int64 weight = 8;
+}
+
+message AdminCreateProductReq {
+  uint64 category_id = 1;
+  string name = 2;
+  string brand = 3;
+  string description = 4;
+  string content = 5;
+  string cover = 6;
+  repeated string images = 7;
+  string video_url = 8;
+  uint64 freight_template_id = 9;
+  repeated AdminSkuItem skus = 10;
+}
+
+message AdminUpdateProductReq {
+  uint64 id = 1;
+  uint64 category_id = 2;
+  string name = 3;
+  string brand = 4;
+  string description = 5;
+  string content = 6;
+  string cover = 7;
+  repeated string images = 8;
+  string video_url = 9;
+  uint64 freight_template_id = 10;
+  AdminProductStatus status = 11;
+}
+
+message AdminUpdateProductStatusReq {
+  uint64 id = 1;
+  AdminProductStatus status = 2;
+}
+
+message AdminProductItem {
+  uint64 id = 1;
+  string name = 2;
+  string brand = 3;
+  string cover = 4;
+  int64 price = 5;
+  int64 sales_count = 6;
+  AdminProductStatus status = 7;
+  string created_at = 8;
+}
+
+message AdminListProductsReq {
+  int64 page = 1;
+  int64 page_size = 2;
+  uint64 category_id = 3;
+  string keyword = 4;
+  AdminProductStatus status = 5;
+}
+
+message AdminListProductsResp {
+  int64 total = 1;
+  repeated AdminProductItem list = 2;
+}
+
+message AdminProductDetailResp {
+  uint64 id = 1;
+  uint64 category_id = 2;
+  string name = 3;
+  string brand = 4;
+  string description = 5;
+  string content = 6;
+  string cover = 7;
+  repeated string images = 8;
+  string video_url = 9;
+  AdminProductStatus status = 10;
+  uint64 freight_template_id = 11;
+  int64 sales_count = 12;
+  int64 virtual_sales = 13;
+  string created_at = 14;
+  repeated AdminSkuDetailItem skus = 15;
+}
+
+message AdminSkuDetailItem {
+  uint64 id = 1;
+  string sku_code = 2;
+  int64 price = 3;
+  int64 market_price = 4;
+  int64 cost_price = 5;
+  int64 stock = 6;
+  int64 locked_stock = 7;
+  repeated AdminSpecItem specs = 8;
+  repeated string images = 9;
+  int64 weight = 10;
+  SwitchStatus status = 11;
+}
+
+// ---- SKU 管理 ----
+
+message AdminCreateSkuReq {
+  uint64 spu_id = 1;
+  string sku_code = 2;
+  int64 price = 3;
+  int64 market_price = 4;
+  int64 cost_price = 5;
+  int64 stock = 6;
+  repeated AdminSpecItem specs = 7;
+  repeated string images = 8;
+  int64 weight = 9;
+}
+
+message AdminUpdateSkuReq {
+  uint64 id = 1;
+  string sku_code = 2;
+  int64 price = 3;
+  int64 market_price = 4;
+  int64 cost_price = 5;
+  int64 stock = 6;
+  repeated AdminSpecItem specs = 7;
+  repeated string images = 8;
+  int64 weight = 9;
+  SwitchStatus status = 10;
+}
+
+message AdminListSkusReq {
+  uint64 spu_id = 1;
+  int64 page = 2;
+  int64 page_size = 3;
+}
+
+message AdminListSkusResp {
+  int64 total = 1;
+  repeated AdminSkuDetailItem list = 2;
+}
+
+// ---- 运费模板 ----
+
+message AdminFreightTemplateInfo {
+  uint64 id = 1;
+  string name = 2;
+  FreightCalcType calc_type = 3;
+  int64 default_fee = 4;
+  int64 default_quantity = 5;
+  int64 extra_fee = 6;
+  int64 free_threshold_amount = 7;
+  int64 free_threshold_quantity = 8;
+  int64 is_default = 9;
+  SwitchStatus status = 10;
+  string created_at = 11;
+}
+
+message AdminCreateFreightTemplateReq {
+  string name = 1;
+  FreightCalcType calc_type = 2;
+  int64 default_fee = 3;
+  int64 default_quantity = 4;
+  int64 extra_fee = 5;
+  int64 free_threshold_amount = 6;
+  int64 free_threshold_quantity = 7;
+  int64 is_default = 8;
+}
+
+message AdminUpdateFreightTemplateReq {
+  uint64 id = 1;
+  string name = 2;
+  FreightCalcType calc_type = 3;
+  int64 default_fee = 4;
+  int64 default_quantity = 5;
+  int64 extra_fee = 6;
+  int64 free_threshold_amount = 7;
+  int64 free_threshold_quantity = 8;
+  int64 is_default = 9;
+  SwitchStatus status = 10;
+}
+
+message AdminListFreightTemplatesResp {
+  int64 total = 1;
+  repeated AdminFreightTemplateInfo list = 2;
+}
+
+// ---- 库存管理 ----
+
+message AdminSkuStockItem {
+  uint64 sku_id = 1;
+  int64 quantity = 2;
+}
+
+message AdminAdjustStockReq {
+  repeated AdminSkuStockItem items = 1;
+  string reason = 2;
+  string operator = 3;
+}
+
+message AdminSkuStockResult {
+  uint64 sku_id = 1;
+  bool success = 2;
+  string message = 3;
+  int64 current_stock = 4;
+  int64 current_locked = 5;
+}
+
+message AdminStockChangeResp {
+  bool success = 1;
+  repeated AdminSkuStockResult results = 2;
+}
+
+message AdminStockLogItem {
+  uint64 id = 1;
+  uint64 sku_id = 2;
+  string order_sn = 3;
+  string change_type = 4;
+  int64 quantity = 5;
+  int64 before_stock = 6;
+  int64 after_stock = 7;
+  string remark = 8;
+  string created_at = 9;
+}
+
+message AdminListStockLogsReq {
+  uint64 sku_id = 1;
+  string change_type = 2;
+  string start_time = 3;
+  string end_time = 4;
+  int64 page = 5;
+  int64 page_size = 6;
+}
+
+message AdminListStockLogsResp {
+  int64 total = 1;
+  repeated AdminStockLogItem list = 2;
+}
+
+
+// =============================================
+// 订单管理（AdminOrder）
+// =============================================
+
+message AdminListOrdersReq {
+  int64 page = 1;
+  int64 page_size = 2;
+  AdminOrderStatus status = 3;
+  string order_sn = 4;
+  string start_time = 5;
+  string end_time = 6;
+}
+
+message AdminOrderItem {
+  string order_sn = 1;
+  uint64 user_id = 2;
+  string user_phone = 3;
+  int64 pay_amount = 4;
+  AdminOrderStatus status = 5;
+  string status_desc = 6;
+  string created_at = 7;
+}
+
+message AdminListOrdersResp {
+  int64 total = 1;
+  repeated AdminOrderItem list = 2;
+}
+
+message AdminGetOrderReq {
+  string order_sn = 1;
+}
+
+message AdminOrderProductItem {
+  uint64 sku_id = 1;
+  uint64 spu_id = 2;
+  string product_name = 3;
+  string sku_name = 4;
+  string pic = 5;
+  int64 price = 6;
+  int64 quantity = 7;
+  int64 total_amount = 8;
+}
+
+message AdminOrderAddress {
+  string receiver_name = 1;
+  string receiver_phone = 2;
+  string province = 3;
+  string city = 4;
+  string district = 5;
+  string detail_address = 6;
+}
+
+message AdminOrderDetailResp {
+  string order_sn = 1;
+  uint64 user_id = 2;
+  string user_phone = 3;
+  AdminOrderStatus status = 4;
+  string status_desc = 5;
+  AdminPayType pay_type = 6;
+  string pay_type_desc = 7;
+  int64 pay_amount = 8;
+  int64 total_amount = 9;
+  int64 freight_amount = 10;
+  int64 coupon_amount = 11;
+  string remark = 12;
+  AdminOrderAddress address = 13;
+  repeated AdminOrderProductItem items = 14;
+  string delivery_sn = 15;
+  string delivery_company = 16;
+  string create_time = 17;
+  string pay_time = 18;
+  string delivery_time = 19;
+  string finish_time = 20;
+  string cancel_time = 21;
+}
+
+message AdminShipOrderReq {
+  string order_sn = 1;
+  string delivery_company = 2;
+  string delivery_sn = 3;
+  string remark = 4;
+}
+
+
+// =============================================
+// 售后管理（AdminAfterSale）
+// =============================================
+
+message AdminListAfterSalesReq {
+  int64 page = 1;
+  int64 page_size = 2;
+  AdminAfterSaleStatus status = 3;
+}
+
+message AdminAfterSaleItem {
+  uint64 after_sale_id = 1;
+  string order_sn = 2;
+  AdminAfterSaleType type = 3;
+  AdminAfterSaleStatus status = 4;
+  string status_desc = 5;
+  int64 refund_amount = 6;
+  string spu_name = 7;
+  string sku_name = 8;
+  string pic = 9;
+  string created_at = 10;
+}
+
+message AdminListAfterSalesResp {
+  int64 total = 1;
+  repeated AdminAfterSaleItem list = 2;
+}
+
+message AdminGetAfterSaleReq {
+  uint64 after_sale_id = 1;
+}
+
+message AdminAfterSaleDetailResp {
+  uint64 after_sale_id = 1;
+  string order_sn = 2;
+  AdminAfterSaleType type = 3;
+  AdminAfterSaleStatus status = 4;
+  string status_desc = 5;
+  int64 apply_amount = 6;
+  string reason = 7;
+  repeated string images = 8;
+  string audit_remark = 9;
+  string created_at = 10;
+  string audit_time = 11;
+  string return_tracking_sn = 12;
+  string return_tracking_corp = 13;
+  int64 refund_amount = 14;
+  string refund_time = 15;
+  AdminOrderProductItem product_item = 16;
+}
+
+message AdminHandleAfterSaleReq {
+  uint64 after_sale_id = 1;
+  AfterSaleAuditAction action = 2;
+  string remark = 3;
+}
+
+
+// =============================================
+// 优惠券管理（AdminCoupon）
+// =============================================
+
+message AdminCreateCouponReq {
+  string name = 1;
+  AdminCouponType type = 2;
+  int64 threshold_amount = 3;
+  int64 reduce_amount = 4;
+  int64 discount_rate = 5;
+  int64 max_discount_amount = 6;
+  int64 total_quantity = 7;
+  int64 per_user_limit = 8;
+  string start_time = 9;
+  string end_time = 10;
+  string description = 11;
+}
+
+message AdminUpdateCouponReq {
+  uint64 id = 1;
+  string name = 2;
+  AdminCouponType type = 3;
+  int64 threshold_amount = 4;
+  int64 reduce_amount = 5;
+  int64 discount_rate = 6;
+  int64 max_discount_amount = 7;
+  int64 total_quantity = 8;
+  int64 per_user_limit = 9;
+  string start_time = 10;
+  string end_time = 11;
+  string description = 12;
+}
+
+message AdminUpdateCouponStatusReq {
+  uint64 id = 1;
+  SwitchStatus status = 2;
+}
+
+message AdminCouponItem {
+  uint64 id = 1;
+  string name = 2;
+  AdminCouponType type = 3;
+  int64 total_quantity = 4;
+  int64 used_quantity = 5;
+  SwitchStatus status = 6;
+  string start_time = 7;
+  string end_time = 8;
+}
+
+message AdminListCouponsReq {
+  int64 page = 1;
+  int64 page_size = 2;
+  SwitchStatus status = 3;
+  string name = 4;
+}
+
+message AdminListCouponsResp {
+  int64 total = 1;
+  repeated AdminCouponItem list = 2;
 }
