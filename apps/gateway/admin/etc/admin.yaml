@@ -1,6 +1,6 @@
 Name: admin-api
 Host: 0.0.0.0
-Port: 8085
+Port: 8088
 Mode: dev
 
 JwtAuth:

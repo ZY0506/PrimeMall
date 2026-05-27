@@ -32,6 +32,11 @@ func (c *Client) Subscribe(ctx context.Context, name string, handler func([]byte
 	}
 
 	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logx.WithContext(ctx).Errorf("消息消费协程panic: %v", r)
+			}
+		}()
 		for {
 			select {
 			case <-ctx.Done():

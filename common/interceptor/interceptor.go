@@ -21,8 +21,8 @@ func ClientInfoUnaryInterceptor() grpc.UnaryClientInterceptor {
 			}
 
 			md.Set(ctxdata.ContextKeyClientIp, clientInfo.IP)
-			md.Set(ctxdata.ContextKeyDeviceID, clientInfo.UserAgent)
-			md.Set(ctxdata.ContextKeyClientUserAgent, clientInfo.DeviceID)
+			md.Set(ctxdata.ContextKeyDeviceID, clientInfo.DeviceID)
+			md.Set(ctxdata.ContextKeyClientUserAgent, clientInfo.UserAgent)
 
 			ctx = metadata.NewOutgoingContext(ctx, md)
 		}
