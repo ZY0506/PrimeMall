@@ -1,1 +1,15 @@
-# 运行配置（端口、RPC客户端地址、JWT密钥）
+Name: admin-api
+Host: 0.0.0.0
+Port: 8085
+Mode: dev
+
+JwtAuth:
+  AccessSecret: "${JWT_SECRET}"
+  AccessExpire: 7200
+
+AdminRpc:
+  Etcd:
+    Hosts:
+      - "${ETCD_HOST}"
+    Key: admin.rpc
+  Timeout: 5000

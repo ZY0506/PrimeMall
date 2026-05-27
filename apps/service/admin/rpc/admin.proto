@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package admin;
 
+import "google/protobuf/timestamp.proto";
+
 option go_package = "./admin";
 
 // goctl rpc protoc .\apps\service\admin\rpc\admin.proto --go_out=apps/service/admin/rpc/types --go-grpc_out apps/service/admin/rpc/types --zrpc_out=apps/service/admin/rpc/ -m
@@ -111,46 +113,25 @@ enum FreightCalcType {
 // =============================================
 
 // ==================== Admin ====================
-// 管理员自身管理（登录、管理员CRUD、角色、权限、日志查询）
+// 管理员自身管理 + 角色/权限只读查询
 service Admin {
   // 登录认证
   rpc AdminLogin(AdminLoginReq) returns (AdminLoginResp);
-  rpc GetCurrentAdmin(GetCurrentAdminReq) returns (GetCurrentAdminResp);
+  rpc GetCurrentAdmin(Empty) returns (GetCurrentAdminResp);
   rpc UpdatePassword(UpdatePasswordReq) returns (Empty);
 
   // 管理员 CRUD
-  rpc CreateAdmin(CreateAdminReq) returns (IdResp);
+  rpc CreateAdmin(CreateAdminReq) returns (Empty);
   rpc UpdateAdmin(UpdateAdminReq) returns (Empty);
   rpc DeleteAdmin(DeleteAdminReq) returns (Empty);
   rpc GetAdmin(GetAdminReq) returns (GetAdminResp);
   rpc ListAdmin(ListAdminReq) returns (ListAdminResp);
 
-  // 角色管理
-  rpc CreateRole(CreateRoleReq) returns (IdResp);
-  rpc UpdateRole(UpdateRoleReq) returns (Empty);
-  rpc DeleteRole(DeleteRoleReq) returns (Empty);
-  rpc GetRole(GetRoleReq) returns (GetRoleResp);
-  rpc ListRole(ListRoleReq) returns (ListRoleResp);
-
-  // 权限管理
-  rpc CreatePermission(CreatePermissionReq) returns (IdResp);
-  rpc UpdatePermission(UpdatePermissionReq) returns (Empty);
-  rpc DeletePermission(DeletePermissionReq) returns (Empty);
-  rpc ListPermission(ListPermissionReq) returns (ListPermissionResp);
-
-  // 角色权限
-  rpc AssignRolePermissions(AssignRolePermissionsReq) returns (Empty);
-  rpc GetRolePermissions(GetRolePermissionsReq) returns (GetRolePermissionsResp);
+  // 角色查询（只读，角色由系统初始化预置）
+  rpc ListRole(Empty) returns (ListRoleResp);
 
   // 操作日志
   rpc ListAdminLog(ListAdminLogReq) returns (ListAdminLogResp);
-}
-
-// ==================== AdminInternal ====================
-// 内部服务（供其他服务调用）
-service AdminInternal {
-  // 创建管理员操作日志
-  rpc CreateAdminLog(CreateAdminLogReq) returns (Empty);
 }
 
 // ==================== AdminUser ====================
@@ -167,26 +148,20 @@ service AdminUser {
 service AdminProduct {
   // 分类管理
   rpc CategoryTree(Empty) returns (AdminCategoryTreeResp);
-  rpc CreateCategory(AdminCreateCategoryReq) returns (IdResp);
+  rpc CreateCategory(AdminCreateCategoryReq) returns (Empty);
   rpc UpdateCategory(AdminUpdateCategoryReq) returns (Empty);
   rpc DeleteCategory(IdReq) returns (Empty);
 
-  // 商品管理（SPU + SKU 一起创建）
-  rpc CreateProduct(AdminCreateProductReq) returns (IdResp);
+  // 商品管理（SPU + SKU 一起创建/更新，全量提交 SKU）
+  rpc CreateProduct(AdminCreateProductReq) returns (Empty);
   rpc UpdateProduct(AdminUpdateProductReq) returns (Empty);
   rpc DeleteProduct(IdReq) returns (Empty);
   rpc GetProduct(IdReq) returns (AdminProductDetailResp);
   rpc ListProducts(AdminListProductsReq) returns (AdminListProductsResp);
   rpc UpdateProductStatus(AdminUpdateProductStatusReq) returns (Empty);
 
-  // SKU 管理
-  rpc CreateSku(AdminCreateSkuReq) returns (IdResp);
-  rpc UpdateSku(AdminUpdateSkuReq) returns (Empty);
-  rpc DeleteSku(IdReq) returns (Empty);
-  rpc ListSkusByProduct(AdminListSkusReq) returns (AdminListSkusResp);
-
   // 运费模板管理
-  rpc CreateFreightTemplate(AdminCreateFreightTemplateReq) returns (IdResp);
+  rpc CreateFreightTemplate(AdminCreateFreightTemplateReq) returns (Empty);
   rpc UpdateFreightTemplate(AdminUpdateFreightTemplateReq) returns (Empty);
   rpc DeleteFreightTemplate(IdReq) returns (Empty);
   rpc ListFreightTemplates(AdminPageReq) returns (AdminListFreightTemplatesResp);
@@ -213,16 +188,6 @@ service AdminAfterSale {
   rpc HandleAfterSale(AdminHandleAfterSaleReq) returns (Empty);
 }
 
-// ==================== AdminCoupon ====================
-// 优惠券管理（聚合 MarketingRpc，预留）
-service AdminCoupon {
-  rpc CreateCoupon(AdminCreateCouponReq) returns (IdResp);
-  rpc UpdateCoupon(AdminUpdateCouponReq) returns (Empty);
-  rpc UpdateCouponStatus(AdminUpdateCouponStatusReq) returns (Empty);
-  rpc ListCoupons(AdminListCouponsReq) returns (AdminListCouponsResp);
-}
-
-
 // =============================================
 // 通用结构
 // =============================================
@@ -230,10 +195,6 @@ service AdminCoupon {
 message Empty {}
 
 message IdReq {
-  uint64 id = 1;
-}
-
-message IdResp {
   uint64 id = 1;
 }
 
@@ -255,7 +216,7 @@ message AdminInfo {
   uint64 role_id = 5;
   string role_name = 6;
   AdminStatus status = 7;
-  string created_at = 8;
+  google.protobuf.Timestamp created_at = 8;
 }
 
 message AdminLoginReq {
@@ -265,24 +226,18 @@ message AdminLoginReq {
 }
 
 message AdminLoginResp {
-  uint64 admin_id = 1;
-  string token = 2;
-  int64 expire_time = 3;
-}
-
-message GetCurrentAdminReq {
-  uint64 admin_id = 1;
+  string token = 1;
+  int64 expire_time = 2;
 }
 
 message GetCurrentAdminResp {
   AdminInfo admin = 1;
-  repeated string permissions = 2;
+  repeated string permissions = 2; // 当前管理员的权限码列表
 }
 
 message UpdatePasswordReq {
-  uint64 admin_id = 1;
-  string old_password = 2;
-  string new_password = 3;
+  string old_password = 1;
+  string new_password = 2;
 }
 
 message CreateAdminReq {
@@ -327,7 +282,7 @@ message ListAdminResp {
 
 
 // =============================================
-// 角色
+// 角色（只读，系统初始化固定）
 // =============================================
 
 message RoleInfo {
@@ -335,94 +290,13 @@ message RoleInfo {
   string name = 2;
   string code = 3;
   string remark = 4;
-  string created_at = 5;
+  google.protobuf.Timestamp created_at = 5;
 }
 
-message CreateRoleReq {
-  string name = 1;
-  string code = 2;
-  string remark = 3;
-}
-
-message UpdateRoleReq {
-  uint64 id = 1;
-  string name = 2;
-  string code = 3;
-  string remark = 4;
-}
-
-message DeleteRoleReq {
-  uint64 id = 1;
-}
-
-message GetRoleReq {
-  uint64 id = 1;
-}
-
-message GetRoleResp {
-  RoleInfo role = 1;
-}
-
-message ListRoleReq {}
 
 message ListRoleResp {
   repeated RoleInfo list = 1;
 }
-
-
-// =============================================
-// 权限
-// =============================================
-
-message PermissionInfo {
-  uint64 id = 1;
-  string name = 2;
-  string code = 3;
-  string module = 4;
-}
-
-message CreatePermissionReq {
-  string name = 1;
-  string code = 2;
-  string module = 3;
-}
-
-message UpdatePermissionReq {
-  uint64 id = 1;
-  string name = 2;
-  string code = 3;
-  string module = 4;
-}
-
-message DeletePermissionReq {
-  uint64 id = 1;
-}
-
-message ListPermissionReq {}
-
-message ListPermissionResp {
-  repeated PermissionInfo list = 1;
-}
-
-
-// =============================================
-// 角色权限
-// =============================================
-
-message AssignRolePermissionsReq {
-  uint64 role_id = 1;
-  repeated uint64 permission_ids = 2;
-}
-
-message GetRolePermissionsReq {
-  uint64 role_id = 1;
-}
-
-message GetRolePermissionsResp {
-  repeated uint64 permission_ids = 1;
-  repeated string permission_codes = 2;
-}
-
 
 // =============================================
 // 管理员操作日志
@@ -440,27 +314,13 @@ message AdminLogInfo {
   string response_result = 9;
   string ip = 10;
   int64 duration_ms = 11;
-  string created_at = 12;
-}
-
-message CreateAdminLogReq {
-  uint64 admin_id = 1;
-  string username = 2;
-  LogModule module = 3;
-  string action = 4;
-  string request_method = 5;
-  string request_url = 6;
-  string request_params = 7;
-  string response_result = 8;
-  string ip = 9;
-  int64 duration_ms = 10;
+  google.protobuf.Timestamp created_at = 12;
 }
 
 message ListAdminLogReq {
   int64 page = 1;
   int64 page_size = 2;
-  uint64 admin_id = 3;
-  LogModule module = 4;
+  LogModule module = 3;
 }
 
 message ListAdminLogResp {
@@ -487,7 +347,7 @@ message AdminUserItem {
   string avatar = 4;
   int64 status = 5;
   string status_desc = 6;
-  string created_at = 7;
+  google.protobuf.Timestamp created_at = 7;
 }
 
 message AdminListUsersResp {
@@ -510,8 +370,8 @@ message AdminGetUserDetailResp {
   string status_desc = 8;
   int64 order_count = 9;
   int64 total_amount = 10;
-  string last_login_time = 11;
-  string created_at = 12;
+  google.protobuf.Timestamp last_login_time = 11;
+  google.protobuf.Timestamp created_at = 12;
 }
 
 message AdminBanUserReq {
@@ -607,6 +467,7 @@ message AdminUpdateProductReq {
   string video_url = 9;
   uint64 freight_template_id = 10;
   AdminProductStatus status = 11;
+  repeated AdminSkuItem skus = 12; // 全量 SKU 列表，用于替换原有 SKU
 }
 
 message AdminUpdateProductStatusReq {
@@ -622,7 +483,7 @@ message AdminProductItem {
   int64 price = 5;
   int64 sales_count = 6;
   AdminProductStatus status = 7;
-  string created_at = 8;
+  google.protobuf.Timestamp created_at = 8;
 }
 
 message AdminListProductsReq {
@@ -652,7 +513,7 @@ message AdminProductDetailResp {
   uint64 freight_template_id = 11;
   int64 sales_count = 12;
   int64 virtual_sales = 13;
-  string created_at = 14;
+  google.protobuf.Timestamp created_at = 14;
   repeated AdminSkuDetailItem skus = 15;
 }
 
@@ -670,44 +531,6 @@ message AdminSkuDetailItem {
   SwitchStatus status = 11;
 }
 
-// ---- SKU 管理 ----
-
-message AdminCreateSkuReq {
-  uint64 spu_id = 1;
-  string sku_code = 2;
-  int64 price = 3;
-  int64 market_price = 4;
-  int64 cost_price = 5;
-  int64 stock = 6;
-  repeated AdminSpecItem specs = 7;
-  repeated string images = 8;
-  int64 weight = 9;
-}
-
-message AdminUpdateSkuReq {
-  uint64 id = 1;
-  string sku_code = 2;
-  int64 price = 3;
-  int64 market_price = 4;
-  int64 cost_price = 5;
-  int64 stock = 6;
-  repeated AdminSpecItem specs = 7;
-  repeated string images = 8;
-  int64 weight = 9;
-  SwitchStatus status = 10;
-}
-
-message AdminListSkusReq {
-  uint64 spu_id = 1;
-  int64 page = 2;
-  int64 page_size = 3;
-}
-
-message AdminListSkusResp {
-  int64 total = 1;
-  repeated AdminSkuDetailItem list = 2;
-}
-
 // ---- 运费模板 ----
 
 message AdminFreightTemplateInfo {
@@ -721,7 +544,7 @@ message AdminFreightTemplateInfo {
   int64 free_threshold_quantity = 8;
   int64 is_default = 9;
   SwitchStatus status = 10;
-  string created_at = 11;
+  google.protobuf.Timestamp created_at = 11;
 }
 
 message AdminCreateFreightTemplateReq {
@@ -763,7 +586,6 @@ message AdminSkuStockItem {
 message AdminAdjustStockReq {
   repeated AdminSkuStockItem items = 1;
   string reason = 2;
-  string operator = 3;
 }
 
 message AdminSkuStockResult {
@@ -788,14 +610,14 @@ message AdminStockLogItem {
   int64 before_stock = 6;
   int64 after_stock = 7;
   string remark = 8;
-  string created_at = 9;
+  google.protobuf.Timestamp created_at = 9;
 }
 
 message AdminListStockLogsReq {
   uint64 sku_id = 1;
   string change_type = 2;
-  string start_time = 3;
-  string end_time = 4;
+  google.protobuf.Timestamp start_time = 3;
+  google.protobuf.Timestamp end_time = 4;
   int64 page = 5;
   int64 page_size = 6;
 }
@@ -815,8 +637,8 @@ message AdminListOrdersReq {
   int64 page_size = 2;
   AdminOrderStatus status = 3;
   string order_sn = 4;
-  string start_time = 5;
-  string end_time = 6;
+  google.protobuf.Timestamp start_time = 5;
+  google.protobuf.Timestamp end_time = 6;
 }
 
 message AdminOrderItem {
@@ -826,7 +648,7 @@ message AdminOrderItem {
   int64 pay_amount = 4;
   AdminOrderStatus status = 5;
   string status_desc = 6;
-  string created_at = 7;
+  google.protobuf.Timestamp created_at = 7;
 }
 
 message AdminListOrdersResp {
@@ -875,11 +697,11 @@ message AdminOrderDetailResp {
   repeated AdminOrderProductItem items = 14;
   string delivery_sn = 15;
   string delivery_company = 16;
-  string create_time = 17;
-  string pay_time = 18;
-  string delivery_time = 19;
-  string finish_time = 20;
-  string cancel_time = 21;
+  google.protobuf.Timestamp create_time = 17;
+  google.protobuf.Timestamp pay_time = 18;
+  google.protobuf.Timestamp delivery_time = 19;
+  google.protobuf.Timestamp finish_time = 20;
+  google.protobuf.Timestamp cancel_time = 21;
 }
 
 message AdminShipOrderReq {
@@ -910,7 +732,7 @@ message AdminAfterSaleItem {
   string spu_name = 7;
   string sku_name = 8;
   string pic = 9;
-  string created_at = 10;
+  google.protobuf.Timestamp created_at = 10;
 }
 
 message AdminListAfterSalesResp {
@@ -932,12 +754,12 @@ message AdminAfterSaleDetailResp {
   string reason = 7;
   repeated string images = 8;
   string audit_remark = 9;
-  string created_at = 10;
-  string audit_time = 11;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp audit_time = 11;
   string return_tracking_sn = 12;
   string return_tracking_corp = 13;
   int64 refund_amount = 14;
-  string refund_time = 15;
+  google.protobuf.Timestamp refund_time = 15;
   AdminOrderProductItem product_item = 16;
 }
 
@@ -945,66 +767,4 @@ message AdminHandleAfterSaleReq {
   uint64 after_sale_id = 1;
   AfterSaleAuditAction action = 2;
   string remark = 3;
-}
-
-
-// =============================================
-// 优惠券管理（AdminCoupon）
-// =============================================
-
-message AdminCreateCouponReq {
-  string name = 1;
-  AdminCouponType type = 2;
-  int64 threshold_amount = 3;
-  int64 reduce_amount = 4;
-  int64 discount_rate = 5;
-  int64 max_discount_amount = 6;
-  int64 total_quantity = 7;
-  int64 per_user_limit = 8;
-  string start_time = 9;
-  string end_time = 10;
-  string description = 11;
-}
-
-message AdminUpdateCouponReq {
-  uint64 id = 1;
-  string name = 2;
-  AdminCouponType type = 3;
-  int64 threshold_amount = 4;
-  int64 reduce_amount = 5;
-  int64 discount_rate = 6;
-  int64 max_discount_amount = 7;
-  int64 total_quantity = 8;
-  int64 per_user_limit = 9;
-  string start_time = 10;
-  string end_time = 11;
-  string description = 12;
-}
-
-message AdminUpdateCouponStatusReq {
-  uint64 id = 1;
-  SwitchStatus status = 2;
-}
-
-message AdminCouponItem {
-  uint64 id = 1;
-  string name = 2;
-  AdminCouponType type = 3;
-  int64 total_quantity = 4;
-  int64 used_quantity = 5;
-  SwitchStatus status = 6;
-  string start_time = 7;
-  string end_time = 8;
-}
-
-message AdminListCouponsReq {
-  int64 page = 1;
-  int64 page_size = 2;
-  SwitchStatus status = 3;
-  string name = 4;
-}
-
-message AdminListCouponsResp {
-  int64 total = 1;
-  repeated AdminCouponItem list = 2;
 }

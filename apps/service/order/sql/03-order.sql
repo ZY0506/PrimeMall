@@ -159,3 +159,15 @@ CREATE TABLE IF NOT EXISTS `after_sale_item` (
     KEY `idx_after_sale_sn` (`after_sale_sn`),
     KEY `idx_order_item_id` (`order_item_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='售后商品快照表';
+
+-- =============================================
+-- 索引优化（高并发场景）
+-- =============================================
+ALTER TABLE `order_info` ADD INDEX `idx_status_created` (`status`, `created_at`);
+ALTER TABLE `order_info` ADD INDEX `idx_expire_status` (`expire_time`, `status`);
+ALTER TABLE `order_info` ADD INDEX `idx_user_status` (`user_id`, `status`);
+ALTER TABLE `order_item` ADD INDEX `idx_spu_id` (`spu_id`);
+ALTER TABLE `after_sale` ADD INDEX `idx_user_status` (`user_id`, `status`);
+ALTER TABLE `after_sale` ADD INDEX `idx_status_created` (`status`, `created_at`);
+ALTER TABLE `after_sale` ADD INDEX `idx_type` (`type`);
+ALTER TABLE `after_sale_item` ADD INDEX `idx_sku_id` (`sku_id`);

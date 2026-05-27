@@ -1,498 +1,455 @@
 syntax = "v1"
 
-info(
-    title: "PrimeMall Admin API"
-    desc: "PrimeMall 管理后台"
-    author: "烤冷面"
-    version: "v1.0"
+info (
+	title:   "PrimeMall Admin API"
+	desc:    "PrimeMall 管理后台"
+	author:  "烤冷面"
+	version: "v1.0"
 )
 
 // =============================================================
 // 公共类型
 // =============================================================
-
 type (
-    IdReq {
-        Id uint64 `path:"id"`
-    }
-
-    OrderSnReq {
-        OrderSn string `path:"order_sn"`
-    }
-
-    Pagination {
-        Page int64 `form:"page,default=1"`
-        Size int64 `form:"size,default=10"`
-    }
-
-    UpdateStatusReq {
-        Id     uint64 `json:"id"`
-        Status int64  `json:"status"`
-    }
+	IdReq {
+		Id uint64 `path:"id"`
+	}
+	OrderSnReq {
+		OrderSn string `path:"order_sn"`
+	}
+	Pagination {
+		Page int64 `form:"page,default=1"`
+		Size int64 `form:"size,default=10"`
+	}
+	UpdateStatusReq {
+		Id     uint64 `json:"id"`
+		Status int64  `json:"status"`
+	}
 )
 
 // =============================================================
 // 管理员认证
 // =============================================================
 type (
-    AdminLoginReq {
-        Username string `json:"username"`
-        Password string `json:"password"`
-    }
-
-    AdminLoginResp {
-        AccessToken  string `json:"access_token"`
-        AccessExpire string `json:"access_expire"`
-    }
-
-    ChangePasswordReq {
-        OldPassword string `json:"old_password"`
-        NewPassword string `json:"new_password"`
-    }
-
-    AdminInfoResp {
-        Id       uint64 `json:"id"`
-        Username string `json:"username"`
-        Nickname string `json:"nickname"`
-        Avatar   string `json:"avatar"`
-        Role     string `json:"role"`
-    }
+	AdminLoginReq {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}
+	AdminLoginResp {
+		AccessToken  string `json:"access_token"`
+		AccessExpire string `json:"access_expire"`
+	}
+	ChangePasswordReq {
+		OldPassword string `json:"old_password"`
+		NewPassword string `json:"new_password"`
+	}
+	AdminInfoResp {
+		Id       uint64 `json:"id"`
+		Username string `json:"username"`
+		Nickname string `json:"nickname"`
+		Avatar   string `json:"avatar"`
+		Role     string `json:"role"`
+	}
 )
-
 
 // =============================================================
 // 用户管理
 // =============================================================
-
 type (
-    AdminUserListReq {
-        Pagination
-        Keyword string `form:"keyword,optional"`
-        Status  int64  `form:"status,optional"`
-    }
-
-    AdminUserItem {
-        Id         uint64 `json:"id"`
-        Phone      string `json:"phone"`
-        Nickname   string `json:"nickname"`
-        Avatar     string `json:"avatar"`
-        Status     int64  `json:"status"`
-        StatusDesc string `json:"status_desc"`
-        CreatedAt  string `json:"created_at"`
-    }
-
-    AdminUserListResp {
-        Total int64             `json:"total"`
-        List  []AdminUserItem   `json:"list"`
-    }
-
-    AdminUserDetailResp {
-        Id            uint64 `json:"id"`
-        Phone         string `json:"phone"`
-        Nickname      string `json:"nickname"`
-        Avatar        string `json:"avatar"`
-        Gender        int64  `json:"gender"`
-        Birthday      string `json:"birthday"`
-        Status        int64  `json:"status"`
-        StatusDesc    string `json:"status_desc"`
-        OrderCount    int64  `json:"order_count"`
-        TotalAmount   int64  `json:"total_amount"`
-        LastLoginTime string `json:"last_login_time"`
-        CreatedAt     string `json:"created_at"`
-    }
-
-    BlackUserReq {
-        Id     uint64 `json:"id"`
-        Reason string `json:"reason,optional"`
-    }
+	AdminUserListReq {
+		Pagination
+		Keyword string `form:"keyword,optional"`
+		Status  int64  `form:"status,optional"`
+	}
+	AdminUserItem {
+		Id         uint64 `json:"id"`
+		Phone      string `json:"phone"`
+		Nickname   string `json:"nickname"`
+		Avatar     string `json:"avatar"`
+		Status     int64  `json:"status"`
+		StatusDesc string `json:"status_desc"`
+		CreatedAt  string `json:"created_at"`
+	}
+	AdminUserListResp {
+		Total int64           `json:"total"`
+		List  []AdminUserItem `json:"list"`
+	}
+	AdminUserDetailResp {
+		Id            uint64 `json:"id"`
+		Phone         string `json:"phone"`
+		Nickname      string `json:"nickname"`
+		Avatar        string `json:"avatar"`
+		Gender        int64  `json:"gender"`
+		Birthday      string `json:"birthday"`
+		Status        int64  `json:"status"`
+		StatusDesc    string `json:"status_desc"`
+		OrderCount    int64  `json:"order_count"`
+		TotalAmount   int64  `json:"total_amount"`
+		LastLoginTime string `json:"last_login_time"`
+		CreatedAt     string `json:"created_at"`
+	}
+	BlackUserReq {
+		Id     uint64 `json:"id"`
+		Reason string `json:"reason,optional"`
+	}
 )
-
 
 // =============================================================
 // 分类管理
 // =============================================================
-
 type (
-    AdminCategoryItem {
-        Id       uint64 `json:"id"`
-        ParentId uint64 `json:"parent_id"`
-        Name     string `json:"name"`
-        Icon     string `json:"icon"`
-        Level    int64  `json:"level"`
-        Sort     int64  `json:"sort"`
-    }
-
-    CategoryListResp {
-        List []AdminCategoryItem `json:"list"`
-    }
-
-    SaveCategoryReq {
-        Id       uint64 `json:"id,optional"`
-        ParentId uint64 `json:"parent_id"`
-        Name     string `json:"name"`
-        Icon     string `json:"icon,optional"`
-        Sort     int64  `json:"sort"`
-    }
+	AdminCategoryItem {
+		Id       uint64 `json:"id"`
+		ParentId uint64 `json:"parent_id"`
+		Name     string `json:"name"`
+		Icon     string `json:"icon"`
+		Level    int64  `json:"level"`
+		Sort     int64  `json:"sort"`
+	}
+	CategoryListResp {
+		List []AdminCategoryItem `json:"list"`
+	}
+	SaveCategoryReq {
+		Id       uint64 `json:"id,optional"`
+		ParentId uint64 `json:"parent_id"`
+		Name     string `json:"name"`
+		Icon     string `json:"icon,optional"`
+		Sort     int64  `json:"sort"`
+	}
 )
-
 
 // =============================================================
 // 商品/SPU/SKU
 // =============================================================
-
 type (
-    ProductSpecItem {
-        Name  string `json:"name"`
-        Value string `json:"value"`
-    }
-
-    AdminSkuItem {
-        Id       uint64            `json:"id,optional"`
-        Code     string            `json:"code"`
-        Pic      []string          `json:"pic"`
-        Price    int64             `json:"price"`
-        Stock    int64             `json:"stock"`
-        Weight   int64             `json:"weight"`
-        SpecData []ProductSpecItem `json:"spec_data"`
-    }
-
-    AdminProductListReq {
-        Pagination
-        Keyword    string `form:"keyword,optional"`
-        CategoryId uint64 `form:"category_id,optional"`
-        Status     int64  `form:"status,optional"`
-    }
-
-    AdminProductItem {
-        Id         uint64 `json:"id"`
-        Name       string `json:"name"`
-        Brand      string `json:"brand"`
-        DefaultPic string `json:"default_pic"`
-        Price      int64  `json:"price"`
-        Sales      int64  `json:"sales"`
-        Status     int64  `json:"status"`
-        CreatedAt  string `json:"created_at"`
-    }
-
-    AdminProductListResp {
-        Total int64              `json:"total"`
-        List  []AdminProductItem `json:"list"`
-    }
-
-    SaveProductReq {
-        Id                uint64           `json:"id,optional"`
-        CategoryId        uint64           `json:"category_id"`
-        Brand             string           `json:"brand"`
-        Name              string           `json:"name"`
-        Description       string           `json:"description"`
-        Content           string           `json:"content"`
-        DefaultPic        string           `json:"default_pic"`
-        BannerPics        []string         `json:"banner_pics"`
-        VideoUrl          string           `json:"video_url,optional"`
-        Weight            int64            `json:"weight"`
-        FreightTemplateId uint64           `json:"freight_template_id"`
-        Status            int64            `json:"status"`
-        Skus              []AdminSkuItem   `json:"skus"`
-    }
-
-    AdminProductDetailResp {
-        Id                uint64           `json:"id"`
-        CategoryId        uint64           `json:"category_id"`
-        Brand             string           `json:"brand"`
-        Name              string           `json:"name"`
-        Description       string           `json:"description"`
-        Content           string           `json:"content"`
-        DefaultPic        string           `json:"default_pic"`
-        BannerPics        []string         `json:"banner_pics"`
-        VideoUrl          string           `json:"video_url"`
-        Weight            int64            `json:"weight"`
-        FreightTemplateId uint64           `json:"freight_template_id"`
-        Status            int64            `json:"status"`
-        Skus              []AdminSkuItem   `json:"skus"`
-        CreatedAt         string           `json:"created_at"`
-    }
+	ProductSpecItem {
+		Name  string `json:"name"`
+		Value string `json:"value"`
+	}
+	AdminSkuItem {
+		Id       uint64            `json:"id,optional"`
+		Code     string            `json:"code"`
+		Pic      []string          `json:"pic"`
+		Price    int64             `json:"price"`
+		Stock    int64             `json:"stock"`
+		Weight   int64             `json:"weight"`
+		SpecData []ProductSpecItem `json:"spec_data"`
+	}
+	AdminProductListReq {
+		Pagination
+		Keyword    string `form:"keyword,optional"`
+		CategoryId uint64 `form:"category_id,optional"`
+		Status     int64  `form:"status,optional"`
+	}
+	AdminProductItem {
+		Id         uint64 `json:"id"`
+		Name       string `json:"name"`
+		Brand      string `json:"brand"`
+		DefaultPic string `json:"default_pic"`
+		Price      int64  `json:"price"`
+		Sales      int64  `json:"sales"`
+		Status     int64  `json:"status"`
+		CreatedAt  string `json:"created_at"`
+	}
+	AdminProductListResp {
+		Total int64              `json:"total"`
+		List  []AdminProductItem `json:"list"`
+	}
+	SaveProductReq {
+		Id                uint64         `json:"id,optional"`
+		CategoryId        uint64         `json:"category_id"`
+		Brand             string         `json:"brand"`
+		Name              string         `json:"name"`
+		Description       string         `json:"description"`
+		Content           string         `json:"content"`
+		DefaultPic        string         `json:"default_pic"`
+		BannerPics        []string       `json:"banner_pics"`
+		VideoUrl          string         `json:"video_url,optional"`
+		Weight            int64          `json:"weight"`
+		FreightTemplateId uint64         `json:"freight_template_id"`
+		Status            int64          `json:"status"`
+		Skus              []AdminSkuItem `json:"skus"`
+	}
+	AdminProductDetailResp {
+		Id                uint64         `json:"id"`
+		CategoryId        uint64         `json:"category_id"`
+		Brand             string         `json:"brand"`
+		Name              string         `json:"name"`
+		Description       string         `json:"description"`
+		Content           string         `json:"content"`
+		DefaultPic        string         `json:"default_pic"`
+		BannerPics        []string       `json:"banner_pics"`
+		VideoUrl          string         `json:"video_url"`
+		Weight            int64          `json:"weight"`
+		FreightTemplateId uint64         `json:"freight_template_id"`
+		Status            int64          `json:"status"`
+		Skus              []AdminSkuItem `json:"skus"`
+		CreatedAt         string         `json:"created_at"`
+	}
 )
-
 
 // =============================================================
 // 订单管理
 // =============================================================
-
 type (
-    AdminOrderListReq {
-        Pagination
-        Status    int64  `form:"status,optional"`
-        OrderSn   string `form:"order_sn,optional"`
-        StartTime string `form:"start_time,optional"`
-        EndTime   string `form:"end_time,optional"`
-    }
-
-    AdminOrderSnapshot {
-        OrderSn    string `json:"order_sn"`
-        UserId     uint64 `json:"user_id"`
-        UserPhone  string `json:"user_phone"`
-        PayAmount  int64  `json:"pay_amount"`
-        Status     int64  `json:"status"`
-        StatusDesc string `json:"status_desc"`
-        CreatedAt  string `json:"created_at"`
-    }
-
-    AdminOrderListResp {
-        Total int64                  `json:"total"`
-        List  []AdminOrderSnapshot   `json:"list"`
-    }
-
-    // 后台订单商品项
-    AdminOrderItem {
-        SkuId       uint64 `json:"sku_id"`
-        SpuId       uint64 `json:"spu_id"`
-        ProductName string `json:"product_name"`
-        SkuName     string `json:"sku_name"`
-        Pic         string `json:"pic"`
-        Price       int64  `json:"price"`         // 成交单价（分）
-        Quantity    int64  `json:"quantity"`      // 购买数量
-        TotalAmount int64  `json:"total_amount"`  // 小计金额（分）
-    }
-
-    // 后台订单地址
-    AdminOrderAddress {
-        ReceiverName  string `json:"receiver_name"`
-        ReceiverPhone string `json:"receiver_phone"`
-        Province      string `json:"province"`
-        City          string `json:"city"`
-        District      string `json:"district"`
-        DetailAddress string `json:"detail_address"`
-    }
-
-    // 后台订单详情
-    AdminOrderDetailResp {
-        OrderSn        string `json:"order_sn"`
-        UserId         uint64 `json:"user_id"`
-        UserPhone      string `json:"user_phone"`
-        Status         int64  `json:"status"`
-        StatusDesc     string `json:"status_desc"`
-        PayType        int64  `json:"pay_type"`
-        PayTypeDesc    string `json:"pay_type_desc"`
-        PayAmount      int64  `json:"pay_amount"`
-        TotalAmount    int64  `json:"total_amount"`
-        FreightAmount  int64  `json:"freight_amount"`
-        CouponAmount   int64  `json:"coupon_amount"`
-        Remark         string `json:"remark"`
-        Address        AdminOrderAddress `json:"address"`
-        Items          []AdminOrderItem `json:"items"`
-        DeliverySn      string `json:"delivery_sn,optional"`
-        DeliveryCompany string `json:"delivery_company,optional"`
-        PaymentSn      string `json:"payment_sn,optional"`
-        CreateTime     string `json:"create_time"`
-        PayTime        string `json:"pay_time,optional"`
-        DeliveryTime   string `json:"delivery_time,optional"`
-        FinishTime     string `json:"finish_time,optional"`
-        CancelTime     string `json:"cancel_time,optional"`
-    }
-
-    ShipOrderReq {
-        OrderSn         string `json:"order_sn"`
-        DeliveryCompany string `json:"delivery_company"`
-        DeliverySn      string `json:"delivery_sn"`
-        Remark          string `json:"remark,optional"`
-    }
+	AdminOrderListReq {
+		Pagination
+		Status    int64  `form:"status,optional"`
+		OrderSn   string `form:"order_sn,optional"`
+		StartTime string `form:"start_time,optional"`
+		EndTime   string `form:"end_time,optional"`
+	}
+	AdminOrderSnapshot {
+		OrderSn    string `json:"order_sn"`
+		UserId     uint64 `json:"user_id"`
+		UserPhone  string `json:"user_phone"`
+		PayAmount  int64  `json:"pay_amount"`
+		Status     int64  `json:"status"`
+		StatusDesc string `json:"status_desc"`
+		CreatedAt  string `json:"created_at"`
+	}
+	AdminOrderListResp {
+		Total int64                `json:"total"`
+		List  []AdminOrderSnapshot `json:"list"`
+	}
+	// 后台订单商品项
+	AdminOrderItem {
+		SkuId       uint64 `json:"sku_id"`
+		SpuId       uint64 `json:"spu_id"`
+		ProductName string `json:"product_name"`
+		SkuName     string `json:"sku_name"`
+		Pic         string `json:"pic"`
+		Price       int64  `json:"price"` // 成交单价（分）
+		Quantity    int64  `json:"quantity"` // 购买数量
+		TotalAmount int64  `json:"total_amount"` // 小计金额（分）
+	}
+	// 后台订单地址
+	AdminOrderAddress {
+		ReceiverName  string `json:"receiver_name"`
+		ReceiverPhone string `json:"receiver_phone"`
+		Province      string `json:"province"`
+		City          string `json:"city"`
+		District      string `json:"district"`
+		DetailAddress string `json:"detail_address"`
+	}
+	// 后台订单详情
+	AdminOrderDetailResp {
+		OrderSn         string            `json:"order_sn"`
+		UserId          uint64            `json:"user_id"`
+		UserPhone       string            `json:"user_phone"`
+		Status          int64             `json:"status"`
+		StatusDesc      string            `json:"status_desc"`
+		PayType         int64             `json:"pay_type"`
+		PayTypeDesc     string            `json:"pay_type_desc"`
+		PayAmount       int64             `json:"pay_amount"`
+		TotalAmount     int64             `json:"total_amount"`
+		FreightAmount   int64             `json:"freight_amount"`
+		CouponAmount    int64             `json:"coupon_amount"`
+		Remark          string            `json:"remark"`
+		Address         AdminOrderAddress `json:"address"`
+		Items           []AdminOrderItem  `json:"items"`
+		DeliverySn      string            `json:"delivery_sn,optional"`
+		DeliveryCompany string            `json:"delivery_company,optional"`
+		PaymentSn       string            `json:"payment_sn,optional"`
+		CreateTime      string            `json:"create_time"`
+		PayTime         string            `json:"pay_time,optional"`
+		DeliveryTime    string            `json:"delivery_time,optional"`
+		FinishTime      string            `json:"finish_time,optional"`
+		CancelTime      string            `json:"cancel_time,optional"`
+	}
+	ShipOrderReq {
+		OrderSn         string `json:"order_sn"`
+		DeliveryCompany string `json:"delivery_company"`
+		DeliverySn      string `json:"delivery_sn"`
+		Remark          string `json:"remark,optional"`
+	}
 )
 
 // =============================================================
 // 售后管理
 // =============================================================
 type (
-    AdminRefundListReq {
-        Pagination
-        Status int64 `form:"status,optional"`
-    }
-
-    AdminRefundItem {
-        Id           uint64 `json:"id"`
-        RefundSn     string `json:"refund_sn"`
-        OrderSn      string `json:"order_sn"`
-        UserId       uint64 `json:"user_id"`
-        RefundAmount int64  `json:"refund_amount"`
-        Status       int64  `json:"status"`
-        StatusDesc   string `json:"status_desc"`
-        CreatedAt    string `json:"created_at"`
-    }
-
-    AdminRefundListResp {
-        Total int64               `json:"total"`
-        List  []AdminRefundItem   `json:"list"`
-    }
-
-    HandleRefundReq {
-        RefundSn string `json:"refund_sn"`
-        Action   int64  `json:"action"` // 1通过 2拒绝
-        Remark   string `json:"remark,optional"`
-    }
+	AdminRefundListReq {
+		Pagination
+		Status int64 `form:"status,optional"`
+	}
+	AdminRefundItem {
+		Id           uint64 `json:"id"`
+		RefundSn     string `json:"refund_sn"`
+		OrderSn      string `json:"order_sn"`
+		UserId       uint64 `json:"user_id"`
+		RefundAmount int64  `json:"refund_amount"`
+		Status       int64  `json:"status"`
+		StatusDesc   string `json:"status_desc"`
+		CreatedAt    string `json:"created_at"`
+	}
+	AdminRefundListResp {
+		Total int64             `json:"total"`
+		List  []AdminRefundItem `json:"list"`
+	}
+	HandleRefundReq {
+		RefundSn string `json:"refund_sn"`
+		Action   int64  `json:"action"` // 1通过 2拒绝
+		Remark   string `json:"remark,optional"`
+	}
 )
 
 // =============================================================
 // 优惠券管理
 // =============================================================
-
 type (
-    SaveCouponReq {
-        Id                uint64 `json:"id,optional"`
-        Name              string `json:"name"`
-        Type              int64  `json:"type"`
-        ThresholdAmount   int64  `json:"threshold_amount"`
-        ReduceAmount      int64  `json:"reduce_amount"`
-        DiscountRate      int64  `json:"discount_rate"`
-        MaxDiscountAmount int64  `json:"max_discount_amount"`
-        TotalQuantity     int64  `json:"total_quantity"`
-        PerUserLimit      int64  `json:"per_user_limit"`
-        StartTime         string `json:"start_time"`
-        EndTime           string `json:"end_time"`
-        Status            int64  `json:"status"`
-        Description       string `json:"description"`
-    }
-
-    AdminCouponItem {
-        Id            uint64 `json:"id"`
-        Name          string `json:"name"`
-        Type          int64  `json:"type"`
-        TotalQuantity int64  `json:"total_quantity"`
-        UsedQuantity  int64  `json:"used_quantity"`
-        Status        int64  `json:"status"`
-        StartTime     string `json:"start_time"`
-        EndTime       string `json:"end_time"`
-    }
-
-    AdminCouponListReq {
-        Pagination
-        Status int64  `form:"status,optional"`
-        Name   string `form:"name,optional"`
-    }
-
-    AdminCouponListResp {
-        Total int64               `json:"total"`
-        List  []AdminCouponItem   `json:"list"`
-    }
+	SaveCouponReq {
+		Id                uint64 `json:"id,optional"`
+		Name              string `json:"name"`
+		Type              int64  `json:"type"`
+		ThresholdAmount   int64  `json:"threshold_amount"`
+		ReduceAmount      int64  `json:"reduce_amount"`
+		DiscountRate      int64  `json:"discount_rate"`
+		MaxDiscountAmount int64  `json:"max_discount_amount"`
+		TotalQuantity     int64  `json:"total_quantity"`
+		PerUserLimit      int64  `json:"per_user_limit"`
+		StartTime         string `json:"start_time"`
+		EndTime           string `json:"end_time"`
+		Status            int64  `json:"status"`
+		Description       string `json:"description"`
+	}
+	AdminCouponItem {
+		Id            uint64 `json:"id"`
+		Name          string `json:"name"`
+		Type          int64  `json:"type"`
+		TotalQuantity int64  `json:"total_quantity"`
+		UsedQuantity  int64  `json:"used_quantity"`
+		Status        int64  `json:"status"`
+		StartTime     string `json:"start_time"`
+		EndTime       string `json:"end_time"`
+	}
+	AdminCouponListReq {
+		Pagination
+		Status int64  `form:"status,optional"`
+		Name   string `form:"name,optional"`
+	}
+	AdminCouponListResp {
+		Total int64             `json:"total"`
+		List  []AdminCouponItem `json:"list"`
+	}
 )
 
 // =============================================================
 // 操作日志
 // =============================================================
-
 type (
-    AdminOperateLogItem {
-        Id         uint64 `json:"id"`
-        AdminId    uint64 `json:"admin_id"`
-        Module     string `json:"module"`
-        Action     string `json:"action"`
-        Content    string `json:"content"`
-        Ip         string `json:"ip"`
-        CreatedAt  string `json:"created_at"`
-    }
-
-    AdminOperateLogResp {
-        Total int64                   `json:"total"`
-        List  []AdminOperateLogItem   `json:"list"`
-    }
+	AdminOperateLogItem {
+		Id        uint64 `json:"id"`
+		AdminId   uint64 `json:"admin_id"`
+		Module    string `json:"module"`
+		Action    string `json:"action"`
+		Content   string `json:"content"`
+		Ip        string `json:"ip"`
+		CreatedAt string `json:"created_at"`
+	}
+	AdminOperateLogResp {
+		Total int64                 `json:"total"`
+		List  []AdminOperateLogItem `json:"list"`
+	}
 )
 
 // =============================================================
 // 登录接口
 // =============================================================
-@server(
-    group: auth
-    prefix: /api/v1/admin
+@server (
+	group:  auth
+	prefix: /api/v1/admin
 )
 service shop-api {
-
-    @doc "管理员登录"
-    @handler login
-    post /login (AdminLoginReq) returns (AdminLoginResp)
+	@doc "管理员登录"
+	@handler login
+	post /login (AdminLoginReq) returns (AdminLoginResp)
 }
 
 // =============================================================
 // 管理后台接口
 // =============================================================
-
-@server(
-    jwt: JwtAuth
-    group: admin
-    prefix: /api/v1/admin
+@server (
+	jwt:    JwtAuth
+	group:  admin
+	prefix: /api/v1/admin
 )
 service shop-api {
-    // 管理员
-    @handler adminInfo
-    get /info returns (AdminInfoResp)
+	// 管理员
+	@handler adminInfo
+	get /info returns (AdminInfoResp)
 
-    @handler changePassword
-    put /password (ChangePasswordReq)
+	@handler changePassword
+	put /password (ChangePasswordReq)
 
-    // 用户
-    @handler userList
-    get /user/list (AdminUserListReq) returns (AdminUserListResp)
+	// 用户
+	@handler userList
+	get /user/list (AdminUserListReq) returns (AdminUserListResp)
 
-    @handler userDetail
-    get /user/detail/:id (IdReq) returns (AdminUserDetailResp)
+	@handler userDetail
+	get /user/detail/:id (IdReq) returns (AdminUserDetailResp)
 
-    @handler blacklistUser
-    post /user/blacklist (BlackUserReq)
+	@handler blacklistUser
+	post /user/blacklist (BlackUserReq)
 
-    @handler recoverUser
-    post /user/recover (IdReq)
+	@handler recoverUser
+	post /user/recover (IdReq)
 
-    // 分类
-    @handler categoryList
-    get /category/list returns (CategoryListResp)
+	// 分类
+	@handler categoryList
+	get /category/list returns (CategoryListResp)
 
-    @handler saveCategory
-    post /category/save (SaveCategoryReq)
+	@handler saveCategory
+	post /category/save (SaveCategoryReq)
 
-    @handler deleteCategory
-    delete /category/:id (IdReq)
+	@handler deleteCategory
+	delete /category/:id (IdReq)
 
-    // 商品
-    @handler productList
-    get /product/list (AdminProductListReq) returns (AdminProductListResp)
+	// 商品
+	@handler productList
+	get /product/list (AdminProductListReq) returns (AdminProductListResp)
 
-    @handler productDetail
-    get /product/detail/:id (IdReq) returns (AdminProductDetailResp)
+	@handler productDetail
+	get /product/detail/:id (IdReq) returns (AdminProductDetailResp)
 
-    @handler saveProduct
-    post /product/save (SaveProductReq)
+	@handler saveProduct
+	post /product/save (SaveProductReq)
 
-    @handler updateProductStatus
-    post /product/status (UpdateStatusReq)
+	@handler updateProductStatus
+	post /product/status (UpdateStatusReq)
 
-    @handler deleteProduct
-    delete /product/:id (IdReq)
+	@handler deleteProduct
+	delete /product/:id (IdReq)
 
-    // 订单
-    @handler orderList
-    get /order/list (AdminOrderListReq) returns (AdminOrderListResp)
+	// 订单
+	@handler orderList
+	get /order/list (AdminOrderListReq) returns (AdminOrderListResp)
 
-    @handler orderDetail
-    get /order/detail/:order_sn (OrderSnReq) returns (AdminOrderDetailResp)
+	@handler orderDetail
+	get /order/detail/:order_sn (OrderSnReq) returns (AdminOrderDetailResp)
 
-    @handler shipOrder
-    post /order/ship (ShipOrderReq)
+	@handler shipOrder
+	post /order/ship (ShipOrderReq)
 
-    // 售后
-    @handler refundList
-    get /refund/list (AdminRefundListReq) returns (AdminRefundListResp)
+	// 售后
+	@handler refundList
+	get /refund/list (AdminRefundListReq) returns (AdminRefundListResp)
 
-    @handler handleRefund
-    post /refund/handle (HandleRefundReq)
+	@handler handleRefund
+	post /refund/handle (HandleRefundReq)
 
-    // 优惠券
-    @handler couponList
-    get /coupon/list (AdminCouponListReq) returns (AdminCouponListResp)
+	// 优惠券
+	@handler couponList
+	get /coupon/list (AdminCouponListReq) returns (AdminCouponListResp)
 
-    @handler saveCoupon
-    post /coupon/save (SaveCouponReq)
+	@handler saveCoupon
+	post /coupon/save (SaveCouponReq)
 
-    @handler updateCouponStatus
-    post /coupon/status (UpdateStatusReq)
+	@handler updateCouponStatus
+	post /coupon/status (UpdateStatusReq)
 
-    // 操作日志
-    @handler operateLogs
-    get /operate/logs returns (AdminOperateLogResp)
+	// 操作日志
+	@handler operateLogs
+	get /operate/logs returns (AdminOperateLogResp)
 }
+

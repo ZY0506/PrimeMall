@@ -16,37 +16,37 @@ import "google/protobuf/timestamp.proto";
  * 核心：预下单、创建订单、订单管理、售后管理
  */
 service Order {
-  // 预下单（结算页接口）：校验信息、计算价格、生成结算token
+  // PreOrder - 预下单（结算页接口）：校验信息、计算价格、生成结算token
   rpc PreOrder(PreOrderRequest) returns (PreOrderResponse);
 
-  // 创建订单（提交订单接口）：基于结算token，锁库存、生成正式订单
+  // CreateOrder - 创建订单（提交订单接口）：基于结算token，锁库存、生成正式订单
   rpc CreateOrder(CreateOrderRequest) returns (CreateOrderResponse);
 
-  // 订单列表：查询用户所有订单/按状态筛选
+  // OrderList - 订单列表：查询用户所有订单/按状态筛选
   rpc OrderList(OrderListRequest) returns (OrderListResponse);
 
-  // 订单详情：查询订单完整信息
+  // OrderDetail - 订单详情：查询订单完整信息
   rpc OrderDetail(OrderDetailRequest) returns (OrderDetailResponse);
 
-  // 取消订单：仅待支付订单可取消
+  // CancelOrder - 取消订单：仅待支付订单可取消
   rpc CancelOrder(CancelOrderRequest) returns (Empty);
 
-  // 确认收货：已发货订单确认完成
+  // ConfirmReceipt - 确认收货：已发货订单确认完成
   rpc ConfirmReceipt(OrderDetailRequest) returns (Empty);
 
-  // 申请售后：订单内商品申请退款/退货退款
+  // ApplyAfterSale - 申请售后：订单内商品申请退款/退货退款
   rpc ApplyAfterSale(AfterSaleRequest) returns (Empty);
 
-  // 取消售后：撤销售后申请
+  // CancelAfterSale - 取消售后：撤销售后申请
   rpc CancelAfterSale(CancelAfterSaleRequest) returns (Empty);
 
-  // 售后列表：查询用户所有售后单
+  // AfterSaleList - 售后列表：查询用户所有售后单
   rpc AfterSaleList(AfterSaleListRequest) returns (AfterSaleListResponse);
 
-  // 售后详情：查询售后单完整信息
+  // AfterSaleDetail - 售后详情：查询售后单完整信息
   rpc AfterSaleDetail(AfterSaleDetailRequest) returns (AfterSaleDetailResponse);
 
-  // 提交退货物流：退货退款场景填写退货快递信息
+  // SubmitReturnLogistics - 提交退货物流：退货退款场景填写退货快递信息
   rpc SubmitReturnLogistics(SubmitReturnLogisticsRequest) returns (Empty);
 }
 
@@ -55,31 +55,47 @@ service Order {
  * 与订单服务耦合部署，支持购物车结算、增删改查
  */
 service Cart {
-  // 添加/更新购物车：quantity=0 时删除商品
+  // UpdateCart - 添加/更新购物车：quantity=0 时删除商品
   rpc UpdateCart(UpdateCartRequest) returns (Empty);
 
-  // 修改单个商品选中状态
+  // SelectCart - 修改单个商品选中状态
   rpc SelectCart(SelectCartRequest) returns (Empty);
 
-  // 批量修改选中状态（支持全选/全不选）
+  // BatchSelectCart - 批量修改选中状态（支持全选/全不选）
   rpc BatchSelectCart(BatchSelectCartRequest) returns (Empty);
 
-  // 获取购物车列表（含选中状态、库存、价格）
+  // CartList - 获取购物车列表（含选中状态、库存、价格）
   rpc CartList(Empty) returns (CartListResponse);
 
-  // 批量删除购物车商品
+  // RemoveCart - 批量删除购物车商品
   rpc RemoveCart(RemoveCartRequest) returns (Empty);
 
-  // 清空当前用户购物车
+  // ClearCart - 清空当前用户购物车
   rpc ClearCart(Empty) returns (Empty);
 }
 
 /**
  * 管理后台订单服务
- * 预留：订单查询、售后审核、订单操作
+ * 提供订单查询、发货、售后审核等管理功能
  */
 service OrderAdmin{
+  // ListOrders - 订单列表查询
+  rpc ListOrders(AdminListOrdersRequest) returns (AdminListOrdersResponse);
 
+  // GetOrder - 订单详情查询
+  rpc GetOrder(AdminGetOrderRequest) returns (AdminOrderDetailResponse);
+
+  // ShipOrder - 订单发货
+  rpc ShipOrder(AdminShipOrderRequest) returns (Empty);
+
+  // ListAfterSales - 售后列表查询
+  rpc ListAfterSales(AdminListAfterSalesRequest) returns (AdminListAfterSalesResponse);
+
+  // GetAfterSale - 售后详情查询
+  rpc GetAfterSale(AdminGetAfterSaleRequest) returns (AdminAfterSaleDetailResponse);
+
+  // HandleAfterSale - 处理售后（审核同意/拒绝）
+  rpc HandleAfterSale(AdminHandleAfterSaleRequest) returns (Empty);
 }
 
 /**
@@ -87,7 +103,14 @@ service OrderAdmin{
  * 预留：支付回调、库存通知、其他服务调用订单
  */
 service OrderInternal{
+  // NotifyPaymentSuccess - 接收支付成功通知（由 Payment 服务调用）
+  rpc NotifyPaymentSuccess(PaymentSuccessNotifyRequest) returns (Empty);
 
+  // NotifyRefundSuccess - 接收退款成功通知（由 Payment 服务调用）
+  rpc NotifyRefundSuccess(RefundSuccessNotifyRequest) returns (Empty);
+
+  // NotifyOrderTimeout - 接收订单超时通知（由 MQ 消费者调用）
+  rpc NotifyOrderTimeout(OrderTimeoutNotifyRequest) returns (Empty);
 }
 
 // ========================
@@ -123,7 +146,6 @@ enum AfterSaleStatus {
 /**
  * 取消订单原因类型
  */
-// 0-未取消 1-用户主动取消 2-超时未支付取消 3-库存不足 4-管理员取消 5-其他
 enum CancelReasonType {
   CANCEL_REASON_TYPE_NONE = 0;                // 未取消
   CANCEL_REASON_TYPE_USER = 1;                // 用户取消
@@ -147,8 +169,8 @@ enum PayType {
  */
 enum AfterSaleType {
   AFTER_SALE_TYPE_UNKNOWN = 0;          // 未知售后类型
-  AFTER_SALE_TYPE_REFUND_ONLY = 1;     // 仅退款
-  AFTER_SALE_TYPE_RETURN_REFUND = 2;   // 退货退款
+  AFTER_SALE_TYPE_REFUND_ONLY = 1;      // 仅退款
+  AFTER_SALE_TYPE_RETURN_REFUND = 2;    // 退货退款
 }
 
 // 空响应体
@@ -162,11 +184,11 @@ message Empty {}
  * 地址详情
  */
 message AddressDetail {
-  string province = 1;      // 省份
-  string city = 2;          // 城市
-  string district = 3;      // 区县
-  string detail_address = 4; // 详细地址
-  string postal_code = 5;    // 邮政编码
+  string province = 1;        // 省份
+  string city = 2;            // 城市
+  string district = 3;        // 区县
+  string detail_address = 4;  // 详细地址
+  string postal_code = 5;     // 邮政编码
 }
 
 /**
@@ -217,13 +239,13 @@ message OrderItemSimple {
  * 预下单响应参数
  */
 message PreOrderResponse {
-  string settlement_token = 1;        // 【核心】结算令牌（冻结结算上下文，30分钟有效期）
-  repeated OrderItem items = 2;        // 商品信息（含实时价格、规格）
-  AddressSnapshot address = 3;        // 地址快照
-  int64 total_amount = 4;              // 商品总价（单位：分）
-  int64 freight_amount = 5;            // 运费金额（单位：分）
-  int64 coupon_amount = 6;             // 优惠券抵扣金额（单位：分）
-  int64 pay_amount = 7;                // 实付金额（总价+运费-优惠）
+  string settlement_token = 1;    // 【核心】结算令牌（冻结结算上下文，30分钟有效期）
+  repeated OrderItem items = 2;   // 商品信息（含实时价格、规格）
+  AddressSnapshot address = 3;    // 地址快照
+  int64 total_amount = 4;         // 商品总价（单位：分）
+  int64 freight_amount = 5;       // 运费金额（单位：分）
+  int64 coupon_amount = 6;        // 优惠券抵扣金额（单位：分）
+  int64 pay_amount = 7;           // 实付金额（总价+运费-优惠）
 }
 
 // ========================
@@ -234,13 +256,13 @@ message PreOrderResponse {
  * 创建订单请求参数
  */
 message CreateOrderRequest {
-  string settlement_token = 1;         // 【核心】预下单生成的结算令牌，30分钟有效
-  PayType pay_type = 2;                // 支付方式：1-微信 2-支付宝
-  string remark = 3;                   // 订单备注（选填）
-  string idempotency_key = 4;          // 幂等键（前端生成唯一ID，防重复提交）
-  repeated uint64 cart_sku_ids = 5;    // 购物车已结算SKU列表，下单成功后删除
-  uint64 address_id = 6;               // 收货地址ID
-  uint64 coupon_id = 7;                // 优惠券ID（无则传0）
+  string settlement_token = 1;      // 【核心】预下单生成的结算令牌，30分钟有效
+  PayType pay_type = 2;             // 支付方式：1-微信 2-支付宝
+  string remark = 3;                // 订单备注（选填）
+  string idempotency_key = 4;       // 幂等键（前端生成唯一ID，防重复提交）
+  repeated uint64 cart_sku_ids = 5; // 购物车已结算SKU列表，下单成功后删除
+  uint64 address_id = 6;            // 收货地址ID
+  uint64 coupon_id = 7;             // 优惠券ID（无则传0）
 }
 
 /**
@@ -256,10 +278,10 @@ message CreateOrderResponse {
  */
 message OrderTimeoutMessage {
   string order_sn = 1;                    // 订单号
-  CancelReasonType cancel_reason_type = 3;           // 取消原因类型
-  string cancel_reason = 4;               // 取消原因
-  repeated OrderItemSimple items = 5;     // 订单项快照(用于解锁库存)
-  uint64 coupon_id = 6;                    // 优惠券ID(可选)
+  CancelReasonType cancel_reason_type = 2; // 取消原因类型
+  string cancel_reason = 3;               // 取消原因
+  repeated OrderItemSimple items = 4;     // 订单项快照(用于解锁库存)
+  uint64 coupon_id = 5;                   // 优惠券ID(可选)
 }
 
 // ========================
@@ -315,14 +337,17 @@ message OrderDetailResponse {
   string remark = 8;                            // 订单备注
   google.protobuf.Timestamp pay_time = 9;       // 支付时间
   google.protobuf.Timestamp delivery_time = 10; // 发货时间
-  google.protobuf.Timestamp finish_time = 11;    // 完成时间
+  google.protobuf.Timestamp finish_time = 11;   // 完成时间
   google.protobuf.Timestamp cancel_time = 12;   // 取消时间
 }
 
+/**
+ * 取消订单请求
+ */
 message CancelOrderRequest {
-  string order_sn = 1;  // 订单编号
-  CancelReasonType reason_type = 2;
-  string reason = 3;    // 取消原因
+  string order_sn = 1;              // 订单编号
+  CancelReasonType reason_type = 2; // 取消原因类型
+  string reason = 3;                // 取消原因
 }
 
 // ========================
@@ -333,14 +358,14 @@ message CancelOrderRequest {
  * 申请售后请求
  */
 message AfterSaleRequest {
-  string order_sn = 1;                // 订单编号
-  uint64 sku_id = 2;                  // 售后SKU ID
-  int64 quantity = 3;                 // 售后数量
-  AfterSaleType type = 4;             // 售后类型
-  string reason = 5;                   // 售后原因
-  int64 apply_amount = 6;             // 申请退款金额
-  repeated string images = 7;          // 凭证图片
-  string idempotency_key = 8;          // 幂等键
+  string order_sn = 1;            // 订单编号
+  uint64 sku_id = 2;              // 售后SKU ID
+  int64 quantity = 3;             // 售后数量
+  AfterSaleType type = 4;         // 售后类型
+  string reason = 5;              // 售后原因
+  int64 apply_amount = 6;         // 申请退款金额
+  repeated string images = 7;     // 凭证图片
+  string idempotency_key = 8;     // 幂等键
 }
 
 /**
@@ -354,9 +379,9 @@ message CancelAfterSaleRequest {
  * 售后列表请求
  */
 message AfterSaleListRequest {
-  AfterSaleStatus status = 1;
-  int64 page = 2;    // 页码
-  int64 size = 3;    // 每页条数
+  AfterSaleStatus status = 1;   // 售后状态（0=查询全部）
+  int64 page = 2;               // 页码
+  int64 size = 3;               // 每页条数
 }
 
 /**
@@ -395,21 +420,21 @@ message AfterSaleDetailRequest {
 message AfterSaleDetailResponse {
   uint64 after_sale_id = 1;                // 售后单ID
   string order_sn = 2;                     // 订单编号
-  AfterSaleType type = 3;                   // 售后类型
-  AfterSaleStatus status = 4;               // 售后状态
-  string status_desc = 18;                   // 售后状态描述
-  int64 apply_amount = 5;                   // 申请退款金额
-  string reason = 6;                        // 售后原因
-  repeated string images = 7;               // 凭证图片
+  AfterSaleType type = 3;                  // 售后类型
+  AfterSaleStatus status = 4;              // 售后状态
+  string status_desc = 18;                 // 售后状态描述
+  int64 apply_amount = 5;                  // 申请退款金额
+  string reason = 6;                       // 售后原因
+  repeated string images = 7;              // 凭证图片
   string audit_remark = 8;                 // 审核备注
   google.protobuf.Timestamp created_at = 9; // 创建时间
   google.protobuf.Timestamp audit_time = 10; // 审核时间
-  string return_tracking_sn = 12;           // 退货物流单号
-  string return_tracking_corp = 13;         // 退货物流公司
+  string return_tracking_sn = 12;          // 退货物流单号
+  string return_tracking_corp = 13;        // 退货物流公司
   google.protobuf.Timestamp receive_time = 14; // 商家收货时间
-  int64 refund_amount = 15;                 // 实际退款金额
+  int64 refund_amount = 15;                // 实际退款金额
   google.protobuf.Timestamp refund_time = 16; // 退款完成时间
-  OrderItem product_item = 17;              // 商品快照
+  OrderItem product_item = 17;             // 商品快照
 }
 
 /**
@@ -417,8 +442,8 @@ message AfterSaleDetailResponse {
  */
 message SubmitReturnLogisticsRequest {
   uint64 after_sale_id = 1;        // 售后单ID
-  string logistics_company = 2;     // 物流公司名称
-  string tracking_no = 3;           // 物流单号
+  string logistics_company = 2;    // 物流公司名称
+  string tracking_no = 3;          // 物流单号
 }
 
 // ========================
@@ -456,7 +481,7 @@ message UpdateCartRequest {
  */
 message SelectCartRequest {
   uint64 sku_id = 1;    // SKU ID
-  bool selected = 2;     // 选中状态 true-选中 false-取消
+  bool selected = 2;    // 选中状态 true-选中 false-取消
 }
 
 /**
@@ -481,4 +506,226 @@ message RemoveCartRequest {
 message CartListResponse {
   repeated CartItem items = 1;    // 购物车商品列表
   int64 total_amount = 2;         // 选中商品总价
+}
+
+// ========================
+// 管理后台相关接口
+// ========================
+
+/**
+ * 管理后台订单列表请求
+ */
+message AdminListOrdersRequest {
+  int64 page = 1;                              // 页码
+  int64 page_size = 2;                         // 每页条数
+  OrderStatus status = 3;                      // 订单状态（0=全部）
+  string order_sn = 4;                         // 订单编号（模糊搜索）
+  google.protobuf.Timestamp start_time = 5;    // 开始时间
+  google.protobuf.Timestamp end_time = 6;      // 结束时间
+}
+
+/**
+ * 管理后台订单项
+ */
+message AdminOrderListItem {
+  string order_sn = 1;                           // 订单编号
+  uint64 user_id = 2;                            // 用户ID
+  string user_phone = 3;                         // 用户手机号
+  int64 pay_amount = 4;                          // 实付金额（分）
+  OrderStatus status = 5;                        // 订单状态
+  string status_desc = 6;                        // 状态描述
+  google.protobuf.Timestamp created_at = 7;      // 创建时间
+}
+
+/**
+ * 管理后台订单列表响应
+ */
+message AdminListOrdersResponse {
+  int64 total = 1;                               // 总条数
+  repeated AdminOrderListItem list = 2;          // 订单列表
+}
+
+/**
+ * 管理后台订单详情请求
+ */
+message AdminGetOrderRequest {
+  string order_sn = 1;    // 订单编号
+}
+
+/**
+ * 管理后台订单商品项
+ */
+message AdminOrderProductItem {
+  uint64 sku_id = 1;                             // SKU ID
+  uint64 spu_id = 2;                             // SPU ID
+  string product_name = 3;                       // 商品名称
+  string sku_name = 4;                           // SKU规格名称
+  string pic = 5;                                // 商品图片
+  int64 price = 6;                               // 商品单价（分）
+  int64 quantity = 7;                            // 购买数量
+  int64 total_amount = 8;                        // 商品小计（分）
+}
+
+/**
+ * 管理后台订单地址
+ */
+message AdminOrderAddress {
+  string receiver_name = 1;     // 收货人姓名
+  string receiver_phone = 2;    // 收货人电话
+  string province = 3;          // 省份
+  string city = 4;              // 城市
+  string district = 5;          // 区县
+  string detail_address = 6;    // 详细地址
+}
+
+/**
+ * 管理后台订单详情响应
+ */
+message AdminOrderDetailResponse {
+  string order_sn = 1;                           // 订单编号
+  uint64 user_id = 2;                            // 用户ID
+  string user_phone = 3;                         // 用户手机号
+  OrderStatus status = 4;                        // 订单状态
+  string status_desc = 5;                        // 状态描述
+  PayType pay_type = 6;                          // 支付方式
+  string pay_type_desc = 7;                      // 支付方式描述
+  int64 pay_amount = 8;                          // 实付金额（分）
+  int64 total_amount = 9;                        // 商品总价（分）
+  int64 freight_amount = 10;                     // 运费（分）
+  int64 coupon_amount = 11;                      // 优惠金额（分）
+  string remark = 12;                            // 订单备注
+  AdminOrderAddress address = 13;                // 收货地址
+  repeated AdminOrderProductItem items = 14;     // 商品列表
+  string delivery_sn = 15;                       // 物流单号
+  string delivery_company = 16;                  // 物流公司
+  google.protobuf.Timestamp create_time = 17;    // 创建时间
+  google.protobuf.Timestamp pay_time = 18;       // 支付时间
+  google.protobuf.Timestamp delivery_time = 19;  // 发货时间
+  google.protobuf.Timestamp finish_time = 20;    // 完成时间
+  google.protobuf.Timestamp cancel_time = 21;    // 取消时间
+}
+
+/**
+ * 管理后台发货请求
+ */
+message AdminShipOrderRequest {
+  string order_sn = 1;            // 订单编号
+  string delivery_company = 2;    // 物流公司名称
+  string delivery_sn = 3;         // 物流单号
+  string remark = 4;              // 发货备注
+}
+
+/**
+ * 管理后台售后列表请求
+ */
+message AdminListAfterSalesRequest {
+  int64 page = 1;                 // 页码
+  int64 page_size = 2;            // 每页条数
+  AfterSaleStatus status = 3;     // 售后状态（0=全部）
+}
+
+/**
+ * 管理后台售后项
+ */
+message AdminAfterSaleListItem {
+  uint64 after_sale_id = 1;                      // 售后单ID
+  string order_sn = 2;                           // 订单编号
+  AfterSaleType type = 3;                        // 售后类型
+  AfterSaleStatus status = 4;                    // 售后状态
+  string status_desc = 5;                        // 状态描述
+  int64 refund_amount = 6;                       // 退款金额（分）
+  string spu_name = 7;                           // 商品名称
+  string sku_name = 8;                           // 商品规格
+  string pic = 9;                                // 商品图片
+  google.protobuf.Timestamp created_at = 10;     // 创建时间
+}
+
+/**
+ * 管理后台售后列表响应
+ */
+message AdminListAfterSalesResponse {
+  int64 total = 1;                               // 总条数
+  repeated AdminAfterSaleListItem list = 2;      // 售后列表
+}
+
+/**
+ * 管理后台售后详情请求
+ */
+message AdminGetAfterSaleRequest {
+  uint64 after_sale_id = 1;    // 售后单ID
+}
+
+/**
+ * 管理后台售后详情响应
+ */
+message AdminAfterSaleDetailResponse {
+  uint64 after_sale_id = 1;                      // 售后单ID
+  string order_sn = 2;                           // 订单编号
+  AfterSaleType type = 3;                        // 售后类型
+  AfterSaleStatus status = 4;                    // 售后状态
+  string status_desc = 5;                        // 状态描述
+  int64 apply_amount = 6;                        // 申请退款金额（分）
+  string reason = 7;                             // 售后原因
+  repeated string images = 8;                    // 凭证图片
+  string audit_remark = 9;                       // 审核备注
+  google.protobuf.Timestamp created_at = 10;     // 创建时间
+  google.protobuf.Timestamp audit_time = 11;     // 审核时间
+  string return_tracking_sn = 12;                // 退货物流单号
+  string return_tracking_corp = 13;              // 退货物流公司
+  int64 refund_amount = 14;                      // 实际退款金额（分）
+  google.protobuf.Timestamp refund_time = 15;    // 退款完成时间
+  AdminOrderProductItem product_item = 16;       // 商品快照
+}
+
+/**
+ * 售后审核动作枚举
+ */
+enum AfterSaleAuditAction {
+  AFTER_SALE_AUDIT_ACTION_UNKNOWN = 0;    // 未知动作
+  AFTER_SALE_AUDIT_ACTION_APPROVE = 1;    // 同意
+  AFTER_SALE_AUDIT_ACTION_REJECT = 2;     // 拒绝
+}
+
+/**
+ * 管理后台处理售后请求
+ */
+message AdminHandleAfterSaleRequest {
+  uint64 after_sale_id = 1;               // 售后单ID
+  AfterSaleAuditAction action = 2;        // 审核动作
+  string remark = 3;                      // 审核备注
+}
+
+// ========================
+// 内部通知接口消息体
+// ========================
+
+/**
+ * 支付成功通知请求（由 Payment 服务调用）
+ */
+message PaymentSuccessNotifyRequest {
+  string payment_sn = 1;              // 支付流水号
+  string order_sn = 2;                // 订单号
+  string transaction_id = 3;          // 第三方支付交易流水号
+  google.protobuf.Timestamp pay_time = 4;  // 支付成功时间
+}
+
+/**
+ * 退款成功通知请求（由 Payment 服务调用）
+ */
+message RefundSuccessNotifyRequest {
+  string refund_sn = 1;               // 退款单号
+  string payment_sn = 2;              // 原支付流水号
+  string order_sn = 3;                // 原订单号
+  uint64 after_sale_id = 4;           // 售后单ID
+  string third_party_refund_no = 5;   // 第三方退款流水号
+  google.protobuf.Timestamp refund_time = 6;  // 退款成功时间
+}
+
+/**
+ * 订单超时通知请求（由 MQ 消费者调用）
+ */
+message OrderTimeoutNotifyRequest {
+  string order_sn = 1;                // 订单号
+  CancelReasonType cancel_reason_type = 2;  // 取消原因类型
+  string cancel_reason = 3;           // 取消原因
 }

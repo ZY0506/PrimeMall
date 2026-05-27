@@ -11,6 +11,7 @@ import (
 const (
 	ContextKeyClientInfo      = "client_info"
 	ContextKeyUserId          = "user_id"
+	ContextKeyAdminId         = "admin_id"
 	ContextKeyClientIp        = "client_ip"
 	ContextKeyDeviceID        = "client_device_id"
 	ContextKeyClientUserAgent = "client_user_agent"

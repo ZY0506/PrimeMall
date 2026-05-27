@@ -3,3 +3,326 @@ syntax = "proto3";
 package payment;
 
 option go_package = "./payment";
+
+// goctl rpc protoc .\apps\service\payment\rpc\payment.proto --go_out=apps/service/payment/rpc/types --go-grpc_out apps/service/payment/rpc/types --zrpc_out=apps/service/payment/rpc/ -m
+
+import "google/protobuf/timestamp.proto";
+
+// ========================
+// 服务定义
+// ========================
+
+/**
+ * C端用户支付服务
+ * 核心：创建支付、查询支付状态
+ */
+service Payment {
+  // CreatePayment - 创建支付（订单提交后调用）：生成支付流水，返回支付参数
+  rpc CreatePayment(CreatePaymentRequest) returns (CreatePaymentResponse);
+
+  // QueryPayment - 查询支付状态：前端轮询或展示支付结果
+  rpc QueryPayment(QueryPaymentRequest) returns (QueryPaymentResponse);
+
+  // GetPaymentDetail - 获取支付详情：查看完整支付信息
+  rpc GetPaymentDetail(GetPaymentDetailRequest) returns (GetPaymentDetailResponse);
+}
+
+/**
+ * 管理后台支付服务
+ * 提供支付记录查询等功能
+ */
+service PaymentAdmin {
+  // ListPayments - 支付列表查询
+  rpc ListPayments(AdminListPaymentsRequest) returns (AdminListPaymentsResponse);
+
+  // GetPayment - 支付详情查询
+  rpc GetPayment(AdminGetPaymentRequest) returns (AdminPaymentDetailResponse);
+}
+
+/**
+ * 内部微服务调用接口
+ * 供 Order、Marketing 等服务调用
+ */
+service PaymentInternal {
+  // Refund - 执行退款（Order 服务售后审核通过后调用）
+  rpc Refund(RefundRequest) returns (RefundResponse);
+
+  // QueryRefund - 查询退款状态
+  rpc QueryRefund(QueryRefundRequest) returns (QueryRefundResponse);
+
+  // HandlePaymentCallback - 处理支付回调（第三方支付平台回调）
+  rpc HandlePaymentCallback(PaymentCallbackRequest) returns (PaymentCallbackResponse);
+
+  // HandleRefundCallback - 处理退款回调（第三方支付平台回调）
+  rpc HandleRefundCallback(RefundCallbackRequest) returns (RefundCallbackResponse);
+}
+
+// ========================
+// 枚举定义
+// ========================
+
+/**
+ * 支付方式
+ */
+enum PayType {
+  PAY_TYPE_UNKNOWN = 0;     // 未知支付方式
+  PAY_TYPE_WECHAT = 1;      // 微信支付
+  PAY_TYPE_ALIPAY = 2;      // 支付宝支付
+}
+
+/**
+ * 支付状态
+ */
+enum PaymentStatus {
+  PAYMENT_STATUS_UNKNOWN = 0;       // 未知状态
+  PAYMENT_STATUS_PENDING = 1;       // 待支付
+  PAYMENT_STATUS_SUCCESS = 2;       // 支付成功
+  PAYMENT_STATUS_FAILED = 3;        // 支付失败
+  PAYMENT_STATUS_REFUNDING = 4;     // 退款中
+  PAYMENT_STATUS_REFUNDED = 5;      // 已退款
+}
+
+/**
+ * 退款状态
+ */
+enum RefundStatus {
+  REFUND_STATUS_UNKNOWN = 0;        // 未知状态
+  REFUND_STATUS_PROCESSING = 1;     // 处理中
+  REFUND_STATUS_SUCCESS = 2;        // 退款成功
+  REFUND_STATUS_FAILED = 3;         // 退款失败
+}
+
+// 空响应体
+message Empty {}
+
+// ========================
+// C端支付接口
+// ========================
+
+/**
+ * 创建支付请求
+ */
+message CreatePaymentRequest {
+  string order_sn = 1;                    // 订单号
+  PayType pay_type = 2;                   // 支付方式
+  string idempotency_key = 3;             // 幂等键（防重复提交）
+  string client_ip = 4;                   // 客户端IP地址
+  google.protobuf.Timestamp expire_time = 5;  // 【必填】订单过期时间（由订单服务传入）
+}
+
+/**
+ * 创建支付响应
+ */
+message CreatePaymentResponse {
+  string payment_sn = 1;            // 支付流水号
+  string pay_params = 2;            // 支付参数（JSON格式，前端直接调用第三方支付SDK）
+  int64 amount = 3;                 // 支付金额（单位：分）
+  google.protobuf.Timestamp expire_time = 4;  // 支付过期时间
+}
+
+/**
+ * 查询支付状态请求
+ */
+message QueryPaymentRequest {
+  string payment_sn = 1;            // 支付流水号
+}
+
+/**
+ * 查询支付状态响应
+ */
+message QueryPaymentResponse {
+  string payment_sn = 1;            // 支付流水号
+  string order_sn = 2;              // 订单号
+  PaymentStatus status = 3;         // 支付状态
+  int64 amount = 4;                 // 支付金额（单位：分）
+  google.protobuf.Timestamp pay_time = 5;  // 支付成功时间
+}
+
+/**
+ * 获取支付详情请求
+ */
+message GetPaymentDetailRequest {
+  string payment_sn = 1;            // 支付流水号
+}
+
+/**
+ * 获取支付详情响应
+ */
+message GetPaymentDetailResponse {
+  string payment_sn = 1;            // 支付流水号
+  string order_sn = 2;              // 订单号
+  uint64 user_id = 3;               // 用户ID
+  int64 amount = 4;                 // 支付金额（单位：分）
+  PayType pay_type = 5;             // 支付方式
+  PaymentStatus status = 6;         // 支付状态
+  string channel_order_sn = 7;      // 第三方支付平台订单号
+  string transaction_id = 8;        // 第三方支付交易流水号
+  google.protobuf.Timestamp created_at = 9;   // 创建时间
+  google.protobuf.Timestamp pay_time = 10;    // 支付成功时间
+  string error_msg = 11;            // 错误信息（失败时）
+}
+
+// ========================
+// 内部退款接口
+// ========================
+
+/**
+ * 退款请求（内部 RPC）
+ */
+message RefundRequest {
+  string refund_sn = 1;             // 退款单号（业务唯一标识，幂等键）
+  string payment_sn = 2;            // 原支付流水号
+  string order_sn = 3;              // 原订单号
+  uint64 after_sale_id = 4;         // 售后单ID
+  int64 refund_amount = 5;          // 退款金额（单位：分）
+  PayType pay_type = 6;             // 原支付方式
+  string reason = 7;                // 退款原因
+  string operator = 8;              // 操作人（管理员ID或系统）
+}
+
+/**
+ * 退款响应
+ */
+message RefundResponse {
+  string refund_sn = 1;             // 退款单号
+  string third_party_refund_no = 2; // 第三方支付平台退款流水号
+  RefundStatus status = 3;          // 退款状态
+}
+
+/**
+ * 查询退款状态请求
+ */
+message QueryRefundRequest {
+  string refund_sn = 1;             // 退款单号
+}
+
+/**
+ * 查询退款状态响应
+ */
+message QueryRefundResponse {
+  string refund_sn = 1;             // 退款单号
+  string payment_sn = 2;            // 原支付流水号
+  string order_sn = 3;              // 原订单号
+  uint64 after_sale_id = 4;         // 售后单ID
+  int64 refund_amount = 5;          // 退款金额（单位：分）
+  RefundStatus status = 6;          // 退款状态
+  string third_party_refund_no = 7; // 第三方退款流水号
+  google.protobuf.Timestamp refund_time = 8;  // 退款成功时间
+  string error_msg = 9;             // 错误信息（失败时）
+}
+
+// ========================
+// 支付/退款回调接口
+// ========================
+
+/**
+ * 支付回调请求（第三方支付平台回调）
+ */
+message PaymentCallbackRequest {
+  string payment_sn = 1;            // 支付流水号
+  string order_sn = 2;              // 订单号
+  string channel = 3;               // 支付渠道：wechat/alipay
+  string raw_data = 4;              // 回调原始数据（JSON格式）
+  string signature = 5;             // 签名
+  google.protobuf.Timestamp callback_time = 6;  // 回调时间
+}
+
+/**
+ * 支付回调响应
+ */
+message PaymentCallbackResponse {
+  bool success = 1;                 // 是否处理成功
+  string message = 2;               // 响应消息
+}
+
+/**
+ * 退款回调请求（第三方支付平台回调）
+ */
+message RefundCallbackRequest {
+  string refund_sn = 1;             // 退款单号
+  string payment_sn = 2;            // 原支付流水号
+  string order_sn = 3;              // 原订单号
+  string channel = 4;               // 支付渠道：wechat/alipay
+  string raw_data = 5;              // 回调原始数据（JSON格式）
+  string signature = 6;             // 签名
+  RefundStatus refund_status = 7;   // 退款状态
+  string third_party_refund_no = 8; // 第三方退款流水号
+  google.protobuf.Timestamp callback_time = 9;  // 回调时间
+}
+
+/**
+ * 退款回调响应
+ */
+message RefundCallbackResponse {
+  bool success = 1;                 // 是否处理成功
+  string message = 2;               // 响应消息
+}
+
+// ========================
+// 管理后台接口
+// ========================
+
+/**
+ * 管理后台支付列表请求
+ */
+message AdminListPaymentsRequest {
+  int64 page = 1;                   // 页码
+  int64 page_size = 2;              // 每页条数
+  PaymentStatus status = 3;         // 支付状态（0=全部）
+  string order_sn = 4;              // 订单号（模糊搜索）
+  google.protobuf.Timestamp start_time = 5;  // 开始时间
+  google.protobuf.Timestamp end_time = 6;    // 结束时间
+}
+
+/**
+ * 管理后台支付列表项
+ */
+message AdminPaymentListItem {
+  string payment_sn = 1;            // 支付流水号
+  string order_sn = 2;              // 订单号
+  uint64 user_id = 3;               // 用户ID
+  string user_phone = 4;            // 用户手机号
+  int64 amount = 5;                 // 支付金额（单位：分）
+  PayType pay_type = 6;             // 支付方式
+  string pay_type_desc = 7;         // 支付方式描述
+  PaymentStatus status = 8;         // 支付状态
+  string status_desc = 9;           // 状态描述
+  google.protobuf.Timestamp created_at = 10;  // 创建时间
+  google.protobuf.Timestamp pay_time = 11;    // 支付成功时间
+}
+
+/**
+ * 管理后台支付列表响应
+ */
+message AdminListPaymentsResponse {
+  int64 total = 1;                  // 总条数
+  repeated AdminPaymentListItem list = 2;  // 支付列表
+}
+
+/**
+ * 管理后台支付详情请求
+ */
+message AdminGetPaymentRequest {
+  string payment_sn = 1;            // 支付流水号
+}
+
+/**
+ * 管理后台支付详情响应
+ */
+message AdminPaymentDetailResponse {
+  string payment_sn = 1;            // 支付流水号
+  string order_sn = 2;              // 订单号
+  uint64 user_id = 3;               // 用户ID
+  string user_phone = 4;            // 用户手机号
+  int64 amount = 5;                 // 支付金额（单位：分）
+  PayType pay_type = 6;             // 支付方式
+  string pay_type_desc = 7;         // 支付方式描述
+  PaymentStatus status = 8;         // 支付状态
+  string status_desc = 9;           // 状态描述
+  string channel_order_sn = 10;     // 第三方支付平台订单号
+  string transaction_id = 11;       // 第三方支付交易流水号
+  google.protobuf.Timestamp created_at = 12;  // 创建时间
+  google.protobuf.Timestamp pay_time = 13;    // 支付成功时间
+  string callback_data = 14;        // 支付回调数据快照（JSON格式）
+  string error_msg = 15;            // 错误信息
+}
