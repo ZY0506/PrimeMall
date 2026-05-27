@@ -42,6 +42,13 @@ const (
 	USER_STATUS_BANNED            // 封禁
 )
 
+// 管理员状态
+const (
+	ADMIN_STATUS_UNKNOWN  = iota // 未知
+	ADMIN_STATUS_NORMAL          // 正常
+	ADMIN_STATUS_DISABLED        // 禁用
+)
+
 // 封禁类型
 const (
 	BAN_TYPE_UNKNOWN = iota
@@ -98,6 +105,7 @@ const (
 	STOCK_CHANGE_TYPE_DEDUCT                   // 扣减库存
 	STOCK_CHANGE_TYPE_ROLLBACK                 // 回滚库存(订单取消/退款)
 	STOCK_CHANGE_TYPE_REVERT_DEDUCT            // 恢复库存
+	STOCK_CHANGE_TYPE_ADMIN                    // 管理员调整
 )
 
 // 前缀（订单部分）
@@ -176,6 +184,18 @@ var AfterSaleStatusMap = map[int]string{
 	AFTER_SALE_STATUS_CANCELED:  "已取消",
 }
 
+const (
+	PAY_TYPE_UNKNOWN = iota // 未知支付方式
+	PAY_TYPE_WECHAT         // 微信支付
+	PAY_TYPE_ALIPAY         // 支付宝支付
+)
+
+var PayTypeMap = map[int]string{
+	PAY_TYPE_UNKNOWN: "未知支付方式",
+	PAY_TYPE_WECHAT:  "微信支付",
+	PAY_TYPE_ALIPAY:  "支付宝支付",
+}
+
 // 售后类型
 const (
 	AFTER_SALE_TYPE_REFUND_ONLY   = 1
@@ -195,5 +215,20 @@ const (
 	ORDER_DELAY_QUEUE         = "order.delay.queue"
 	ORDER_DLX_EXCHANGE        = "order.dlx"
 	ORDER_TIMEOUT_ROUTING_KEY = "order.timeout"
-	ORDER_TTL_MS              = 15 * 60 * 1000 // 30分钟
+	ORDER_TTL_MS              = 15 * 60 * 1000 // 15分钟
+)
+
+// 支付服务 Redis Key 前缀
+const (
+	PAYMENT_SN_PREFIX          = "payment:sn:"          // 支付流水号索引
+	PAYMENT_ORDER_PREFIX       = "payment:order:"       // 订单号→支付流水号索引
+	PAYMENT_IDEMPOTENCY_PREFIX = "payment:idempotency:" // 幂等键→支付流水号映射
+	PAYMENT_DETAIL_PREFIX      = "payment:detail:"      // 支付详情JSON快照
+	PAYMENT_CACHE_EXPIRE       = 24 * time.Hour         // 支付缓存过期时间
+)
+
+// 计算运费方式
+const (
+	CALCULATE_FREIGHT_BY_COUNT  = iota + 1 // 按件数
+	CALCULATE_FREIGHT_BY_WEIGHT            // 按重量
 )

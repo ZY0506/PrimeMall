@@ -133,3 +133,14 @@ CREATE TABLE IF NOT EXISTS `freight_template` (
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci
   COMMENT='运费模板表';
+
+-- =============================================
+-- 索引优化（高并发场景）
+-- =============================================
+ALTER TABLE `category` ADD INDEX `idx_parent_status_sort` (`parent_id`, `status`, `sort`);
+ALTER TABLE `product_spu` ADD INDEX `idx_category_status` (`category_id`, `status`);
+ALTER TABLE `product_spu` ADD INDEX `idx_status_sales` (`status`, `sales_count`);
+ALTER TABLE `product_sku` ADD INDEX `idx_spu_status` (`spu_id`, `status`);
+ALTER TABLE `stock_log` ADD INDEX `idx_order_sn` (`order_sn`);
+ALTER TABLE `stock_log` ADD INDEX `idx_sku_created` (`sku_id`, `created_at`);
+ALTER TABLE `freight_template` ADD INDEX `idx_default` (`is_default`);

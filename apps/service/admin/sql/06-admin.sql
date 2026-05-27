@@ -16,7 +16,7 @@ USE `shop_admin`;
 -- 管理员表
 -- =============================================
 CREATE TABLE IF NOT EXISTS `admin` (
-    `id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '管理员ID',
+    `id`              BIGINT UNSIGNED NOT NULL COMMENT '管理员ID',
     `username`        VARCHAR(64)     NOT NULL COMMENT '登录用户名',
     `password`        VARCHAR(255)    NOT NULL COMMENT '登录密码（加密）',
     `real_name`       VARCHAR(64)     NOT NULL DEFAULT '' COMMENT '真实姓名',
@@ -185,3 +185,19 @@ CREATE TABLE IF NOT EXISTS `help_article` (
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci
   COMMENT='帮助中心文章表';
+
+-- =============================================
+-- 索引优化（高并发场景）
+-- =============================================
+ALTER TABLE `admin` ADD INDEX `idx_role_id` (`role_id`);
+ALTER TABLE `admin` ADD INDEX `idx_status` (`status`);
+ALTER TABLE `role` ADD UNIQUE INDEX `uk_code` (`code`);
+ALTER TABLE `role_permission` ADD INDEX `idx_permission_id` (`permission_id`);
+ALTER TABLE `admin_log` ADD INDEX `idx_admin_created` (`admin_id`, `created_at`);
+ALTER TABLE `admin_log` ADD INDEX `idx_module` (`module`);
+ALTER TABLE `banner` ADD INDEX `idx_status_platform` (`status`, `type`, `platform`);
+ALTER TABLE `banner` ADD INDEX `idx_status_time` (`status`, `start_time`, `end_time`);
+ALTER TABLE `notice` ADD INDEX `idx_type_status` (`type`, `status`);
+ALTER TABLE `notice` ADD INDEX `idx_status_publish` (`status`, `publish_time`);
+ALTER TABLE `help_category` ADD INDEX `idx_status_sort` (`status`, `sort`);
+ALTER TABLE `help_article` ADD INDEX `idx_category_status` (`category_id`, `status`);

@@ -99,3 +99,12 @@ CREATE TABLE IF NOT EXISTS `user_login_log` (
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci
   COMMENT='用户登录日志表';
+
+-- =============================================
+-- 索引优化（高并发场景）
+-- =============================================
+ALTER TABLE `user` ADD INDEX `idx_nickname` (`nickname`);
+ALTER TABLE `user` ADD INDEX `idx_created_at` (`created_at`);
+ALTER TABLE `user_address` ADD INDEX `idx_user_default` (`user_id`, `is_default`);
+ALTER TABLE `user_punish_log` ADD INDEX `idx_user_action` (`user_id`, `action_type`);
+ALTER TABLE `user_login_log` ADD INDEX `idx_user_created` (`user_id`, `created_at`);

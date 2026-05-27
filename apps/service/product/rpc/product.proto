@@ -25,27 +25,22 @@ service Product {
 // ==================== RPC（管理后台） ====================
 service ProductAdmin {
   // 分类管理
-  rpc CreateCategory(CreateCategoryReq) returns (IdResp);
+  rpc CreateCategory(CreateCategoryReq) returns (Empty);
   rpc UpdateCategory(UpdateCategoryReq) returns (Empty);
   rpc DeleteCategory(IdReq) returns (Empty);
   rpc ListCategories(ListCategoriesReq) returns (ListCategoriesResp);
   rpc TreeCategories(Empty) returns (CategoryTreeResp);
 
-  // 商品管理（SPU）
-  rpc CreateProduct(CreateProductReq) returns (IdResp);
+  // 商品管理（SPU + SKU 一起创建/更新，全量提交 SKU）
+  rpc CreateProduct(CreateProductReq) returns (Empty);
   rpc UpdateProduct(UpdateProductReq) returns (Empty);
   rpc DeleteProduct(IdReq) returns (Empty);
   rpc ListProductsAdmin(ListProductsAdminReq) returns (ListProductsAdminResp);
   rpc GetProductAdmin(IdReq) returns (ProductDetailResp);
-
-  // SKU管理
-  rpc CreateSku(CreateSkuReq) returns (IdResp);
-  rpc UpdateSku(UpdateSkuReq) returns (Empty);
-  rpc DeleteSku(IdReq) returns (Empty);
-  rpc ListSkusByProduct(ListSkusByProductReq) returns (ListSkusResp);
+  rpc UpdateProductStatus(UpdateProductStatusReq) returns (Empty);
 
   // 运费模板管理
-  rpc CreateFreightTemplate(CreateFreightTemplateReq) returns (IdResp);
+  rpc CreateFreightTemplate(CreateFreightTemplateReq) returns (Empty);
   rpc UpdateFreightTemplate(UpdateFreightTemplateReq) returns (Empty);
   rpc DeleteFreightTemplate(IdReq) returns (Empty);
   rpc ListFreightTemplates(PageReq) returns (ListFreightTemplatesResp);
@@ -80,10 +75,6 @@ service ProductInternal {
 message Empty{}
 
 message IdReq {
-  uint64 id = 1;
-}
-
-message IdResp {
   uint64 id = 1;
 }
 
@@ -237,7 +228,7 @@ message CreateProductReq {
   repeated SkuItem skus = 11;             // SKU列表
 }
 
-// 更新商品请求
+// 更新商品请求（SPU + SKU 全量更新）
 message UpdateProductReq {
   uint64 id = 1;
   uint64 category_id = 2;
@@ -251,6 +242,13 @@ message UpdateProductReq {
   uint64 freight_template_id = 10;
   ProductStatus status = 11;
   repeated AttributeItem attributes = 12;
+  repeated SkuItem skus = 13; // 全量 SKU 列表，用于替换原有 SKU
+}
+
+// 更新商品状态请求
+message UpdateProductStatusReq {
+  uint64 id = 1;
+  ProductStatus status = 2;
 }
 
 // ==================== 商品列表项（前台） ====================

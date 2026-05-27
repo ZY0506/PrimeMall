@@ -85,3 +85,12 @@ CREATE TABLE IF NOT EXISTS `refund` (
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci
   COMMENT='退款记录表';
+
+-- =============================================
+-- 索引优化（高并发场景）
+-- =============================================
+ALTER TABLE `payment` ADD INDEX `idx_user_status` (`user_id`, `status`);
+ALTER TABLE `payment` ADD INDEX `idx_channel` (`channel`);
+ALTER TABLE `payment_callback_log` ADD INDEX `idx_payment_status` (`payment_sn`, `status`);
+ALTER TABLE `refund` ADD INDEX `idx_user_id` (`user_id`);
+ALTER TABLE `refund` ADD INDEX `idx_user_status` (`user_id`, `status`);

@@ -14,7 +14,7 @@ import (
 
 type ProductRpcServer struct {
 	svcCtx *svc.ServiceContext
-	product.UnimplementedProductRpcServer
+	product.UnimplementedProductServer
 }
 
 func NewProductRpcServer(svcCtx *svc.ServiceContext) *ProductRpcServer {
