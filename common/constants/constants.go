@@ -26,6 +26,11 @@ const (
 const (
 	IDEMPOTENCY_KEY   = "idempotency:"
 	IDEMPOTENCY_EXIRE = 30 * time.Second
+	// Lua脚本：原子删除幂等键并重新设置（用于幂等键过期但订单未创建的竞态场景）
+	LuaResetIdempotencyKey = `
+		redis.call("DEL", KEYS[1])
+		return redis.call("SET", KEYS[1], ARGV[1], "NX", "PX", ARGV[2])
+		`
 	USER_SERVICE      = "user_service:"
 	PRODUCT_SERVICE   = "product_service:"
 	ORDER_SERVICE     = "order_service:"

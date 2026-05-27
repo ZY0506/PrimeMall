@@ -3,10 +3,9 @@ package response
 import (
 	"context"
 	"errors"
-	"github.com/ZY0506/PrimeMall/apps/service/user/rpc/types/user"
+	"github.com/ZY0506/PrimeMall/common/errorx"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"google.golang.org/grpc/status"
 	"net/http"
 )
 
@@ -59,8 +58,8 @@ const (
 	ErrCodeNicknameExists        = 20006 // 昵称已被占用
 	ErrCodeAvatarUploadFail      = 20007 // 头像上传失败
 	ErrCodeOssCallbackFail       = 20008 // OSS 回调处理失败
-	ErrCodeUserUnbanned          = 20008 // 账号已解封
-	ErrCodeUserPunishLogNotFound = 20009 // 风控日志不存在
+	ErrCodeUserUnbanned          = 20009 // 账号已解封
+	ErrCodeUserPunishLogNotFound = 20010 // 风控日志不存在
 )
 
 // 商品模块 (3xxxx)
@@ -74,9 +73,9 @@ const (
 	ErrCodeCategoryNotFound     = 30007 // 分类不存在
 	ErrCodeCategoryHasChildren  = 30008 // 分类含有子分类，无法删除
 	ErrCodeProductInvalidStatus = 30009 // 商品状态非法
-	ErrCodePictureNotFound      = 30009 // 图片不存在
-	ErrCodeCategoryDisabled     = 30010 // 分类被禁用
-	ErrCodeInvalidQuantity      = 30011 // 数量非法
+	ErrCodePictureNotFound      = 30010 // 图片不存在
+	ErrCodeCategoryDisabled     = 30011 // 分类被禁用
+	ErrCodeInvalidQuantity      = 30012 // 数量非法
 )
 
 // 订单模块 (4xxxx)
@@ -218,20 +217,13 @@ func LogicError(ctx context.Context, w http.ResponseWriter, err error) {
 		})
 		return
 	} else {
-		st, ok := status.FromError(err)
-		if ok {
-			for _, detail := range st.Details() {
-				switch e := detail.(type) {
-				case *user.ErrDetail:
-					// 解析到rpc业务错误
-					httpx.WriteJsonCtx(ctx, w, http.StatusOK, Response{
-						Code: int(e.Code),
-						Msg:  e.Msg,
-						Data: nil,
-					})
-					return
-				}
-			}
+		if code, msg, ok := errorx.ParseBizError(err); ok {
+			httpx.WriteJsonCtx(ctx, w, http.StatusBadRequest, Response{
+				Code: int(code),
+				Msg:  msg,
+				Data: nil,
+			})
+			return
 		}
 	}
 	logx.WithContext(ctx).Errorf("InternalError: error=%v", err)
