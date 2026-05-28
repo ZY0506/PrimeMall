@@ -4,12 +4,12 @@ Port: 8088
 Mode: dev
 
 JwtAuth:
-  AccessSecret: "${JWT_SECRET}"
+  AccessSecret: ${JWT_SECRET}
   AccessExpire: 7200
 
 AdminRpc:
   Etcd:
     Hosts:
-      - "${ETCD_HOST}"
+      - ${ETCD_HOST:-127.0.0.1}:${ETCD_PORT:-2379}
     Key: admin.rpc
   Timeout: 5000

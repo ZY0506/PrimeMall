@@ -1,0 +1,115 @@
+# =================================================================
+# PrimeMall 基础设施服务编排
+# 包含: MySQL 数据库 / Redis 缓存 / Etcd 服务发现 / RabbitMQ 消息队列
+# 使用: docker compose -f docker-compose.yml up -d
+# =================================================================
+version: '3.8'
+services:
+
+  # =================================================================
+  # MySQL 主数据库服务
+  # =================================================================
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-prime_mall
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-123456}
+      - TZ=Asia/Shanghai
+    ports:
+      - "${DB_PORT_EXTERNAL:-13306}:3306"
+    volumes:
+      - ./storage/mysql/data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_PASSWORD:-123456"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - prime_mall_network
+
+  # =================================================================
+  # Redis 缓存服务
+  # =================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: rdb-prime_mall
+    restart: unless-stopped
+    command: >
+      redis-server
+      --appendonly yes
+      --requirepass ${REDIS_PASSWORD:-123456}
+    ports:
+      - "${REDIS_PORT_EXTERNAL:-16379}:6379"
+    volumes:
+      - ./storage/redis/data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-123456}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - prime_mall_network
+
+  # =================================================================
+  # Etcd 服务注册与发现
+  # =================================================================
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.9
+    container_name: etcd-prime_mall
+    restart: unless-stopped
+    environment:
+      - ETCD_NAME=etcd-prime_mall
+      - ETCD_ADVERTISE_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_INITIAL_CLUSTER_STATE=new
+      - ETCD_INITIAL_CLUSTER_TOKEN=prime_mall_etcd_cluster
+      - TZ=Asia/Shanghai
+    ports:
+      - "${ETCD_PORT_EXTERNAL:-12379}:2379"
+    volumes:
+      - ./storage/etcd/data:/etcd
+    healthcheck:
+      test: ["CMD", "etcdctl", "endpoint", "health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - prime_mall_network
+
+  # =================================================================
+  # RabbitMQ 消息队列服务
+  # =================================================================
+  rabbitmq:
+    image: rabbitmq:3.9-management
+    container_name: rabbitmq-prime_mall
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME:-admin}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-RabbitMQ@2024}
+      - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_VHOST:-/}
+      - TZ=Asia/Shanghai
+    ports:
+      - "${RABBITMQ_PORT_EXTERNAL:-15672}:15672"
+      - "${RABBITMQ_AMQP_PORT:-5672}:5672"
+    volumes:
+      - ./storage/rabbitmq/data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - prime_mall_network
+
+# =================================================================
+# 网络配置
+# =================================================================
+networks:
+  prime_mall_network:
+    driver: bridge
+    name: prime_mall_network

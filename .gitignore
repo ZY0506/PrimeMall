@@ -6,3 +6,10 @@ go.sum
 .idea
 .vscode
 *.log
+
+storage
+.exe
+.claude
+.uploads
+doc
+template
