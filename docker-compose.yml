@@ -3,7 +3,6 @@
 # 包含: MySQL 数据库 / Redis 缓存 / Etcd 服务发现 / RabbitMQ 消息队列
 # 使用: docker compose -f docker-compose.yml up -d
 # =================================================================
-version: '3.8'
 services:
 
   # =================================================================
@@ -11,17 +10,22 @@ services:
   # =================================================================
   mysql:
     image: mysql:8.0
+
     container_name: mysql-prime_mall
     restart: unless-stopped
     environment:
       - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-123456}
       - TZ=Asia/Shanghai
+      - MYSQL_CHARACTER_SET_SERVER=utf8mb4
+      - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
+
     ports:
       - "${DB_PORT_EXTERNAL:-13306}:3306"
     volumes:
       - ./storage/mysql/data:/var/lib/mysql
+      - ./deployments/docker/mysql/init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_PASSWORD:-123456"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_PASSWORD:-123456}"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -33,13 +37,15 @@ services:
   # Redis 缓存服务
   # =================================================================
   redis:
-    image: redis:7-alpine
+    image: redis:7.2
     container_name: rdb-prime_mall
     restart: unless-stopped
     command: >
       redis-server
       --appendonly yes
       --requirepass ${REDIS_PASSWORD:-123456}
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
     ports:
       - "${REDIS_PORT_EXTERNAL:-16379}:6379"
     volumes:
@@ -84,12 +90,12 @@ services:
   # RabbitMQ 消息队列服务
   # =================================================================
   rabbitmq:
-    image: rabbitmq:3.9-management
+    image: rabbitmq:3.13-management
     container_name: rabbitmq-prime_mall
     restart: unless-stopped
     environment:
       - RABBITMQ_DEFAULT_USER=${RABBITMQ_USERNAME:-admin}
-      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-RabbitMQ@2024}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASSWORD:-123456}
       - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_VHOST:-/}
       - TZ=Asia/Shanghai
     ports:

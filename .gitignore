@@ -7,6 +7,8 @@ go.sum
 .vscode
 *.log
 
+AccessKey.csv
+
 storage
 .exe
 .claude

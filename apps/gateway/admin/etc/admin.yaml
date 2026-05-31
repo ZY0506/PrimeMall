@@ -10,6 +10,6 @@ JwtAuth:
 AdminRpc:
   Etcd:
     Hosts:
-      - ${ETCD_HOST:-127.0.0.1}:${ETCD_PORT:-2379}
+      - ${ETCD_HOST}:${ETCD_PORT}
     Key: admin.rpc
   Timeout: 5000
