@@ -9,6 +9,7 @@ import (
 type Claims struct {
 	UserId uint64 `json:"user_id"`
 	JTI    string `json:"token_id"`
+	Role   string `json:"role"`
 }
 
 type MyClaims struct {

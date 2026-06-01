@@ -39,6 +39,10 @@ func ValidatePhone(phone string) bool {
 }
 
 // ValidatePassword 验证密码合法性
+// 规则：
+// 1. 长度 8-20 位
+// 2. 必须包含至少一个字母
+// 3. 必须包含至少一个数字
 func ValidatePassword(pwd string) bool {
 	length := len(pwd)
 
@@ -46,24 +50,25 @@ func ValidatePassword(pwd string) bool {
 	if length < 8 || length > 20 {
 		return false
 	}
-	return true
 
-	//var hasLetter, hasNumber bool
-	//
-	//for _, c := range pwd {
-	//	switch {
-	//	case c >= 'a' && c <= 'z':
-	//		hasLetter = true
-	//	case c >= 'A' && c <= 'Z':
-	//		hasLetter = true
-	//	case c >= '0' && c <= '9':
-	//		hasNumber = true
-	//	default:
-	//		// 不允许特殊字符（如果你想允许，可以删掉这段）
-	//		return false
-	//	}
-	//}
-	//
-	//// 必须包含字母 + 数字
-	//return hasLetter && hasNumber
+	var hasLetter, hasNumber bool
+
+	for _, c := range pwd {
+		switch {
+		case c >= 'a' && c <= 'z':
+			hasLetter = true
+		case c >= 'A' && c <= 'Z':
+			hasLetter = true
+		case c >= '0' && c <= '9':
+			hasNumber = true
+		default:
+			// 允许常见特殊字符
+			if c > 127 {
+				return false // 不允许非 ASCII 字符
+			}
+		}
+	}
+
+	// 必须包含字母 + 数字
+	return hasLetter && hasNumber
 }
