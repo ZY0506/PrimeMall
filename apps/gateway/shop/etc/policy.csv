@@ -1,0 +1,11 @@
+p, user, /api/v1/marketing/coupon/*, (GET)|(POST), allow
+p, user, /api/v1/order/aftersale/*, (GET)|(POST), allow
+p, user, /api/v1/order/cart/*, (GET)|(POST)|(DELETE), allow
+p, user, /api/v1/order/*, (GET)|(POST), allow
+p, user, /api/v1/payment/*, (GET)|(POST), allow
+p, user, /api/v1/address/*, (GET)|(POST)|(PUT)|(DELETE)|(PATCH), allow
+p, user, /api/v1/user/*, (GET)|(POST)|(PUT)|(DELETE), allow
+p, user, /internal/v1/coupon/*, (GET)|(POST), allow
+
+# admin 继承 user 全部权限（预留）
+g, admin, user

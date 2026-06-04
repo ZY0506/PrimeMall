@@ -1,0 +1,183 @@
+syntax = "proto3";
+package marketing;
+
+option go_package = "./marketing";
+
+// goctl rpc protoc .\apps\service\marketing\rpc\marketing.proto --go_out=apps/service/marketing/rpc/types --go-grpc_out=apps/service/marketing/rpc/types --zrpc_out=apps/service/marketing/rpc/ -m
+
+// ==================== RPC ====================
+service Marketing {
+  // 创建优惠券（管理后台）
+  rpc CreateCoupon(CreateCouponReq) returns (Empty);
+  // 更新优惠券（管理后台）
+  rpc UpdateCoupon(UpdateCouponReq) returns (Empty);
+  // 删除优惠券（管理后台）
+  rpc DeleteCoupon(IdReq) returns (Empty);
+  // 获取单个优惠券
+  rpc GetCoupon(IdReq) returns (CouponResp);
+  // 获取全部可领取优惠券（领券中心）
+  rpc ListCoupons(ListCouponsReq) returns (ListCouponsResp);
+  // 用户领取优惠券
+  rpc ClaimCoupon(ClaimCouponReq) returns (ClaimCouponResp);
+  // 我的优惠券列表
+  rpc MyCoupons(MyCouponsReq) returns (MyCouponsResp);
+  // 结算页获取可用/不可用优惠券
+  rpc AvailableCoupons(AvailableCouponsReq) returns (AvailableCouponsResp);
+  // 内部：使用优惠券（锁定扣减）
+  rpc UseCoupon(UseCouponReq) returns (UseCouponResp);
+  // 内部：解锁优惠券（订单取消回滚）
+  rpc UnlockCoupon(UnlockCouponReq) returns (UnlockCouponResp);
+}
+
+// ==================== 通用结构 ====================
+message Empty {}
+
+message IdReq {
+  uint64 id = 1;
+}
+
+message PageReq {
+  int64 page = 1;
+  int64 size = 2;
+}
+
+message PageResp {
+  int64 total = 1;
+  int64 page = 2;
+  int64 size = 3;
+}
+
+// ==================== 优惠券 ====================
+enum CouponType {
+  COUPON_TYPE_UNKNOWN = 0;
+  COUPON_TYPE_FULL_REDUCE = 1;  // 满减券
+  COUPON_TYPE_DISCOUNT = 2;     // 折扣券
+  COUPON_TYPE_NO_THRESHOLD = 3; // 无门槛券
+}
+
+message CreateCouponReq {
+  string name = 1;
+  CouponType type = 2;
+  int64 threshold_amount = 3;    // 门槛（分）
+  int64 reduce_amount = 4;       // 减免金额（分）
+  int32 discount_rate = 5;       // 折扣率（万分比）
+  int64 max_discount_amount = 6; // 折扣封顶（分）
+  int32 total_quantity = 7;
+  int32 per_user_limit = 8;
+  int64 start_time = 9;          // Unix秒
+  int64 end_time = 10;
+  string description = 11;
+}
+
+message UpdateCouponReq {
+  uint64 id = 1;
+  string name = 2;
+  CouponType type = 3;
+  int64 threshold_amount = 4;
+  int64 reduce_amount = 5;
+  int32 discount_rate = 6;
+  int64 max_discount_amount = 7;
+  int32 total_quantity = 8;
+  int32 per_user_limit = 9;
+  int64 start_time = 10;
+  int64 end_time = 11;
+  string description = 12;
+  int32 status = 13; // 1-启用 2-禁用
+}
+
+message CouponInfo {
+  uint64 id = 1;
+  string name = 2;
+  CouponType type = 3;
+  int64 threshold_amount = 4;
+  int64 reduce_amount = 5;
+  int32 discount_rate = 6;
+  int64 max_discount_amount = 7;
+  int32 total_quantity = 8;
+  int32 used_quantity = 9;
+  int32 per_user_limit = 10;
+  int64 start_time = 11;
+  int64 end_time = 12;
+  int32 status = 13;
+  string description = 14;
+  int64 created_at = 15;
+}
+
+message CouponResp {
+  CouponInfo coupon = 1;
+}
+
+message ListCouponsReq {
+  PageReq page = 1;
+}
+
+message ListCouponsResp {
+  PageResp page = 1;
+  repeated CouponInfo list = 2;
+}
+
+// ==================== 用户优惠券 ====================
+message ClaimCouponReq {
+  uint64 coupon_id = 1;
+}
+
+message ClaimCouponResp {
+  uint64 user_coupon_id = 1;
+  int64 expire_time = 2;
+}
+
+message MyCouponsReq {
+  int32 status = 1; // 0-未使用 1-已使用 2-已过期
+  PageReq page = 2;
+}
+
+message UserCouponInfo {
+  uint64 id = 1;
+  uint64 coupon_id = 2;
+  uint64 user_id = 3;
+  string name = 4;
+  CouponType type = 5;
+  int32 status = 6;             // 0-未使用 1-已使用 2-已过期
+  int64 expire_time = 7;
+  string order_sn = 8;          // 使用的订单号
+  string unavailable_reason = 9;
+  int64 threshold_amount = 10;
+  int64 reduce_amount = 11;
+  int32 discount_rate = 12;
+  int64 max_discount_amount = 13;
+}
+
+message MyCouponsResp {
+  PageResp page = 1;
+  repeated UserCouponInfo list = 2;
+}
+
+message AvailableCouponsReq {
+  int64 order_amount = 1; // 订单金额（分）
+}
+
+message AvailableCouponsResp {
+  repeated UserCouponInfo available = 1;
+  repeated UserCouponInfo unavailable = 2;
+}
+
+message UseCouponReq {
+  uint64 user_coupon_id = 1;
+  string order_sn = 2;
+}
+
+message UseCouponResp {
+  bool success = 1;
+  int64 discount_amount = 2;
+  string error_msg = 3;
+}
+
+message UnlockCouponReq {
+  uint64 user_coupon_id = 1;
+  string order_sn = 2;
+}
+
+message UnlockCouponResp {
+  bool success = 1;
+  string error_msg = 2;
+}

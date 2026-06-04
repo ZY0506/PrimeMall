@@ -1,0 +1,45 @@
+Name: user.rpc
+ListenOn: 0.0.0.0:8081
+
+Etcd:
+  Hosts:
+    - ${ETCD_HOST}:${ETCD_PORT}
+  Key: user.rpc
+
+JWT:
+  Secret: ${JWT_SECRET}
+  Issuer: ${JWT_ISSUER}
+  AccessTokenExpire: 7200
+  RefreshTokenExpire: 604800
+
+DB:
+  DSN: ${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/shop_user?charset=utf8mb4&parseTime=True&loc=Local
+  MaxIdleConns: 10
+  MaxOpenConns: 10
+
+RDB:
+  Addr: ${REDIS_HOST}:${REDIS_PORT}
+  RedisPassword: "${REDIS_PASSWORD}"
+  RedisDB: 0
+  RedisPoolSize: 10
+  RedisMinIdleConns: 10
+
+OssConfig:
+  AccessKeyId: ${OSS_ACCESS_KEY}
+  AccessKeySecret: ${OSS_ACCESS_SECRET}
+  Endpoint: ${OSS_ENDPOINT}
+  BucketName: ${OSS_BUCKET}
+  Host: https://${OSS_BUCKET}.${OSS_ENDPOINT}
+  UploadDir: avatar/
+  ExpireTime: 3600000
+  CallbackUrl: ${OSS_CALLBACK_URL}
+  MaxFileSize: 10485760
+  AllowedExts:
+    - jpg
+    - jpeg
+    - png
+    - gif
+    - webp
+
+Snowflake:
+  NodeID: 1
