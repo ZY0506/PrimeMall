@@ -112,6 +112,38 @@ services:
     networks:
       - prime_mall_network
 
+  # =================================================================
+  # Elasticsearch 搜索引擎
+  # =================================================================
+  elasticsearch:
+    image: elasticsearch:7.17.27
+    container_name: es-prime_mall
+    restart: unless-stopped
+    environment:
+      - cluster.name=prime-mall-es
+      - node.name=es-prime-mall
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - TZ=Asia/Shanghai
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    ports:
+      - "${ES_PORT_EXTERNAL:-19200}:9200"
+      - "${ES_INTERNAL_PORT:-19300}:9300"
+    volumes:
+      - ./storage/es/data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - prime_mall_network
+
 # =================================================================
 # 网络配置
 # =================================================================
