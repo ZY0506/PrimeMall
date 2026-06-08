@@ -39,7 +39,7 @@ func (m *customOrderItemModel) withSession(session sqlx.Session) OrderItemModel 
 // InsertTx 事务操作
 func (m *customOrderItemModel) InsertTx(ctx context.Context, session sqlx.Session, data *OrderItem) (sql.Result, error) {
 	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, orderItemRowsExpectAutoSet)
-	ret, err := session.ExecCtx(ctx, query, data.OrderId, data.OrderSn, data.SkuId, data.SpuId, data.SpuName, data.SkuName, data.SkuPic, data.Price, data.Count, data.TotalAmount, data.IsSeckill)
+	ret, err := session.ExecCtx(ctx, query, data.Id, data.OrderId, data.OrderSn, data.SkuId, data.SpuId, data.SpuName, data.SkuName, data.SkuPic, data.Price, data.Count, data.TotalAmount, data.IsSeckill)
 	return ret, err
 }
 

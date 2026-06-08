@@ -38,8 +38,8 @@ func (m *customOrderInfoModel) withSession(session sqlx.Session) OrderInfoModel 
 
 // InsertTx 事务操作插入
 func (m *customOrderInfoModel) InsertTx(ctx context.Context, session sqlx.Session, data *OrderInfo) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, orderInfoRowsExpectAutoSet)
-	ret, err := session.ExecCtx(ctx, query, data.OrderSn, data.OrderType, data.IdempotencyKey, data.UserId, data.Status, data.AddressSnap, data.TotalAmount, data.FreightAmount, data.CouponId, data.CouponDiscount, data.PayAmount, data.Remark, data.PayTime, data.PayType, data.DeliveryTime, data.ReceiveTime, data.CancelTime, data.SeckillActivityId, data.SeckillPrice)
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, orderInfoRowsExpectAutoSet)
+	ret, err := session.ExecCtx(ctx, query, data.Id, data.OrderSn, data.OrderType, data.IdempotencyKey, data.UserId, data.Status, data.AddressSnap, data.TotalAmount, data.FreightAmount, data.CouponId, data.CouponDiscount, data.PayAmount, data.Remark, data.PayTime, data.PayType, data.DeliveryTime, data.DeliverySn, data.DeliveryCorp, data.ReceiveTime, data.CancelTime, data.CancelReasonType, data.CancelReason, data.SeckillActivityId, data.SeckillPrice, data.ExpireTime)
 	return ret, err
 }
 

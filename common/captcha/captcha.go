@@ -55,9 +55,8 @@ func (s *Service) Send(ctx context.Context, phone, scene string, sendFunc func(p
 
 	// 模拟发送
 	// TODO: 调用短信服务以及回调、失败回滚
-	//logx.Infof("发送验证码给手机: %s", phone)
 	logx.WithContext(ctx).Infof("发送验证码给手机: %s", phone)
-	fmt.Printf("验证码: %s\n", string(code))
+	fmt.Printf("验证码: %s\n", code)
 	// 调用发送回调
 	if err := sendFunc(phone, code); err != nil {
 		// 发送失败，回滚冷却标记和验证码

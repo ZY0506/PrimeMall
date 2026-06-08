@@ -16,6 +16,7 @@ import (
 	"github.com/ZY0506/PrimeMall/common/response"
 
 	"github.com/zeromicro/go-zero/core/logx"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -41,9 +42,6 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.CreatePaymentRequest) (*p
 	if in.IdempotencyKey == "" {
 		return nil, errorx.NewBizError(response.ErrCodeInvalidParam, "幂等键不能为空")
 	}
-	if in.ExpireTime == nil {
-		return nil, errorx.NewBizError(response.ErrCodeInvalidParam, "订单过期时间不能为空")
-	}
 
 	// 幂等校验
 	idempotencyKey := fmt.Sprintf("%s%s", constants.IDEMPOTENCY_KEY+constants.PAYMENT_SERVICE, in.IdempotencyKey)
@@ -67,11 +65,21 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.CreatePaymentRequest) (*p
 	}()
 
 	// 查询订单获取真实支付金额
-	orderDetail, err := l.svcCtx.OrderRpc.OrderDetail(l.ctx, &order.OrderDetailRequest{
+	// 注意：从当前上下文提取 user_id 并注入到 order.rpc 调用的 metadata 中
+	orderCtx := l.ctx
+	if md, ok := metadata.FromIncomingContext(l.ctx); ok {
+		orderCtx = metadata.NewOutgoingContext(l.ctx, md)
+	}
+	orderDetail, err := l.svcCtx.OrderRpc.OrderDetail(orderCtx, &order.OrderDetailRequest{
 		OrderSn: in.OrderSn,
 	})
 	if err != nil {
 		l.Logger.Errorf("查询订单详情失败, orderSn=%s, err=%v", in.OrderSn, err)
+		// 映射常见错误码到更有意义的提示
+		if code, msg, ok := errorx.ParseBizError(err); ok {
+			l.Logger.Errorf("订单详情业务错误, code=%d, msg=%s", code, msg)
+			return nil, err
+		}
 		return nil, errorx.NewBizError(response.ErrCodeOrderNotFound, "订单不存在")
 	}
 	if orderDetail.Base == nil {
@@ -86,7 +94,7 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.CreatePaymentRequest) (*p
 		return nil, err
 	}
 	now := time.Now()
-	expireTime := in.ExpireTime.AsTime()
+	expireTime := orderDetail.ExpireTime.AsTime()
 
 	// 构建支付记录（模拟实现，直接设为成功）
 	paymentRecord := map[string]interface{}{
@@ -145,7 +153,7 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.CreatePaymentRequest) (*p
 	return &payment.CreatePaymentResponse{
 		PaymentSn:  paymentSn,
 		PayParams:  mockPayParams,
-		ExpireTime: in.ExpireTime,
+		ExpireTime: orderDetail.ExpireTime,
 	}, nil
 }
 

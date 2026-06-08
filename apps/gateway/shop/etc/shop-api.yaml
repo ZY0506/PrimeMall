@@ -49,8 +49,8 @@ RDB:
   Addr: ${REDIS_HOST}:${REDIS_PORT}
   RedisPassword: "${REDIS_PASSWORD}"
   RedisDB: 0
-  RedisPoolSize: 10
-  RedisMinIdleConns: 10
+  RedisPoolSize: 50
+  RedisMinIdleConns: 20
 
 OssConfig:
   AccessKeyId: ${OSS_ACCESS_KEY}
@@ -74,5 +74,5 @@ CasbinConf:
   PolicyPath: etc/policy.csv
 
 RateLimit:
-  PerIPSpeed: 50
-  PerIPBurst: 100
+  PerIPSpeed: 500
+  PerIPBurst: 1000

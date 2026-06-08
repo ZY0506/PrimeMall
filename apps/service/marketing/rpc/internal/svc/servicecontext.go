@@ -1,6 +1,7 @@
 package svc
 
 import (
+	"fmt"
 	"github.com/ZY0506/PrimeMall/apps/service/marketing/rpc/internal/config"
 	"github.com/ZY0506/PrimeMall/apps/service/marketing/rpc/internal/model"
 	"github.com/ZY0506/PrimeMall/pkg/database"
@@ -19,6 +20,7 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
+	fmt.Println("初始化数据库连接：", c.DB.DSN)
 	db := database.InitDB(c.DB.DSN, c.DB.MaxIdleConns, c.DB.MaxOpenConns)
 	client, err := rdb.InitRedis(c.RDB.RedisAddr, c.RDB.RedisPassword, c.RDB.RedisDB, c.RDB.RedisPoolSize, c.RDB.RedisMinIdleConns)
 	if err != nil {

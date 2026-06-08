@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/joho/godotenv"
+	"path/filepath"
 
 	"github.com/ZY0506/PrimeMall/apps/service/search/rpc/internal/config"
 	searchServer "github.com/ZY0506/PrimeMall/apps/service/search/rpc/internal/server/search"
@@ -21,8 +23,16 @@ var configFile = flag.String("f", "etc/search.yaml", "the config file")
 func main() {
 	flag.Parse()
 
+	projectRoot, _ := filepath.Abs("./")
+	envPath := filepath.Join(projectRoot, ".env")
+
+	if err := godotenv.Load(envPath); err != nil {
+		fmt.Println("Load .env file failed")
+		panic(err)
+	}
+
 	var c config.Config
-	conf.MustLoad(*configFile, &c)
+	conf.MustLoad(*configFile, &c, conf.UseEnv())
 	ctx := svc.NewServiceContext(c)
 
 	s := zrpc.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {

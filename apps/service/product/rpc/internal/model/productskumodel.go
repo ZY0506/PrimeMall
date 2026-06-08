@@ -106,7 +106,9 @@ func (m *defaultProductSkuModel) FindByIds(ctx context.Context, spuIds []uint64)
 	placeholders = placeholders[:len(placeholders)-1] // 去掉末尾多余的逗号
 
 	// 修改查询：关联 spu 表 (假设表名为 product_spu，关联键为 spu_id)
-	query := fmt.Sprintf("select %s, spu.status as spu_status from %s sku join product_spu spu on sku.spu_id = spu.id where sku.status = 1 and sku.id in (%s)", productSkuRows, m.table, placeholders)
+	// 注意：必须给 sku 字段加前缀，避免与 spu 表的同名字段（如 id）冲突
+	skuPrefixedRows := "sku." + strings.Join(productSkuFieldNames, ",sku.")
+	query := fmt.Sprintf("select %s, spu.status as spu_status from %s sku join product_spu spu on sku.spu_id = spu.id where sku.status = 1 and sku.id in (%s)", skuPrefixedRows, m.table, placeholders)
 
 	args := make([]interface{}, len(spuIds))
 	for i, id := range spuIds {
@@ -122,7 +124,7 @@ func (m *defaultProductSkuModel) FindByIds(ctx context.Context, spuIds []uint64)
 }
 
 func (m *defaultProductSkuModel) FindListBySpuId(ctx context.Context, spuId uint64) (*[]ProductSku, error) {
-	query := fmt.Sprintf("select %s from %s where `spu_id` = ? and `status` = 1 and `delete_at` IS NULL", productSkuRows, m.table)
+	query := fmt.Sprintf("select %s from %s where `spu_id` = ? and `status` = 1 and `deleted_at` IS NULL", productSkuRows, m.table)
 	var resp []ProductSku
 	err := m.conn.QueryRowsCtx(ctx, &resp, query, spuId)
 	if err != nil {
@@ -163,9 +165,9 @@ func (m *defaultProductSkuModel) LockStock(ctx context.Context, items []*product
 					break
 				}
 				var sku ProductSku
-				queryOne := fmt.Sprintf("select %s from %s where `id` = ? and `status` = 1 and `delete_at` IS NULL",
+				queryOne := fmt.Sprintf("select %s from %s where `id` = ? and `status` = 1 and `deleted_at` IS NULL",
 					productSkuRows, m.table)
-				err = session.QueryRowsCtx(ctx, &sku, queryOne, item.SkuId)
+				err = session.QueryRowCtx(ctx, &sku, queryOne, item.SkuId)
 				if err != nil {
 					if errors.Is(err, ErrNotFound) {
 						logx.WithContext(ctx).Errorf("商品不存在, skuId=%d", item.SkuId)
@@ -195,7 +197,7 @@ func (m *defaultProductSkuModel) LockStock(ctx context.Context, items []*product
                     UPDATE %s 
                     SET locked_stock = locked_stock + ?, version = version + 1 
                     WHERE id = ? AND version = ? AND (stock - locked_stock) >= ? 
-                      AND status = 1 AND delete_at IS NULL
+                      AND status = 1 AND deleted_at IS NULL
                 `, m.table)
 				ret, err := session.ExecCtx(ctx, queryUpdate, item.Quantity, item.SkuId, sku.Version, item.Quantity)
 				if err != nil {
@@ -294,9 +296,9 @@ func (m *defaultProductSkuModel) UnlockStock(ctx context.Context, items []*produ
 				}
 				// 1. 查询当前 SKU 最新数据
 				var sku ProductSku
-				queryOne := fmt.Sprintf("select %s from %s where `id` = ? and `status` = 1 and `delete_at` IS NULL",
+				queryOne := fmt.Sprintf("select %s from %s where `id` = ? and `status` = 1 and `deleted_at` IS NULL",
 					productSkuRows, m.table)
-				err = session.QueryRowsCtx(ctx, &sku, queryOne, item.SkuId)
+				err = session.QueryRowCtx(ctx, &sku, queryOne, item.SkuId)
 				if err != nil {
 					if errors.Is(err, ErrNotFound) {
 						logx.WithContext(ctx).Errorf("商品不存在, skuId=%d", item.SkuId)
@@ -315,7 +317,7 @@ func (m *defaultProductSkuModel) UnlockStock(ctx context.Context, items []*produ
 					UPDATE %s 
 					SET locked_stock = locked_stock - ?, version = version + 1 
 					WHERE id = ? AND version = ? AND locked_stock >= ?
-					  AND status = 1 AND delete_at IS NULL
+					  AND status = 1 AND deleted_at IS NULL
 				`, m.table)
 				res, err := session.ExecCtx(ctx, queryUpdate, item.Quantity, item.SkuId, sku.Version, item.Quantity)
 				if err != nil {
@@ -401,9 +403,9 @@ func (m *defaultProductSkuModel) RollbackStock(ctx context.Context, items []*pro
 
 			for retry := 0; retry < constants.MAX_RETRY_COUNT; retry++ {
 				var sku ProductSku
-				queryOne := fmt.Sprintf("select %s from %s where `id` = ? and `status` = 1 and `delete_at` IS NULL",
+				queryOne := fmt.Sprintf("select %s from %s where `id` = ? and `status` = 1 and `deleted_at` IS NULL",
 					productSkuRows, m.table)
-				err := session.QueryRowsCtx(ctx, &sku, queryOne, item.SkuId)
+				err := session.QueryRowCtx(ctx, &sku, queryOne, item.SkuId)
 				if err != nil {
 					if errors.Is(err, ErrNotFound) {
 						logx.WithContext(ctx).Errorf("商品不存在, skuId=%d", item.SkuId)
@@ -421,7 +423,7 @@ func (m *defaultProductSkuModel) RollbackStock(ctx context.Context, items []*pro
 				// 注意：订单支付后，locked_stock 已减为0，这里只需回退 stock
 				queryUpdate := fmt.Sprintf(`
                     UPDATE %s SET stock = stock + ?, version = version + 1 
-                    WHERE id = ? AND version = ? AND status = 1 AND delete_at IS NULL
+                    WHERE id = ? AND version = ? AND status = 1 AND deleted_at IS NULL
                 `, m.table)
 				res, err := session.ExecCtx(ctx, queryUpdate, item.Quantity, item.SkuId, sku.Version)
 				if err != nil {
@@ -517,9 +519,9 @@ func (m *defaultProductSkuModel) DeductStock(ctx context.Context, items []*produ
 					break
 				}
 				var sku ProductSku
-				queryOne := fmt.Sprintf("select %s from %s where `id` = ? and `status` = 1 and `delete_at` IS NULL",
+				queryOne := fmt.Sprintf("select %s from %s where `id` = ? and `status` = 1 and `deleted_at` IS NULL",
 					productSkuRows, m.table)
-				err = session.QueryRowsCtx(ctx, &sku, queryOne, item.SkuId)
+				err = session.QueryRowCtx(ctx, &sku, queryOne, item.SkuId)
 				if err != nil {
 					if errors.Is(err, ErrNotFound) {
 						logx.WithContext(ctx).Errorf("商品不存在, skuId=%d", item.SkuId)
@@ -549,7 +551,7 @@ func (m *defaultProductSkuModel) DeductStock(ctx context.Context, items []*produ
 				queryUpdate := fmt.Sprintf(`
                     UPDATE %s SET stock = stock - ?, locked_stock = locked_stock - ?, version = version + 1 
                     WHERE id = ? AND version = ? AND locked_stock >= ?
-                      AND status = 1 AND delete_at IS NULL
+                      AND status = 1 AND deleted_at IS NULL
                 `, m.table)
 				res, err := session.ExecCtx(ctx, queryUpdate, item.Quantity, item.Quantity, item.SkuId, sku.Version, item.Quantity, item.Quantity)
 				if err != nil {
@@ -630,9 +632,9 @@ func (m *defaultProductSkuModel) RevertDeduct(ctx context.Context, items []*prod
 			for retry := 0; retry < constants.MAX_RETRY_COUNT; retry++ {
 				// 1. 查询当前 SKU
 				var sku ProductSku
-				queryOne := fmt.Sprintf("select %s from %s where `id` = ? and `status` = 1 and `delete_at` IS NULL",
+				queryOne := fmt.Sprintf("select %s from %s where `id` = ? and `status` = 1 and `deleted_at` IS NULL",
 					productSkuRows, m.table)
-				err := session.QueryRowsCtx(ctx, &sku, queryOne, item.SkuId)
+				err := session.QueryRowCtx(ctx, &sku, queryOne, item.SkuId)
 				if err != nil {
 					if errors.Is(err, ErrNotFound) {
 						result.Success = false
@@ -647,7 +649,7 @@ func (m *defaultProductSkuModel) RevertDeduct(ctx context.Context, items []*prod
 				queryUpdate := fmt.Sprintf(`
                     UPDATE %s 
                     SET stock = stock + ?, locked_stock = locked_stock + ?, version = version + 1 
-                    WHERE id = ? AND version = ? AND status = 1 AND delete_at IS NULL
+                    WHERE id = ? AND version = ? AND status = 1 AND deleted_at IS NULL
                 `, m.table)
 				res, err := session.ExecCtx(ctx, queryUpdate, item.Quantity, item.Quantity, item.SkuId, sku.Version)
 				if err != nil {

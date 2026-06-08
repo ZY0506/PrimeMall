@@ -7,7 +7,6 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/internal/model"
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/types/order"
-	"github.com/ZY0506/PrimeMall/apps/service/user/rpc/client/userinternal"
 	"github.com/ZY0506/PrimeMall/common/ctxdata"
 	"github.com/ZY0506/PrimeMall/common/errorx"
 	"github.com/ZY0506/PrimeMall/common/response"
@@ -57,8 +56,8 @@ func (l *OrderDetailLogic) OrderDetail(in *order.OrderDetailRequest) (*order.Ord
 		return nil, err
 	}
 	// 反序列化地址快照
-	address := userinternal.AddressItem{}
-	err = json.Unmarshal([]byte(orderInfo.AddressSnap), &address)
+	addrSnap := order.AddressSnapshot{}
+	err = json.Unmarshal([]byte(orderInfo.AddressSnap), &addrSnap)
 	if err != nil {
 		l.Logger.Errorf("反序列化地址快照失败,error=%v", err)
 		return nil, err
@@ -111,14 +110,14 @@ func (l *OrderDetailLogic) OrderDetail(in *order.OrderDetailRequest) (*order.Ord
 			Items:      items,
 		},
 		Address: &order.AddressSnapshot{
-			ReceiverName:  address.ReceiverName,
-			ReceiverPhone: address.ReceiverPhone,
+			ReceiverName:  addrSnap.ReceiverName,
+			ReceiverPhone: addrSnap.ReceiverPhone,
 			Detail: &order.AddressDetail{
-				Province:      address.Address.Province,
-				City:          address.Address.City,
-				District:      address.Address.District,
-				DetailAddress: address.Address.Detail,
-				PostalCode:    address.Address.PostalCode,
+				Province:      addrSnap.Detail.Province,
+				City:          addrSnap.Detail.City,
+				District:      addrSnap.Detail.District,
+				DetailAddress: addrSnap.Detail.DetailAddress,
+				PostalCode:    addrSnap.Detail.PostalCode,
 			},
 		},
 		FreightAmount: orderInfo.FreightAmount,

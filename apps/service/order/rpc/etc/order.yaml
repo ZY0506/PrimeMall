@@ -22,14 +22,14 @@ UserRpc:
 
 DB:
   DSN: ${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/shop_order?charset=utf8mb4&parseTime=True&loc=Local
-  MaxIdleConns: 10
-  MaxOpenConns: 10
+  MaxIdleConns: 50
+  MaxOpenConns: 50
 
 RDB:
   Addr: ${REDIS_HOST}:${REDIS_PORT}
   RedisPassword: "${REDIS_PASSWORD}"
   RedisDB: 0
-  RedisPoolSize: 10
+  RedisPoolSize: 50
   RedisMinIdleConns: 10
 
 Snowflake:
