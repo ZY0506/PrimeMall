@@ -31,9 +31,7 @@ doc/
 template/
 
 # Test data and scripts (keep test code, ignore data)
-tests/data/
-tests/k6/results/
-*.test
+tests
 concurrency.exe
 
 # Go build output
