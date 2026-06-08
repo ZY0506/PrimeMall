@@ -15,13 +15,13 @@ JWT:
 DB:
   DSN: ${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/shop_user?charset=utf8mb4&parseTime=True&loc=Local
   MaxIdleConns: 50
-  MaxOpenConns: 100
+  MaxOpenConns: 200
 
 RDB:
   Addr: ${REDIS_HOST}:${REDIS_PORT}
   RedisPassword: "${REDIS_PASSWORD}"
   RedisDB: 0
-  RedisPoolSize: 50
+  RedisPoolSize: 100
   RedisMinIdleConns: 20
 
 OssConfig:

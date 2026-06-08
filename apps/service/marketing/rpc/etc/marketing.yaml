@@ -9,11 +9,11 @@ Etcd:
 DB:
   DSN: ${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/shop_marketing?charset=utf8mb4&parseTime=True&loc=Local
   MaxIdleConns: 20
-  MaxOpenConns: 50
+  MaxOpenConns: 100
 
 RDB:
   Addr: ${REDIS_HOST}:${REDIS_PORT}
   RedisPassword: "${REDIS_PASSWORD}"
   RedisDB: 0
-  RedisPoolSize: 30
+  RedisPoolSize: 60
   RedisMinIdleConns: 10
