@@ -41,3 +41,7 @@ concurrency.exe
 # OS files
 .DS_Store
 Thumbs.db
+
+/bin
+start-all.bat
+stop-all.bat
