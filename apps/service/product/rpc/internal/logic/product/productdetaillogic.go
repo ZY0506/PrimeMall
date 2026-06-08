@@ -5,10 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"slices"
+	"strconv"
 
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/internal/model"
+	"github.com/ZY0506/PrimeMall/common/constants"
 	"github.com/ZY0506/PrimeMall/common/errorx"
 	"github.com/ZY0506/PrimeMall/common/response"
+	"github.com/go-redis/redis/v8"
 
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/types/product"
@@ -31,6 +34,20 @@ func NewProductDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Pro
 }
 
 func (l *ProductDetailLogic) ProductDetail(in *product.IdReq) (*product.ProductDetailResp, error) {
+	// ===================== 缓存查询（Cache-Aside） =====================
+	cacheKey := constants.ProductDetailKey + strconv.FormatUint(in.Id, 10)
+	cached, err := l.svcCtx.Client.Get(l.ctx, cacheKey).Result()
+	if err == nil && cached != "" {
+		var cachedResp product.ProductDetailResp
+		if err := json.Unmarshal([]byte(cached), &cachedResp); err == nil {
+			l.Logger.Infof("商品详情缓存命中，id=%v", in.Id)
+			return &cachedResp, nil
+		}
+	}
+	if err != nil && !errors.Is(err, redis.Nil) {
+		l.Logger.Errorf("查询商品详情缓存失败，error=%v", err)
+	}
+
 	// 查询SPU
 	spu, err := l.svcCtx.ProductSpuModel.FindOne(l.ctx, in.Id)
 	if err != nil {
@@ -141,7 +158,7 @@ func (l *ProductDetailLogic) ProductDetail(in *product.IdReq) (*product.ProductD
 		}
 	}
 
-	return &product.ProductDetailResp{
+	resp := &product.ProductDetailResp{
 		Id:                spu.Id,
 		CategoryId:        spu.CategoryId,
 		Name:              spu.Name,
@@ -157,5 +174,12 @@ func (l *ProductDetailLogic) ProductDetail(in *product.IdReq) (*product.ProductD
 		FreightTemplateId: freightTemplate.Id,
 		Skus:              skuList,
 		Attributes:        attributes,
-	}, nil
+	}
+
+	// ===================== 写入缓存 =====================
+	if jsonBytes, marshalErr := json.Marshal(resp); marshalErr == nil {
+		l.svcCtx.Client.Set(l.ctx, cacheKey, string(jsonBytes), constants.ProductDetailTTL)
+	}
+
+	return resp, nil
 }

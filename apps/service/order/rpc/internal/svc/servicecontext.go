@@ -101,6 +101,11 @@ func (s *ServiceContext) registerConsumers() {
 	if err := s.MQClient.Subscribe(s.ctx, "order.timeout", s.handleOrderTimeout); err != nil {
 		logx.Errorf("order.timeout subscribe failed,error:%v", err.Error())
 	}
+
+	// 订单创建（异步下单）
+	if err := s.MQClient.Subscribe(s.ctx, constants.ORDER_CREATE_ROUTING_KEY, s.orderCreateHandler); err != nil {
+		logx.Errorf("order.create subscribe failed,error:%v", err.Error())
+	}
 }
 
 // 订单超时处理器

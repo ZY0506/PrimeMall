@@ -32,6 +32,7 @@ type (
 	customProductSku interface {
 		FindByIds(ctx context.Context, spuIds []uint64) (*[]ProductSkuWithStatus, error)
 		FindListBySpuId(ctx context.Context, spuId uint64) (*[]ProductSku, error)
+		FindHotSkus(ctx context.Context, limit int) (*[]ProductSku, error)
 		LockStock(ctx context.Context, items []*product.SkuStockItem, orderSn string) (*[]*product.SkuStockResult, error)
 		UnlockStock(ctx context.Context, items []*product.SkuStockItem, orderSn string) (*[]*product.SkuStockResult, error)
 		RollbackStock(ctx context.Context, items []*product.SkuStockItem, orderSn string) (*[]*product.SkuStockResult, error)
@@ -133,6 +134,16 @@ func (m *defaultProductSkuModel) FindListBySpuId(ctx context.Context, spuId uint
 	return &resp, nil
 }
 
+// FindHotSkus 查询热销SKU（用于缓存预热）
+func (m *defaultProductSkuModel) FindHotSkus(ctx context.Context, limit int) (*[]ProductSku, error) {
+	query := fmt.Sprintf("select %s from %s where `status` = 1 and `deleted_at` IS NULL order by `stock` desc limit ?", productSkuRows, m.table)
+	var resp []ProductSku
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, limit)
+	if err != nil {
+		return nil, err
+	}
+	return &resp, nil
+}
 // LockStock 锁定库存
 func (m *defaultProductSkuModel) LockStock(ctx context.Context, items []*product.SkuStockItem, orderSn string) (*[]*product.SkuStockResult, error) {
 	results := make([]*product.SkuStockResult, 0, len(items))

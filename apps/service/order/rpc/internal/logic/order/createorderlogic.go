@@ -2,23 +2,16 @@ package orderlogic
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"strings"
 	"time"
 
-	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/internal/model"
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/types/order"
-	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/types/product"
-	"github.com/ZY0506/PrimeMall/apps/service/user/rpc/types/user"
 	"github.com/ZY0506/PrimeMall/common/constants"
 	"github.com/ZY0506/PrimeMall/common/ctxdata"
 	"github.com/ZY0506/PrimeMall/common/errorx"
 	"github.com/ZY0506/PrimeMall/common/response"
-	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -37,7 +30,7 @@ func NewCreateOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Creat
 	}
 }
 
-// CreateOrder 创建订单（高并发最终版：锁库存移出事务 + 订单项快照）
+// CreateOrder 创建订单（异步版：写队列，返回"处理中"）
 func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (resp *order.CreateOrderResponse, err error) {
 	// 1. 获取用户ID
 	var userId uint64
@@ -56,24 +49,11 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (resp *orde
 		return nil, err
 	}
 	if !ok {
-		var existOrder *model.OrderInfo
-		existOrder, err = l.svcCtx.OrderInfoModel.FindOneByUserIdIdempotencyKey(l.ctx, userId, in.IdempotencyKey)
-		if err != nil {
-			if !errors.Is(err, model.ErrNotFound) {
-				l.Logger.Errorf("查询订单失败: %v", err)
-				return nil, err
-			}
-			// Lua脚本原子操作：删除旧键并重新设置，防止并发竞态
-			_, err = l.svcCtx.Client.Eval(l.ctx, constants.LuaResetIdempotencyKey, []string{idempotencyKey}, "1", int64(constants.IDEMPOTENCY_EXIRE/time.Millisecond)).Result()
-			if err != nil {
-				return nil, errorx.NewBizError(response.ErrCodeTooFrequent, "请勿重复提交")
-			}
-		} else {
-			return &order.CreateOrderResponse{
-				OrderSn:   existOrder.OrderSn,
-				PayAmount: existOrder.PayAmount,
-			}, nil
-		}
+		return &order.CreateOrderResponse{
+			OrderSn:   "",
+			PayAmount: 0,
+			Status:    constants.ORDER_STATUS_PROCESSING,
+		}, nil
 	}
 	defer func() {
 		if err != nil {
@@ -95,72 +75,19 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (resp *orde
 		return nil, err
 	}
 
-	// 权限+金额校验
+	// 权限校验
 	if settlementData.UserId != userId {
 		return nil, errorx.NewBizError(response.ErrCodePermissionDenied, "无权限")
-	}
-
-	// 校验地址和优惠卷信息
-	if settlementData.AddressSnapshot == "" {
-		addr, err := l.svcCtx.UserRpc.GetAddressById(l.ctx, &user.GetAddressReq{
-			AddressId: in.AddressId,
-			UserId:    userId,
-		})
-		if err != nil {
-			l.Logger.Errorf("查询地址失败，error=%v", err)
-			return nil, err
-		}
-		addrSnapshot := &order.AddressSnapshot{
-			ReceiverName:  addr.ReceiverName,
-			ReceiverPhone: addr.ReceiverPhone,
-			Detail: &order.AddressDetail{
-				Province:      addr.Address.Province,
-				City:          addr.Address.City,
-				District:      addr.Address.District,
-				DetailAddress: addr.Address.Detail,
-				PostalCode:    addr.Address.PostalCode,
-			},
-		}
-		// 序列化地址快照
-		addrSnapshotStr, err := json.Marshal(addrSnapshot)
-		if err != nil {
-			l.Logger.Errorf("序列化地址快照失败，error=%v", err)
-			return nil, err
-		}
-		settlementData.AddressSnapshot = string(addrSnapshotStr)
-	}
-	if settlementData.CouponId != 0 {
-		// TODO: 校验优惠卷信息是否正确、计算优惠卷扣减金额
-		settlementData.CouponId = in.CouponId
 	}
 
 	// 4. 生成订单ID + 订单号
 	orderId, _ := l.svcCtx.IDGenerator.NextID()
 	orderSn, _ := l.svcCtx.IDGenerator.GenWithPrefix(constants.PREFIX_ORDER_SN)
-	now := time.Now()
 
-	// 5. 构建库存参数 + 数据库订单项
-	length := len(settlementData.ItemSnapshots)
-	lockStockItems := make([]*product.SkuStockItem, 0, length)
-	orderItems := make([]*model.OrderItem, 0, length)
-	unlockStockItems := make([]*order.OrderItemSimple, 0, length)
-	for _, s := range settlementData.ItemSnapshots {
-		// 库存锁定参数
-		lockStockItems = append(lockStockItems, &product.SkuStockItem{
-			SkuId:    s.SkuId,
-			Quantity: s.Count,
-		})
-		// 超时取消订单参数（解锁库存）
-		unlockStockItems = append(unlockStockItems, &order.OrderItemSimple{
-			SkuId:    s.SkuId,
-			Quantity: s.Count,
-		})
-		// 订单项ID
-		itemId, _ := l.svcCtx.IDGenerator.NextID()
-		orderItems = append(orderItems, &model.OrderItem{
-			Id:          itemId,
-			OrderId:     orderId,
-			OrderSn:     orderSn,
+	// 5. 构建消息体，发送到队列异步处理
+	itemMsgs := make([]svc.OrderItemMessage, len(settlementData.ItemSnapshots))
+	for i, s := range settlementData.ItemSnapshots {
+		itemMsgs[i] = svc.OrderItemMessage{
 			SkuId:       s.SkuId,
 			SpuId:       s.SpuId,
 			SpuName:     s.SpuName,
@@ -169,118 +96,44 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (resp *orde
 			Price:       s.Price,
 			Count:       s.Count,
 			TotalAmount: s.TotalAmount,
-			IsSeckill:   0,
-			CreatedAt:   now,
-		})
+		}
+	}
+	msg := &svc.OrderCreateMessage{
+		OrderId:         orderId,
+		OrderSn:         orderSn,
+		UserId:          userId,
+		SettlementToken: in.SettlementToken,
+		PayType:         int64(in.PayType),
+		Remark:          in.Remark,
+		IdempotencyKey:  in.IdempotencyKey,
+		CartSkuIds:      in.CartSkuIds,
+		CouponId:        in.CouponId,
+		AddressSnapshot: settlementData.AddressSnapshot,
+		ItemSnapshots:   itemMsgs,
+		TotalAmount:     settlementData.TotalAmount,
+		FreightAmount:   settlementData.FreightAmount,
+		CouponDiscount:  settlementData.CouponDiscount,
+		PayAmount:       settlementData.PayAmount,
 	}
 
-	// 6. 构建订单主表
-	orderInfo := &model.OrderInfo{
-		Id:             orderId,
-		OrderSn:        orderSn,
-		UserId:         userId,
-		OrderType:      constants.ORDER_TYPE_NORMAL,
-		Status:         constants.ORDER_STATUS_PENDING_PAY,
-		PayType:        int64(in.PayType),
-		PayAmount:      settlementData.PayAmount,
-		TotalAmount:    settlementData.TotalAmount,
-		FreightAmount:  settlementData.FreightAmount,
-		CouponId:       settlementData.CouponId,
-		CouponDiscount: settlementData.CouponDiscount,
-		Remark:         in.Remark,
-		AddressSnap:    settlementData.AddressSnapshot,
-		IdempotencyKey: in.IdempotencyKey,
-		CreatedAt:      now,
-		ExpireTime:     sql.NullTime{Time: now.Add(constants.ORDER_EXPIRE_TIME), Valid: true},
-		UpdatedAt:      now,
-	}
-
-	// ===================== 锁库存  =====================
-	lockRet, err := l.svcCtx.ProductRpc.LockStock(l.ctx, &product.UpdateStockReq{
-		Items:   lockStockItems,
-		OrderSn: orderSn,
-	})
-	if err != nil || !lockRet.Success {
-		var msg string
-		if err != nil {
-			msg = "库存锁定失败"
-		} else {
-			var msgs []string
-			for _, v := range lockRet.Results {
-				if !v.Success {
-					msgs = append(msgs, fmt.Sprintf("SKU:%d %s", v.SkuId, v.Message))
-				}
-			}
-			msg = strings.Join(msgs, "；")
-		}
-		l.Logger.Errorf("锁库存失败: %s,error=%v", msg, err)
-		return nil, errorx.NewBizError(response.ErrCodeOrderFailed, msg)
-	}
-
-	// TODO:锁优惠卷
-	// 检查优惠卷状态
-	// 锁优惠卷、记录优惠卷使用和订单信息
-	// 支付成功再扣减优惠卷
-
-	// 7. 本地事务：仅做数据库插入
-	err = l.svcCtx.DB.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
-		// 插入订单
-		_, err = l.svcCtx.OrderInfoModel.InsertTx(l.ctx, session, orderInfo)
-		if err != nil {
-			return err
-		}
-		// 插入订单项
-		for _, item := range orderItems {
-			_, err = l.svcCtx.OrderItemModel.InsertTx(l.ctx, session, item)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-	// 事务失败：解锁库存
+	msgBytes, _ := json.Marshal(msg)
+	err = l.svcCtx.MQClient.Publish(l.ctx, "", constants.ORDER_CREATE_ROUTING_KEY, msgBytes)
 	if err != nil {
-		_, _ = l.svcCtx.ProductRpc.UnlockStock(l.ctx, &product.UpdateStockReq{
-			Items:   lockStockItems,
-			OrderSn: orderSn,
-		})
-		l.Logger.Errorf("事务失败: %v", err)
+		l.Logger.Errorf("发送订单创建消息失败，error=%v", err)
 		return nil, err
 	}
 
-	// 删除缓存
+	// 删除结算缓存
 	_ = l.svcCtx.Client.Del(l.ctx, cacheKey).Err()
 
-	// 8. 后置处理
-	if len(in.CartSkuIds) > 0 {
-		_ = l.svcCtx.CartModel.BatchDelete(l.ctx, userId, in.CartSkuIds)
-	}
+	// 延长幂等key过期时间
 	_ = l.svcCtx.Client.Expire(l.ctx, idempotencyKey, 24*time.Hour).Err()
-	l.Logger.Info("创建订单成功")
 
-	// 发送消息到延迟队列，处理订单超时；
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				l.Logger.Errorf("发送超时消息协程panic: %v", r)
-			}
-		}()
-		msg, _ := json.Marshal(&order.OrderTimeoutMessage{
-			OrderSn:          orderSn,
-			CancelReason:     "超时取消",
-			CancelReasonType: constants.CANCEL_REASON_TYPE_TIMEOUT,
-			Items:            unlockStockItems,
-			CouponId:         in.CouponId,
-		})
-		err = l.svcCtx.MQClient.Publish(l.ctx, "", constants.ORDER_TIMEOUT_ROUTING_KEY, msg)
-		if err != nil {
-			l.Logger.Errorf("发送消息失败: %v", err)
-			return
-		}
-	}()
+	l.Logger.Infof("订单创建消息已发送，order_sn=%s", orderSn)
 
 	return &order.CreateOrderResponse{
 		OrderSn:   orderSn,
-		PayAmount: orderInfo.PayAmount,
+		PayAmount: settlementData.PayAmount,
+		Status:    constants.ORDER_STATUS_PROCESSING,
 	}, nil
 }

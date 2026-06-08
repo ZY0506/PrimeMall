@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/ZY0506/PrimeMall/common/constants"
@@ -149,6 +150,11 @@ func (l *AdjustStockLogic) AdjustStock(in *product.AdjustStockReq) (*product.Sto
 			anyFailed = true
 			break
 		}
+	}
+// 清除被调整SKU的库存缓存
+	for _, item := range in.Items {
+		stockKey := constants.ProductStockKey + strconv.FormatUint(item.SkuId, 10)
+		l.svcCtx.Client.Del(l.ctx, stockKey)
 	}
 
 	return &product.StockChangeResp{

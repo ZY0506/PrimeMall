@@ -2,7 +2,10 @@ package productadminlogic
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 
+	"github.com/ZY0506/PrimeMall/common/constants"
 	"github.com/ZY0506/PrimeMall/common/errorx"
 	"github.com/ZY0506/PrimeMall/common/response"
 
@@ -52,5 +55,14 @@ func (l *UpdateProductStatusLogic) UpdateProductStatus(in *product.UpdateProduct
 	}
 
 	l.Logger.Infof("更新商品状态成功, id=%d, status=%d", in.Id, in.Status)
+	// 清除商品详情缓存
+	cacheKey := constants.ProductDetailKey + strconv.FormatUint(in.Id, 10)
+	l.svcCtx.Client.Del(l.ctx, cacheKey)
+
+	// 清除该分类下的商品列表缓存
+	pattern := constants.ProductListKey + fmt.Sprintf("%d:*", spu.CategoryId)
+	if keys, err := l.svcCtx.Client.Keys(l.ctx, pattern).Result(); err == nil && len(keys) > 0 {
+		l.svcCtx.Client.Del(l.ctx, keys...)
+	}
 	return &product.Empty{}, nil
 }

@@ -950,6 +950,7 @@ type CreateOrderResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	OrderSn       string                 `protobuf:"bytes,1,opt,name=order_sn,json=orderSn,proto3" json:"order_sn,omitempty"`        // 订单编号
 	PayAmount     int64                  `protobuf:"varint,2,opt,name=pay_amount,json=payAmount,proto3" json:"pay_amount,omitempty"` // 实付金额（单位：分）
+	Status        int32                  `protobuf:"varint,3,opt,name=status,proto3" json:"status,omitempty"`                        // 订单状态（异步下单时返回5=处理中）
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -994,6 +995,13 @@ func (x *CreateOrderResponse) GetOrderSn() string {
 func (x *CreateOrderResponse) GetPayAmount() int64 {
 	if x != nil {
 		return x.PayAmount
+	}
+	return 0
+}
+
+func (x *CreateOrderResponse) GetStatus() int32 {
+	if x != nil {
+		return x.Status
 	}
 	return 0
 }
@@ -4094,11 +4102,12 @@ const file_apps_service_order_rpc_order_proto_rawDesc = "" +
 	"cartSkuIds\x12\x1d\n" +
 	"\n" +
 	"address_id\x18\x06 \x01(\x04R\taddressId\x12\x1b\n" +
-	"\tcoupon_id\x18\a \x01(\x04R\bcouponId\"O\n" +
+	"\tcoupon_id\x18\a \x01(\x04R\bcouponId\"g\n" +
 	"\x13CreateOrderResponse\x12\x19\n" +
 	"\border_sn\x18\x01 \x01(\tR\aorderSn\x12\x1d\n" +
 	"\n" +
-	"pay_amount\x18\x02 \x01(\x03R\tpayAmount\"\xe7\x01\n" +
+	"pay_amount\x18\x02 \x01(\x03R\tpayAmount\x12\x16\n" +
+	"\x06status\x18\x03 \x01(\x05R\x06status\"\xe7\x01\n" +
 	"\x13OrderTimeoutMessage\x12\x19\n" +
 	"\border_sn\x18\x01 \x01(\tR\aorderSn\x12E\n" +
 	"\x12cancel_reason_type\x18\x02 \x01(\x0e2\x17.order.CancelReasonTypeR\x10cancelReasonType\x12#\n" +

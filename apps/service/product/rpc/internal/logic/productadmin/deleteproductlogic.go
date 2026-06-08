@@ -2,7 +2,10 @@ package productadminlogic
 
 import (
 	"context"
+	"fmt"
+	"strconv"
 
+	"github.com/ZY0506/PrimeMall/common/constants"
 	"github.com/ZY0506/PrimeMall/common/errorx"
 	"github.com/ZY0506/PrimeMall/common/response"
 
@@ -48,5 +51,14 @@ func (l *DeleteProductLogic) DeleteProduct(in *product.IdReq) (*product.Empty, e
 	}
 
 	l.Logger.Infof("删除商品成功, id=%d, name=%s", in.Id, spu.Name)
+	// 清除商品详情缓存
+	cacheKey := constants.ProductDetailKey + strconv.FormatUint(in.Id, 10)
+	l.svcCtx.Client.Del(l.ctx, cacheKey)
+
+	// 清除该分类下的商品列表缓存
+	pattern := constants.ProductListKey + fmt.Sprintf("%d:*", spu.CategoryId)
+	if keys, err := l.svcCtx.Client.Keys(l.ctx, pattern).Result(); err == nil && len(keys) > 0 {
+		l.svcCtx.Client.Del(l.ctx, keys...)
+	}
 	return &product.Empty{}, nil
 }
