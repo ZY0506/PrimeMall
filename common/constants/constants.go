@@ -130,6 +130,7 @@ const (
 
 // 订单状态
 const (
+	ORDER_STATUS_PROCESSING  = 5  // 处理中（异步下单时返回）
 	ORDER_STATUS_PENDING_PAY = 10 // 待支付
 	ORDER_STATUS_PAID        = 20 // 已支付
 	ORDER_STATUS_SHIPPED     = 30 // 已发货
@@ -139,6 +140,7 @@ const (
 )
 
 var OrderStatusMap = map[int]string{
+	ORDER_STATUS_PROCESSING:  "处理中",
 	ORDER_STATUS_PENDING_PAY: "待支付",
 	ORDER_STATUS_PAID:        "已支付",
 	ORDER_STATUS_SHIPPED:     "已发货",
@@ -221,6 +223,25 @@ const (
 	ORDER_DLX_EXCHANGE        = "order.dlx"
 	ORDER_TIMEOUT_ROUTING_KEY = "order.timeout"
 	ORDER_TTL_MS              = 15 * 60 * 1000 // 15分钟
+)
+
+// 商品缓存
+const (
+	ProductDetailKey   = "product:detail:"     // + spuId → 商品详情JSON
+	ProductDetailTTL   = 10 * 60 * time.Second // 10分钟
+	ProductListKey     = "product:list:"       // + categoryId:page:sort → 商品列表JSON
+	ProductListTTL     = 5 * 60 * time.Second  // 5分钟
+	ProductStockKey    = "product:stock:"      // + skuId → 库存数量
+	ProductStockTTL    = 10 * time.Second      // 10秒，浏览展示用
+	ProductHotKey      = "product:hot:skus"    // 热销SKU ID列表（预热用）
+	ProductHotTTL      = 30 * 60 * time.Second // 30分钟
+	ProductCategoryKey = "product:category:"   // + categoryId → 分类JSON
+	ProductCategoryTTL = 30 * 60 * time.Second // 30分钟
+)
+
+// 异步订单创建
+const (
+	ORDER_CREATE_ROUTING_KEY = "order.create"
 )
 
 // 支付服务 Redis Key 前缀

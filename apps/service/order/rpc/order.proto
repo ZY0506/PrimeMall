@@ -271,6 +271,7 @@ message CreateOrderRequest {
 message CreateOrderResponse {
   string order_sn = 1;        // 订单编号
   int64 pay_amount = 2;       // 实付金额（单位：分）
+  int32 status = 3;           // 订单状态（异步下单时返回5=处理中）
 }
 
 /**

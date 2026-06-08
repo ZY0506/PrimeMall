@@ -1,0 +1,121 @@
+syntax = "proto3";
+package search;
+
+option go_package = "./search";
+
+// goctl rpc protoc .\apps\service\search\rpc\search.proto --go_out=apps/service/search/rpc/types --go-grpc_out=apps/service/search/rpc/types --zrpc_out=apps/service/search/rpc/ -m
+
+// ==================== RPC ====================
+service Search {
+  // ES商品搜索
+  rpc SearchProducts(SearchProductsReq) returns (SearchProductsResp);
+  // ES商品搜索建议（补全）
+  rpc SuggestProducts(SuggestReq) returns (SuggestResp);
+  // 热搜词列表
+  rpc GetHotKeywords(Empty) returns (HotKeywordsResp);
+  // 用户搜索历史
+  rpc GetSearchHistory(SearchHistoryReq) returns (SearchHistoryResp);
+  // 清除搜索历史
+  rpc ClearSearchHistory(ClearSearchHistoryReq) returns (Empty);
+  // 同步商品到ES
+  rpc SyncProductToES(SyncProductReq) returns (Empty);
+  // 批量同步商品到ES
+  rpc BatchSyncProducts(BatchSyncProductsReq) returns (Empty);
+  // 从ES删除商品
+  rpc DeleteProductFromES(DeleteProductReq) returns (Empty);
+}
+
+// ==================== 通用 ====================
+message Empty {}
+
+message PageReq {
+  int64 page = 1;
+  int64 size = 2;
+}
+
+message PageResp {
+  int64 total = 1;
+  int64 page = 2;
+  int64 size = 3;
+}
+
+// ==================== 搜索 ====================
+message SearchProductsReq {
+  string keyword = 1;
+  int64 category_id = 2;
+  string brand = 3;
+  int64 min_price = 4;
+  int64 max_price = 5;
+  string sort_by = 6;    // price, sales, created_at
+  string sort_type = 7;  // asc, desc
+  PageReq page = 8;
+}
+
+message ProductSearchItem {
+  uint64 id = 1;
+  string name = 2;
+  string brand = 3;
+  string cover = 4;
+  int64 price = 5;
+  int64 sales = 6;
+  uint64 category_id = 7;
+  string category_name = 8;
+  string description = 9;
+  double score = 10; // ES相关度评分
+}
+
+message SearchProductsResp {
+  PageResp page = 1;
+  repeated ProductSearchItem list = 2;
+}
+
+// ==================== 搜索建议 ====================
+message SuggestReq {
+  string keyword = 1;
+  int32 size = 2; // 返回数量
+}
+
+message SuggestResp {
+  repeated string suggestions = 1;
+}
+
+// ==================== 热搜词 ====================
+message HotKeywordItem {
+  uint64 id = 1;
+  string keyword = 2;
+  int64 search_count = 3;
+  int32 sort = 4;
+}
+
+message HotKeywordsResp {
+  repeated HotKeywordItem list = 1;
+}
+
+// ==================== 搜索历史 ====================
+message SearchHistoryReq {
+}
+
+message SearchHistoryItem {
+  string keyword = 1;
+  int64 created_at = 2;
+}
+
+message SearchHistoryResp {
+  repeated SearchHistoryItem list = 1;
+}
+
+message ClearSearchHistoryReq {
+}
+
+// ==================== ES同步 ====================
+message SyncProductReq {
+  uint64 product_id = 1;
+}
+
+message BatchSyncProductsReq {
+  repeated uint64 product_ids = 1;
+}
+
+message DeleteProductReq {
+  uint64 product_id = 1;
+}

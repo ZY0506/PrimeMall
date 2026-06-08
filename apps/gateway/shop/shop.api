@@ -297,6 +297,11 @@ type (
 	CategoryResp {
 		Category Category `json:"category"` // 分类信息
 	}
+	// 属性过滤项
+	AttrFilterItem {
+		Name   string   `json:"name"`   // 属性名，如"颜色"
+		Values []string `json:"values"` // 属性值列表，如["红色","蓝色"]
+	}
 	// 商品列表请求
 	ProductListReq {
 		CategoryId uint64            `form:"category_id,optional" validate:"omitempty,min=1"` // 分类ID
@@ -304,7 +309,7 @@ type (
 		MinPrice   int64             `form:"min_price,optional" validate:"omitempty,min=0"` // 最低价格（单位：分）
 		MaxPrice   int64             `form:"max_price,optional" validate:"omitempty,min=0,gtefield=MinPrice"` // 最高价格（单位：分）
 		Keyword    string            `form:"keyword,optional" validate:"omitempty,min=1,max=100"` // 简单关键词搜索（大数据量建议使用独立搜索服务）
-		Attrs      map[string]string `form:"attrs,optional" validate:"omitempty,min=1,max=500"` // 属性过滤，格式 "颜色:红色,内存:64G"
+		Attrs      []AttrFilterItem `form:"attrs,optional"`                                     // 属性过滤
 		IsNew      bool              `form:"is_new,optional"` // 是否新品（按创建时间<7天）
 		SortBy     string            `form:"sort_by,optional" validate:"omitempty,oneof=price sales created_at"` // 排序字段
 		SortType   string            `form:"sort_type,optional" validate:"omitempty,oneof=asc desc"` // 排序方向

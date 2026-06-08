@@ -1,0 +1,48 @@
+Name: admin.rpc
+ListenOn: 0.0.0.0:8086
+
+Etcd:
+  Hosts:
+    - ${ETCD_HOST}:${ETCD_PORT}
+  Key: admin.rpc
+
+JWT:
+  Secret: ${JWT_SECRET}
+  Issuer: ${JWT_ISSUER}
+  AccessTokenExpire: 7200
+
+DB:
+  DSN: ${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/shop_admin?charset=utf8mb4&parseTime=True&loc=Local
+  MaxIdleConns: 10
+  MaxOpenConns: 10
+
+RDB:
+  Addr: ${REDIS_HOST}:${REDIS_PORT}
+  RedisPassword: "${REDIS_PASSWORD}"
+  RedisDB: 0
+  RedisPoolSize: 10
+  RedisMinIdleConns: 10
+
+Snowflake:
+  NodeID: 6
+
+UserRpc:
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}:${ETCD_PORT}
+    Key: user.rpc
+  Timeout: 5000
+
+ProductRpc:
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}:${ETCD_PORT}
+    Key: product.rpc
+  Timeout: 5000
+
+OrderRpc:
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}:${ETCD_PORT}
+    Key: order.rpc
+  Timeout: 5000
