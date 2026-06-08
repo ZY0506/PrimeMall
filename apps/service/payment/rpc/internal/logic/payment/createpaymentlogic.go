@@ -48,7 +48,7 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.CreatePaymentRequest) (*p
 	exists, err := l.svcCtx.Client.SetNX(l.ctx, idempotencyKey, "1", constants.IDEMPOTENCY_EXIRE).Result()
 	if err != nil {
 		l.Logger.Errorf("幂等性校验失败: %v", err)
-		return nil, err
+		return nil, errorx.NewBizError(response.InternalError, "系统繁忙，请稍后重试")
 	}
 	if !exists {
 		paymentKey := fmt.Sprintf("%s%s", constants.PAYMENT_IDEMPOTENCY_PREFIX, in.IdempotencyKey)
@@ -91,7 +91,7 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.CreatePaymentRequest) (*p
 	paymentSn, err := l.svcCtx.IDGenerator.GenWithPrefix("PAY")
 	if err != nil {
 		l.Logger.Errorf("生成支付流水号失败: %v", err)
-		return nil, err
+		return nil, errorx.NewBizError(response.InternalError, "系统繁忙，请稍后重试")
 	}
 	now := time.Now()
 	expireTime := orderDetail.ExpireTime.AsTime()
@@ -119,7 +119,7 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.CreatePaymentRequest) (*p
 	err = l.svcCtx.Client.HSet(l.ctx, paymentHashKey, paymentRecord).Err()
 	if err != nil {
 		l.Logger.Errorf("存储支付记录到Redis失败: %v", err)
-		return nil, err
+		return nil, errorx.NewBizError(response.InternalError, "系统繁忙，请稍后重试")
 	}
 	_ = l.svcCtx.Client.Expire(l.ctx, paymentHashKey, constants.PAYMENT_CACHE_EXPIRE).Err()
 
@@ -144,7 +144,7 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.CreatePaymentRequest) (*p
 		l.Logger.Errorf("持久化支付记录到MySQL失败: %v", err)
 		// Redis回滚
 		_ = l.svcCtx.Client.Del(l.ctx, paymentHashKey, orderIndexKey).Err()
-		return nil, err
+		return nil, errorx.NewBizError(response.InternalError, "系统繁忙，请稍后重试")
 	}
 
 	mockPayParams := fmt.Sprintf(`{"payment_sn":"%s","mock_url":"https://mock.pay.example.com/pay?sn=%s"}`, paymentSn, paymentSn)

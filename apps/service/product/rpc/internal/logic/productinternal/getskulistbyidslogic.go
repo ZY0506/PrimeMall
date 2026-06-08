@@ -57,6 +57,8 @@ func (l *GetSkuListByIdsLogic) GetSkuListByIds(in *product.SkuIdsReq) (*product.
 			MarketPrice: sku.MarketPrice,
 			CostPrice:   sku.CostPrice,
 			Stock:       sku.Stock,
+			LockedStock: sku.LockedStock,
+			Version:     uint32(sku.Version),
 			Specs:       specs,
 			Images:      images,
 			Weight:      sku.Weight,
