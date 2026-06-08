@@ -144,6 +144,21 @@ services:
     networks:
       - prime_mall_network
 
+  # =================================================================
+  # Nginx 网关负载均衡（端口 8080 -> 后端 3 个网关实例）
+  # =================================================================
+  nginx-shop:
+    image: nginx:1.27-alpine
+    container_name: nginx-shop
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./deployments/nginx/shop.nginx.conf:/etc/nginx/conf.d/shop.conf:ro
+      - ./storage/nginx/logs:/var/log/nginx
+    networks:
+      - prime_mall_network
+
 # =================================================================
 # 网络配置
 # =================================================================

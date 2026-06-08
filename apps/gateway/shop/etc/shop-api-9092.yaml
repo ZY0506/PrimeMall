@@ -1,0 +1,78 @@
+Name: shop-api
+Host: 0.0.0.0
+Port: 9092
+
+UserRpc:
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}:${ETCD_PORT}
+    Key: user.rpc
+
+ProductRpc:
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}:${ETCD_PORT}
+    Key: product.rpc
+
+OrderRpc:
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}:${ETCD_PORT}
+    Key: order.rpc
+
+PaymentRpc:
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}:${ETCD_PORT}
+    Key: payment.rpc
+
+MarketingRpc:
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}:${ETCD_PORT}
+    Key: marketing.rpc
+
+SearchRpc:
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}:${ETCD_PORT}
+    Key: search.rpc
+
+JWTAuth:
+  AccessSecret: ${JWT_SECRET}
+  AccessExpire: 7200
+  RefreshSecret: ${JWT_SECRET}
+  RefreshExpire: 604800
+  Issuer: ${JWT_ISSUER}
+
+RDB:
+  Addr: ${REDIS_HOST}:${REDIS_PORT}
+  RedisPassword: "${REDIS_PASSWORD}"
+  RedisDB: 0
+  RedisPoolSize: 200
+  RedisMinIdleConns: 20
+
+OssConfig:
+  AccessKeyId: ${OSS_ACCESS_KEY}
+  AccessKeySecret: ${OSS_ACCESS_SECRET}
+  Endpoint: ${OSS_ENDPOINT}
+  BucketName: ${OSS_BUCKET}
+  Host: https://${OSS_BUCKET}.${OSS_ENDPOINT}
+  UploadDir: avatar/
+  ExpireTime: 3600000
+  CallbackUrl: ${OSS_CALLBACK_URL}
+  MaxFileSize: 10485760
+  AllowedExts:
+    - jpg
+    - jpeg
+    - png
+    - gif
+    - webp
+
+CasbinConf:
+  ModelPath: etc/rbac_model.conf
+  PolicyPath: etc/policy.csv
+
+RateLimit:
+  PerIPSpeed: 500
+  PerIPBurst: 1000
