@@ -68,7 +68,8 @@ services:
     restart: unless-stopped
     environment:
       - ETCD_NAME=etcd-prime_mall
-      - ETCD_ADVERTISE_CLIENT_URLS=http://0.0.0.0:2379
+      # 宿主机通过 localhost 连接 etcd，必须用映射端口
+      - ETCD_ADVERTISE_CLIENT_URLS=http://localhost:${ETCD_PORT:-12379}
       - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
       - ETCD_INITIAL_CLUSTER_STATE=new
       - ETCD_INITIAL_CLUSTER_TOKEN=prime_mall_etcd_cluster

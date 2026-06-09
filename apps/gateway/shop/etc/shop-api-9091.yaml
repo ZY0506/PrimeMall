@@ -70,9 +70,9 @@ OssConfig:
     - webp
 
 CasbinConf:
-  ModelPath: etc/rbac_model.conf
-  PolicyPath: etc/policy.csv
+  ModelPath: apps/gateway/shop/etc/rbac_model.conf
+  PolicyPath: apps/gateway/shop/etc/policy.csv
 
 RateLimit:
-  PerIPSpeed: 500
-  PerIPBurst: 1000
+  PerIPSpeed: 100000
+  PerIPBurst: 200000
