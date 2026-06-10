@@ -31,10 +31,6 @@ func NewResetPasswordLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Res
 }
 
 func (l *ResetPasswordLogic) ResetPassword(req *types.ResetPasswordReq) error {
-	// 手机号检验
-	if !utils.ValidatePhone(req.Phone) {
-		return response.NewBizError(response.ErrCodeInvalidParam, "手机号格式错误")
-	}
 	// 密码校验
 	if !utils.ValidatePassword(req.NewPassword) {
 		return response.NewBizError(response.ErrCodeInvalidParam, "密码格式错误")

@@ -14,7 +14,7 @@ func SearchProductsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.SearchProductsReq
 		if err := httpx.Parse(r, &req); err != nil {
-			response.ClientError(r.Context(), w, response.RequestError, err.Error())
+			response.ClientError(r.Context(), w, response.ErrCodeInvalidParam, err.Error())
 			return
 		}
 		l := search.NewSearchProductsLogic(r.Context(), svcCtx)

@@ -16,4 +16,5 @@ type Config struct {
 		RedisPoolSize     int    `json:"RedisPoolSize"`
 		RedisMinIdleConns int    `json:"RedisMinIdleConns"`
 	}
+	SearchRpc zrpc.RpcClientConf
 }

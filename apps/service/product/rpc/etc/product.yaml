@@ -17,3 +17,10 @@ RDB:
   RedisDB: 0
   RedisPoolSize: 100
   RedisMinIdleConns: 20
+
+SearchRpc:
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}:${ETCD_PORT}
+    Key: search.rpc
+  Timeout: 5000

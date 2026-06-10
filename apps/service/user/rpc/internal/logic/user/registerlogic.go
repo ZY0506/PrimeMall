@@ -41,11 +41,22 @@ func NewRegisterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Register
 func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.LoginResp, error) {
 	var ok bool
 	var err error
-	// 校验手机号是否已经存在
-	_, err = l.svcCtx.UserModel.FindOneByPhone(l.ctx, in.Phone)
+
+	// 校验两次密码是否一致
+	if in.Password != in.ConfirmPassword {
+		return nil, errorx.NewBizError(response.ErrCodePasswordNotMatch, "两次输入密码不一致")
+	}
+
+	// 校验手机号是否已经存在（排除已注销账户）
+	existingUser, err := l.svcCtx.UserModel.FindOneByPhone(l.ctx, in.Phone)
 	if err == nil {
-		l.Logger.Infof("手机号已存在,phone=%s", in.Phone)
-		return nil, errorx.NewBizError(response.ErrCodePhoneRegistered, "手机号已注册")
+		// 如果用户存在且未注销，则手机号已注册
+		if !existingUser.DeletedAt.Valid {
+			l.Logger.Infof("手机号已存在,phone=%s", in.Phone)
+			return nil, errorx.NewBizError(response.ErrCodePhoneRegistered, "手机号已注册")
+		}
+		// 已注销用户允许重新注册
+		l.Logger.Infof("手机号已注销,phone=%s,允许重新注册", in.Phone)
 	} else if !errors.Is(err, model.ErrNotFound) {
 		l.Logger.Errorf("查询用户失败,error=%v", err)
 		return nil, err
@@ -79,11 +90,18 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.LoginResp, error) 
 		}
 	}()
 
-	// 生成用户ID
-	userId, err := l.svcCtx.IDGenerator.NextID()
-	if err != nil {
-		l.Logger.Errorf("生成用户ID失败,error=%v", err)
-		return nil, err
+	// 生成token要用的用户ID（新注册用新ID，注销复活用旧ID）
+	userId := uint64(0)
+	isRevived := existingUser != nil && existingUser.DeletedAt.Valid
+	if isRevived {
+		userId = existingUser.Id
+		l.Logger.Infof("复用已注销账号, id=%d", userId)
+	} else {
+		userId, err = l.svcCtx.IDGenerator.NextID()
+		if err != nil {
+			l.Logger.Errorf("生成用户ID失败,error=%v", err)
+			return nil, err
+		}
 	}
 
 	// 生成token
@@ -104,7 +122,7 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.LoginResp, error) 
 		return nil, err
 	}
 
-	// 4、 创建用户
+	// 4、 创建/复活用户
 	if in.Nickname == "" {
 		in.Nickname = base62.GenerateNickname("prime_mall_", userId)
 	}
@@ -113,21 +131,41 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.LoginResp, error) 
 		l.Logger.Errorf("密码加密失败,error=%v", err)
 		return nil, err
 	}
-	_, err = l.svcCtx.UserModel.Insert(l.ctx, &model.User{
-		Id:            userId,
-		Phone:         in.Phone,
-		Password:      encodePassword,
-		Nickname:      in.Nickname,
-		Avatar:        "https://avatars.githubusercontent.com/u/583231?v=4",
-		Gender:        constants.USER_GENDER_UNKNOWN,
-		Birthday:      sql.NullTime{},
-		Status:        constants.USER_STATUS_NORMAL,
-		LastLoginTime: sql.NullTime{},
-		LastLoginIp:   "",
-		ExtInfo:       sql.NullString{},
-		CreatedAt:     time.Now(),
-		UpdatedAt:     time.Now(),
-	})
+
+	if isRevived {
+		// 已注销账号复活：UPDATE 现有记录，将 deleted_at 置 NULL
+		existingUser.Phone = in.Phone
+		existingUser.Password = encodePassword
+		existingUser.Nickname = in.Nickname
+		existingUser.Avatar = "https://avatars.githubusercontent.com/u/583231?v=4"
+		existingUser.Gender = constants.USER_GENDER_UNKNOWN
+		existingUser.Birthday = sql.NullTime{}
+		existingUser.Status = constants.USER_STATUS_NORMAL
+		existingUser.LastLoginTime = sql.NullTime{}
+		existingUser.LastLoginIp = ""
+		existingUser.ExtInfo = sql.NullString{}
+		existingUser.DeletedAt = sql.NullTime{Valid: false} // 复活：清除删除标记
+		existingUser.CreatedAt = time.Now()
+		existingUser.UpdatedAt = time.Now()
+		err = l.svcCtx.UserModel.Update(l.ctx, existingUser)
+	} else {
+		// 全新注册：INSERT 新记录
+		_, err = l.svcCtx.UserModel.Insert(l.ctx, &model.User{
+			Id:            userId,
+			Phone:         in.Phone,
+			Password:      encodePassword,
+			Nickname:      in.Nickname,
+			Avatar:        "https://avatars.githubusercontent.com/u/583231?v=4",
+			Gender:        constants.USER_GENDER_UNKNOWN,
+			Birthday:      sql.NullTime{},
+			Status:        constants.USER_STATUS_NORMAL,
+			LastLoginTime: sql.NullTime{},
+			LastLoginIp:   "",
+			ExtInfo:       sql.NullString{},
+			CreatedAt:     time.Now(),
+			UpdatedAt:     time.Now(),
+		})
+	}
 	if err != nil {
 		l.Logger.Errorf("创建用户失败,error=%v", err)
 		return nil, err

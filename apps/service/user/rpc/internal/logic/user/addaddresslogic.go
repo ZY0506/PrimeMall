@@ -44,6 +44,16 @@ func (l *AddAddressLogic) AddAddress(in *user.AddAddressReq) (*user.EmptyResp, e
 		return nil, errorx.NewBizError(response.ErrCodeInvalidParam, "地址标签错误")
 	}
 
+	// 检查地址数量是否超过上限（最多20条）
+	_, total, err := l.svcCtx.AddressModel.FindPageByUserId(l.ctx, userId, 1, 1)
+	if err != nil {
+		l.Logger.Errorf("查询地址数量失败,err=%v", err)
+		return nil, err
+	}
+	if total >= 20 {
+		return nil, errorx.NewBizError(response.ErrCodeAddressLimitExceeded, "地址数量已达上限（最多20条）")
+	}
+
 	// 处理AddressDetail
 	addrDetail, err := json.Marshal(in.Address)
 	if err != nil {

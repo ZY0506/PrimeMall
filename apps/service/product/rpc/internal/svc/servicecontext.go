@@ -6,12 +6,14 @@ import (
 
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/internal/config"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/internal/model"
+	"github.com/ZY0506/PrimeMall/apps/service/search/rpc/client/search"
 	"github.com/ZY0506/PrimeMall/common/constants"
 	"github.com/ZY0506/PrimeMall/pkg/database"
 	"github.com/ZY0506/PrimeMall/pkg/rdb"
 	"github.com/go-redis/redis/v8"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"github.com/zeromicro/go-zero/zrpc"
 )
 
 type ServiceContext struct {
@@ -23,6 +25,7 @@ type ServiceContext struct {
 	ProductSkuModel      model.ProductSkuModel
 	FreightTemplateModel model.FreightTemplateModel
 	StockLogModel        model.StockLogModel
+	SearchRpc            search.Search
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -41,6 +44,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ProductSkuModel:      model.NewProductSkuModel(db),
 		FreightTemplateModel: model.NewFreightTemplateModel(db),
 		StockLogModel:        model.NewStockLogModel(db),
+		SearchRpc:            search.NewSearch(zrpc.MustNewClient(c.SearchRpc)),
 	}
 
 	// 异步预热热销SKU库存到Redis

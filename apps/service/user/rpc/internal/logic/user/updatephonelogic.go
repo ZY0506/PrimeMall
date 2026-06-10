@@ -72,8 +72,7 @@ func (l *UpdatePhoneLogic) UpdatePhone(in *user.UpdatePhoneReq) (*user.EmptyResp
 	ok, err = l.svcCtx.CaptchaSvc.Verify(l.ctx, u.Phone, constants.SCENE_UPDATE_PHONE, in.OldPhoneCode)
 	if err != nil {
 		l.Logger.Errorf("验证码校验失败，error=%v", err)
-		// 系统错误，不记录为业务失败日志（或根据需求决定）
-		return nil, err
+		return nil, errorx.NewBizError(response.ErrCodeCaptchaWrong, "验证码校验失败")
 	}
 	if !ok {
 		l.Logger.Infof("验证码错误,phone=%v", u.Phone)
@@ -84,12 +83,24 @@ func (l *UpdatePhoneLogic) UpdatePhone(in *user.UpdatePhoneReq) (*user.EmptyResp
 	ok, err = l.svcCtx.CaptchaSvc.Verify(l.ctx, in.NewPhone, constants.SCENE_UPDATE_PHONE, in.NewPhoneCode)
 	if err != nil {
 		l.Logger.Errorf("验证码校验失败，error=%v", err)
-		// 系统错误，不记录为业务失败日志（或根据需求决定）
-		return nil, err
+		return nil, errorx.NewBizError(response.ErrCodeCaptchaWrong, "验证码校验失败")
 	}
 	if !ok {
 		l.Logger.Infof("验证码错误,phone=%v", in.NewPhone)
 		return nil, errorx.NewBizError(response.ErrCodeCaptchaWrong, "验证码错误")
+	}
+
+	// 检查新手机号是否已被其他用户注册
+	existingUser, err := l.svcCtx.UserModel.FindOneByPhone(l.ctx, in.NewPhone)
+	if err == nil && existingUser.Id != userId {
+		// 如果查到的是已注销的账号，允许重新绑定
+		if !existingUser.DeletedAt.Valid {
+			l.Logger.Errorf("新手机号已被注册,phone=%s,ownerId=%d,requesterId=%d", in.NewPhone, existingUser.Id, userId)
+			return nil, errorx.NewBizError(response.ErrCodePhoneRegistered, "手机号已注册")
+		}
+	} else if err != nil && !errors.Is(err, model.ErrNotFound) {
+		l.Logger.Errorf("查询新手机号失败,error=%v", err)
+		return nil, err
 	}
 
 	// 更新手机号

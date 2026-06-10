@@ -3,11 +3,13 @@ package svc
 import (
 	"context"
 
+	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/client/product"
 	"github.com/ZY0506/PrimeMall/apps/service/search/rpc/internal/config"
 	"github.com/ZY0506/PrimeMall/apps/service/search/rpc/internal/model"
 	"github.com/ZY0506/PrimeMall/pkg/database"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
+	"github.com/zeromicro/go-zero/zrpc"
 )
 
 type ServiceContext struct {
@@ -16,6 +18,7 @@ type ServiceContext struct {
 	ES                 *ESClient
 	SearchHistoryModel model.SearchHistoryModel
 	HotKeywordModel    model.HotKeywordModel
+	ProductRpc         product.Product
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -44,5 +47,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ES:                 es,
 		SearchHistoryModel: model.NewSearchHistoryModel(db),
 		HotKeywordModel:    model.NewHotKeywordModel(db),
+		ProductRpc:         product.NewProduct(zrpc.MustNewClient(c.ProductRpc)),
 	}
 }

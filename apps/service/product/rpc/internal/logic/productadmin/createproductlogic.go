@@ -14,6 +14,7 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/internal/model"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/types/product"
+	"github.com/ZY0506/PrimeMall/apps/service/search/rpc/types/search"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -163,5 +164,18 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 	}
 
 	l.Logger.Infof("创建商品成功, id=%d, name=%s, skuCount=%d", spuId, in.Name, len(in.Skus))
+
+	// 同步商品到ES搜索引擎（异步非阻塞）
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logx.Errorf("同步商品到ES panic: %v", r)
+			}
+		}()
+		if _, err := l.svcCtx.SearchRpc.SyncProductToES(context.Background(), &search.SyncProductReq{ProductId: uint64(spuId)}); err != nil {
+			logx.Errorf("同步商品到ES失败, productId=%d, err=%v", spuId, err)
+		}
+	}()
+
 	return &product.Empty{}, nil
 }

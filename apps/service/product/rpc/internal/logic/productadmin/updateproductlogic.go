@@ -16,6 +16,7 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/internal/model"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/types/product"
+	"github.com/ZY0506/PrimeMall/apps/service/search/rpc/types/search"
 
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
@@ -238,20 +239,33 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 	}
 
 	l.Logger.Infof("更新商品成功, id=%d", in.Id)
-		// 清除商品详情缓存
-		cacheKey := constants.ProductDetailKey + strconv.FormatUint(in.Id, 10)
-		l.svcCtx.Client.Del(l.ctx, cacheKey)
+	// 清除商品详情缓存
+	cacheKey := constants.ProductDetailKey + strconv.FormatUint(in.Id, 10)
+	l.svcCtx.Client.Del(l.ctx, cacheKey)
 
-		// 清除该分类下的商品列表缓存
-		pattern := constants.ProductListKey + fmt.Sprintf("%d:*", spu.CategoryId)
-		if keys, err := l.svcCtx.Client.Keys(l.ctx, pattern).Result(); err == nil && len(keys) > 0 {
-			l.svcCtx.Client.Del(l.ctx, keys...)
-		}
+	// 清除该分类下的商品列表缓存
+	pattern := constants.ProductListKey + fmt.Sprintf("%d:*", spu.CategoryId)
+	if keys, err := l.svcCtx.Client.Keys(l.ctx, pattern).Result(); err == nil && len(keys) > 0 {
+		l.svcCtx.Client.Del(l.ctx, keys...)
+	}
 
-		// 清除每个SKU的库存缓存
-		for _, sku := range in.Skus {
-			stockKey := constants.ProductStockKey + strconv.FormatUint(sku.Id, 10)
-			l.svcCtx.Client.Del(l.ctx, stockKey)
+	// 清除每个SKU的库存缓存
+	for _, sku := range in.Skus {
+		stockKey := constants.ProductStockKey + strconv.FormatUint(sku.Id, 10)
+		l.svcCtx.Client.Del(l.ctx, stockKey)
+	}
+
+	// 同步商品到ES搜索引擎（异步非阻塞）
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logx.Errorf("同步商品到ES panic: %v", r)
+			}
+		}()
+		if _, err := l.svcCtx.SearchRpc.SyncProductToES(context.Background(), &search.SyncProductReq{ProductId: in.Id}); err != nil {
+			logx.Errorf("同步商品到ES失败, productId=%d, err=%v", in.Id, err)
 		}
+	}()
+
 	return &product.Empty{}, nil
 }

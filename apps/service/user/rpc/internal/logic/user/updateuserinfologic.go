@@ -54,12 +54,18 @@ func (l *UpdateUserInfoLogic) UpdateUserInfo(in *user.UpdateUserInfoReq) (*user.
 	}
 
 	if in.Nickname != "" {
+		if len([]rune(in.Nickname)) > 30 {
+			return nil, errorx.NewBizError(response.ErrCodeInvalidParam, "昵称最大30个字符")
+		}
 		u.Nickname = in.Nickname
 	}
 	if in.Avatar != "" {
 		u.Avatar = in.Avatar
 	}
 	if in.Gender != 0 {
+		if in.Gender != 1 && in.Gender != 2 {
+			return nil, errorx.NewBizError(response.ErrCodeInvalidParam, "性别值非法，合法值: 0未知/1男/2女")
+		}
 		u.Gender = in.Gender
 	}
 	if in.Birthday != nil {

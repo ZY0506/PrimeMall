@@ -14,4 +14,5 @@ type Config struct {
 		Username  string   `json:"Username"`
 		Password  string   `json:"Password"`
 	}
+	ProductRpc zrpc.RpcClientConf
 }

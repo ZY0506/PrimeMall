@@ -13,6 +13,13 @@ DB:
 
 Elasticsearch:
   Addresses:
-    - http://${ES_HOST}:${ES_PORT}
+    - http://localhost:19200
   Username: ""
   Password: ""
+
+ProductRpc:
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}:${ETCD_PORT}
+    Key: product.rpc
+  Timeout: 5000
