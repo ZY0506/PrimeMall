@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
+	"time"
 
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
@@ -32,10 +34,20 @@ type ESClient struct {
 }
 
 func NewESClient(addresses []string, username, password string) (*ESClient, error) {
+	// 自定义Transport：增大连接池，避免高并发下连接耗尽
+	transport := &http.Transport{
+		MaxIdleConns:        200,
+		MaxIdleConnsPerHost: 100,
+		MaxConnsPerHost:     200,
+		IdleConnTimeout:     90 * time.Second,
+		DisableCompression:  false,
+	}
+
 	cfg := elasticsearch.Config{
 		Addresses: addresses,
 		Username:  username,
 		Password:  password,
+		Transport: transport,
 	}
 	client, err := elasticsearch.NewClient(cfg)
 	if err != nil {

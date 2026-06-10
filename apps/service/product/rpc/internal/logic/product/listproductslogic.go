@@ -54,18 +54,20 @@ func (l *ListProductsLogic) ListProducts(in *product.ProductListReq) (*product.P
 	}
 
 	// 要检验id
-	category, err := l.svcCtx.CategoryModel.FindOne(l.ctx, in.CategoryId)
-	if err != nil {
-		if errors.Is(err, model.ErrNotFound) {
-			l.Logger.Errorf("分类不存在,id=%d", in.CategoryId)
-			return nil, errorx.NewBizError(response.ErrCodeCategoryNotFound, "分类不存在")
+	if in.CategoryId > 0 {
+		category, err := l.svcCtx.CategoryModel.FindOne(l.ctx, in.CategoryId)
+		if err != nil {
+			if errors.Is(err, model.ErrNotFound) {
+				l.Logger.Errorf("分类不存在,id=%d", in.CategoryId)
+				return nil, errorx.NewBizError(response.ErrCodeCategoryNotFound, "分类不存在")
+			}
+			l.Logger.Errorf("查询分类id出错，error=%v", err)
+			return nil, err
 		}
-		l.Logger.Errorf("查询分类id出错，error=%v", err)
-		return nil, err
-	}
-	if category.DeleteAt.Valid || category.Status != 1 {
-		l.Logger.Errorf("分类不可用,id=%d", in.CategoryId)
-		return nil, errorx.NewBizError(response.ErrCodeCategoryDisabled, "分类不可用")
+		if category.DeleteAt.Valid || category.Status != 1 {
+			l.Logger.Errorf("分类不可用,id=%d", in.CategoryId)
+			return nil, errorx.NewBizError(response.ErrCodeCategoryDisabled, "分类不可用")
+		}
 	}
 
 	var attrs []model.AttrFilter

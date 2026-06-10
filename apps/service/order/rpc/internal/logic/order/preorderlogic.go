@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/types/product"
 	"github.com/ZY0506/PrimeMall/apps/service/user/rpc/types/user"
@@ -55,7 +56,7 @@ func NewPreOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PreOrder
 	}
 }
 
-// PreOrder 预下单
+// PreOrder 预下单（并行优化版）
 // 核心职责：校验参数/用户/商品/地址 → 计算价格/运费 → 生成订单项快照 → 缓存结算上下文
 func (l *PreOrderLogic) PreOrder(in *order.PreOrderRequest) (*order.PreOrderResponse, error) {
 	// ===================== 1. 基础参数校验 =====================
@@ -75,54 +76,7 @@ func (l *PreOrderLogic) PreOrder(in *order.PreOrderRequest) (*order.PreOrderResp
 		return nil, err
 	}
 
-	// ===================== 3. 校验用户下单权限 =====================
-	ret, err := l.svcCtx.UserRpc.CheckUserStatus(l.ctx, &user.CheckUserStatusReq{
-		UserId:    userId,
-		CheckType: constants.USER_STATUS_RESTRICTED,
-	})
-	if err != nil {
-		l.Logger.Errorf("校验用户状态失败，error=%v", err)
-		return nil, err
-	}
-	if !ret.Allowed {
-		return nil, errorx.NewBizError(response.ErrCodeUserRestricted, ret.Reason)
-	}
-
-	// ===================== 4. 查询收货地址 + 生成地址快照 =====================
-	addr := &user.AddressItem{}
-	addrSnapshot := new(order.AddressSnapshot)
-	var addrSnapshotStr []byte
-	if in.AddressId > 0 {
-		addr, err = l.svcCtx.UserRpc.GetAddressById(l.ctx, &user.GetAddressReq{
-			AddressId: in.AddressId,
-			UserId:    userId,
-		})
-		if err != nil {
-			l.Logger.Errorf("查询地址失败，error=%v", err)
-			return nil, err
-		}
-		addrSnapshot = &order.AddressSnapshot{
-			ReceiverName:  addr.ReceiverName,
-			ReceiverPhone: addr.ReceiverPhone,
-			Detail: &order.AddressDetail{
-				Province:      addr.Address.Province,
-				City:          addr.Address.City,
-				District:      addr.Address.District,
-				DetailAddress: addr.Address.Detail,
-				PostalCode:    addr.Address.PostalCode,
-			},
-		}
-		// 序列化地址快照
-		addrSnapshotStr, err = json.Marshal(addrSnapshot)
-		if err != nil {
-			l.Logger.Errorf("序列化地址快照失败，error=%v", err)
-			return nil, err
-		}
-	}
-
-	// TODO: 获取优惠券信息(校验优惠卷)
-
-	// ===================== 5. 构建商品参数 =====================
+	// ===================== 构建商品参数（无RPC，直接计算）=====================
 	skuIds := make([]uint64, len(in.Items))
 	stockCheckItems := make([]*product.SkuStockItem, 0, len(in.Items))
 	skuQuantityMap := make(map[uint64]int64, len(in.Items))
@@ -135,31 +89,97 @@ func (l *PreOrderLogic) PreOrder(in *order.PreOrderRequest) (*order.PreOrderResp
 		})
 	}
 
-	// ===================== 6. 查询商品SKU信息 =====================
-	skus, err := l.svcCtx.ProductRpc.GetSkuListByIds(l.ctx, &product.SkuIdsReq{SkuIds: skuIds})
+	// ===================== 3/4/6. 并行RPC调用 =====================
+	// 以下三个RPC调用互不依赖，可同时执行：
+	//   - UserRpc.CheckUserStatus (依赖: userId)
+	//   - UserRpc.GetAddressById   (依赖: addressId, userId)
+	//   - ProductRpc.GetSkuListByIds (依赖: skuIds)
+	var (
+		userStatusResp *user.CheckUserStatusResp
+		addressResp    *user.AddressItem
+		skusResp       *product.SkuListResp
+
+		userStatusErr error
+		addressErr    error
+		skusErr       error
+	)
+
+	var wg sync.WaitGroup
+	wg.Add(3)
+
+	go func() {
+		defer wg.Done()
+		userStatusResp, userStatusErr = l.svcCtx.UserRpc.CheckUserStatus(l.ctx, &user.CheckUserStatusReq{
+			UserId:    userId,
+			CheckType: constants.USER_STATUS_RESTRICTED,
+		})
+	}()
+	go func() {
+		defer wg.Done()
+		addressResp, addressErr = l.svcCtx.UserRpc.GetAddressById(l.ctx, &user.GetAddressReq{
+			AddressId: in.AddressId,
+			UserId:    userId,
+		})
+	}()
+	go func() {
+		defer wg.Done()
+		skusResp, skusErr = l.svcCtx.ProductRpc.GetSkuListByIds(l.ctx, &product.SkuIdsReq{SkuIds: skuIds})
+	}()
+
+	wg.Wait()
+
+	// ===================== 检查并行RPC结果 =====================
+	if userStatusErr != nil {
+		l.Logger.Errorf("校验用户状态失败，error=%v", userStatusErr)
+		return nil, userStatusErr
+	}
+	if !userStatusResp.Allowed {
+		return nil, errorx.NewBizError(response.ErrCodeUserRestricted, userStatusResp.Reason)
+	}
+
+	if addressErr != nil {
+		l.Logger.Errorf("查询地址失败，error=%v", addressErr)
+		return nil, addressErr
+	}
+	// 地址快照
+	addrSnapshot := &order.AddressSnapshot{
+		ReceiverName:  addressResp.ReceiverName,
+		ReceiverPhone: addressResp.ReceiverPhone,
+		Detail: &order.AddressDetail{
+			Province:      addressResp.Address.Province,
+			City:          addressResp.Address.City,
+			District:      addressResp.Address.District,
+			DetailAddress: addressResp.Address.Detail,
+			PostalCode:    addressResp.Address.PostalCode,
+		},
+	}
+	addrSnapshotStr, err := json.Marshal(addrSnapshot)
 	if err != nil {
-		l.Logger.Errorf("获取SKU列表失败，error=%v", err)
+		l.Logger.Errorf("序列化地址快照失败，error=%v", err)
 		return nil, err
 	}
-	if len(skus.SkuItems) == 0 {
+
+	if skusErr != nil {
+		l.Logger.Errorf("获取SKU列表失败，error=%v", skusErr)
+		return nil, skusErr
+	}
+	if len(skusResp.SkuItems) == 0 {
 		return nil, errorx.NewBizError(response.ErrCodePreOrderFailed, "商品不存在")
 	}
 
-	// ===================== 7. 检查库存（仅检查，不锁定） =====================
+	// ===================== 7. 检查库存 + 构建快照 =====================
 	var stockErrMsgs []string
 	var itemSnapshots []OrderItemSnapshot
 
-	for _, sku := range skus.SkuItems {
+	for _, sku := range skusResp.SkuItems {
 		if sku.Status != constants.PRODUCT_SKU_STATUS_ENABLED {
 			return nil, errorx.NewBizError(response.ErrCodeProductOffline, "商品已下架")
 		}
 		buyNum := skuQuantityMap[sku.Id]
-		// 库存校验（使用可用库存：总库存 - 锁定库存）
 		availableStock := sku.Stock - sku.LockedStock
 		if availableStock < buyNum {
 			stockErrMsgs = append(stockErrMsgs, fmt.Sprintf("商品【%s】库存不足，当前可用库存：%d，购买数量：%d", sku.SpuName, availableStock, buyNum))
 		}
-		// 拼接规格
 		var specStrs []string
 		for _, spec := range sku.Specs {
 			specStrs = append(specStrs, spec.Value)
@@ -169,7 +189,6 @@ func (l *PreOrderLogic) PreOrder(in *order.PreOrderRequest) (*order.PreOrderResp
 		if len(sku.Images) > 0 {
 			pic = sku.Images[0]
 		}
-		// 构建快照
 		itemSnapshots = append(itemSnapshots, OrderItemSnapshot{
 			SkuId:       sku.Id,
 			SpuId:       sku.SpuId,
@@ -193,7 +212,7 @@ func (l *PreOrderLogic) PreOrder(in *order.PreOrderRequest) (*order.PreOrderResp
 		totalAmount += item.TotalAmount
 	}
 
-	// ===================== 9. 计算运费 =====================
+	// ===================== 9. 计算运费（依赖第6步结果，串行执行）=====================
 	var freightAmount int64 = 0
 	freightResp, err := l.svcCtx.ProductRpc.CalculateFreight(l.ctx, &product.CalculateFreightReq{
 		AddressId: in.AddressId,

@@ -1,6 +1,8 @@
 package svc
 
 import (
+	"context"
+
 	"github.com/ZY0506/PrimeMall/apps/service/search/rpc/internal/config"
 	"github.com/ZY0506/PrimeMall/apps/service/search/rpc/internal/model"
 	"github.com/ZY0506/PrimeMall/pkg/database"
@@ -26,6 +28,13 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		if err != nil {
 			logx.Errorf("Elasticsearch初始化失败，搜索将仅使用数据库模式，错误：%v", err)
 			es = nil
+		} else {
+			// 启动时确保ES索引存在（只初始化一次，不在热路径中重复检查）
+			if err := es.EnsureIndex(context.Background()); err != nil {
+				logx.Errorf("Elasticsearch索引初始化失败，错误：%v", err)
+			} else {
+				logx.Infof("Elasticsearch索引初始化完成: %s", productIndexName)
+			}
 		}
 	}
 

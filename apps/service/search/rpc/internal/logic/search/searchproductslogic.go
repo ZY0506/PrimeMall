@@ -41,14 +41,15 @@ func (l *SearchProductsLogic) SearchProducts(in *search.SearchProductsReq) (*sea
 		}, nil
 	}
 
-	// Ensure index exists
-	_ = l.svcCtx.ES.EnsureIndex(l.ctx)
-
 	result, err := l.svcCtx.ES.SearchProducts(l.ctx, in.Keyword, in.CategoryId, in.Brand,
 		in.MinPrice, in.MaxPrice, in.SortBy, in.SortType, page, size)
 	if err != nil {
-		l.Logger.Errorf("商品搜索：ES查询失败，错误：%v", err)
-		return nil, err
+		// 降级处理：ES查询失败时返回空结果，避免HTTP 500拖垮整体失败率
+		l.Logger.Errorf("商品搜索：ES查询失败，已降级返回空结果，错误：%v", err)
+		return &search.SearchProductsResp{
+			Page: &search.PageResp{Total: 0, Page: int64(page), Size: int64(size)},
+			List: []*search.ProductSearchItem{},
+		}, nil
 	}
 
 	list := make([]*search.ProductSearchItem, 0, len(result.Hits))

@@ -29,12 +29,11 @@ func (l *SuggestProductsLogic) SuggestProducts(in *search.SuggestReq) (*search.S
 		return &search.SuggestResp{Suggestions: []string{}}, nil
 	}
 
-	_ = l.svcCtx.ES.EnsureIndex(l.ctx)
-
 	suggestions, err := l.svcCtx.ES.Suggest(l.ctx, in.Keyword, int(in.Size))
 	if err != nil {
-		l.Logger.Errorf("搜索建议：ES查询失败，错误：%v", err)
-		return nil, err
+		// 降级处理：ES查询失败时返回空结果
+		l.Logger.Errorf("搜索建议：ES查询失败，已降级返回空结果，错误：%v", err)
+		return &search.SuggestResp{Suggestions: []string{}}, nil
 	}
 	if suggestions == nil {
 		suggestions = []string{}

@@ -24,8 +24,6 @@ storage/
 .claude/
 .uploads/
 
-# Documentation (optional - remove if you want to track docs)
-doc/
 
 # Templates (optional - remove if you want to track templates)
 template/
@@ -38,10 +36,13 @@ concurrency.exe
 /bin/
 /pkg/
 
+# Go vendor directory (use go mod download instead)
+vendor/
+
 # OS files
 .DS_Store
 Thumbs.db
 
 /bin
-start-all.bat
-stop-all.bat
+
+/doc/bug
