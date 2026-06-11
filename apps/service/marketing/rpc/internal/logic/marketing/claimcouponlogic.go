@@ -30,14 +30,14 @@ func (l *ClaimCouponLogic) ClaimCoupon(in *marketing.ClaimCouponReq) (*marketing
 	// 从gRPC context获取userId
 	userId, err := ctxdata.GetUserIdFromCtx(l.ctx)
 	if err != nil {
-		l.Logger.Errorf("ClaimCoupon GetUserIdFromCtx error: %v", err)
+		l.Logger.Errorf("领取优惠券：获取用户ID失败，错误：%v", err)
 		return nil, err
 	}
 
 	// 1. 查找优惠券
 	coupon, err := l.svcCtx.CouponModel.FindOne(l.ctx, in.CouponId)
 	if err != nil {
-		l.Logger.Errorf("ClaimCoupon FindOne error: %v", err)
+		l.Logger.Errorf("领取优惠券：查询优惠券失败，错误：%v", err)
 		return nil, err
 	}
 	if coupon == nil {

@@ -27,7 +27,7 @@ func NewMyCouponsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *MyCoupo
 func (l *MyCouponsLogic) MyCoupons(in *marketing.MyCouponsReq) (*marketing.MyCouponsResp, error) {
 	userId, err := ctxdata.GetUserIdFromCtx(l.ctx)
 	if err != nil {
-		l.Logger.Errorf("MyCoupons GetUserIdFromCtx error: %v", err)
+		l.Logger.Errorf("获取我的优惠券：获取用户ID失败，错误：%v", err)
 		return nil, err
 	}
 
@@ -42,7 +42,7 @@ func (l *MyCouponsLogic) MyCoupons(in *marketing.MyCouponsReq) (*marketing.MyCou
 
 	items, total, err := l.svcCtx.UserCouponModel.FindByUserID(l.ctx, userId, int64(in.Status), page, size)
 	if err != nil {
-		l.Logger.Errorf("MyCoupons FindByUserID error: %v", err)
+		l.Logger.Errorf("获取我的优惠券：查询用户优惠券失败，错误：%v", err)
 		return nil, err
 	}
 

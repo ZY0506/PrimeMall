@@ -35,7 +35,7 @@ func (l *ListCouponsLogic) ListCoupons(in *marketing.ListCouponsReq) (*marketing
 
 	items, total, err := l.svcCtx.CouponModel.FindPageList(l.ctx, page, size)
 	if err != nil {
-		l.Logger.Errorf("ListCoupons FindPageList error: %v", err)
+		l.Logger.Errorf("获取优惠券列表：分页查询失败，错误：%v", err)
 		return nil, err
 	}
 
