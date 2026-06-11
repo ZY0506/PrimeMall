@@ -27,6 +27,8 @@ service Marketing {
   rpc UseCoupon(UseCouponReq) returns (UseCouponResp);
   // 内部：解锁优惠券（订单取消回滚）
   rpc UnlockCoupon(UnlockCouponReq) returns (UnlockCouponResp);
+  // 内部：获取用户优惠券信息（含券定义）
+  rpc GetUserCoupon(GetUserCouponReq) returns (GetUserCouponResp);
 }
 
 // ==================== 通用结构 ====================
@@ -164,6 +166,7 @@ message AvailableCouponsResp {
 message UseCouponReq {
   uint64 user_coupon_id = 1;
   string order_sn = 2;
+  int64 order_amount = 3;  // 订单金额（分），用于折扣券精确计算
 }
 
 message UseCouponResp {
@@ -180,4 +183,13 @@ message UnlockCouponReq {
 message UnlockCouponResp {
   bool success = 1;
   string error_msg = 2;
+}
+
+message GetUserCouponReq {
+  uint64 user_coupon_id = 1;  // 用户优惠券ID（优先）
+  uint64 coupon_id = 2;       // 优惠券定义ID（与上下文userId组合查询用户已领取的实例）
+}
+
+message GetUserCouponResp {
+  UserCouponInfo coupon = 1;
 }

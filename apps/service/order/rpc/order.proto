@@ -261,8 +261,6 @@ message CreateOrderRequest {
   string remark = 3;                // 订单备注（选填）
   string idempotency_key = 4;       // 幂等键（前端生成唯一ID，防重复提交）
   repeated uint64 cart_sku_ids = 5; // 购物车已结算SKU列表，下单成功后删除
-  uint64 address_id = 6;            // 收货地址ID
-  uint64 coupon_id = 7;             // 优惠券ID（无则传0）
 }
 
 /**

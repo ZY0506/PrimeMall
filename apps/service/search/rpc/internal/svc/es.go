@@ -10,6 +10,7 @@ import (
 
 	"github.com/elastic/go-elasticsearch/v7"
 	"github.com/elastic/go-elasticsearch/v7/esapi"
+	"github.com/zeromicro/go-zero/core/logx"
 )
 
 const productIndexName = "prime_mall_products"
@@ -71,26 +72,36 @@ func (es *ESClient) EnsureIndex(ctx context.Context) error {
 	}
 	defer existsRes.Body.Close()
 	if existsRes.StatusCode == 200 {
+		putMappingReq := esapi.IndicesPutMappingRequest{
+			Index: []string{productIndexName},
+			Body: strings.NewReader(`{
+				"properties": {
+					"suggest": { "type": "completion" }
+				}
+			}`),
+		}
+		putMappingRes, putErr := putMappingReq.Do(ctx, es.client)
+		if putErr != nil {
+			return putErr
+		}
+		defer putMappingRes.Body.Close()
+		if putMappingRes.IsError() {
+			logx.WithContext(ctx).Infof("更新ES suggest mapping结果: %s", putMappingRes.String())
+		}
 		return nil
 	}
 
 	mapping := `{
 		"settings": {
 			"number_of_shards": 1,
-			"number_of_replicas": 0,
-			"analysis": {
-				"analyzer": {
-					"ik_smart_analyzer": { "type": "custom", "tokenizer": "ik_smart" },
-					"ik_max_word_analyzer": { "type": "custom", "tokenizer": "ik_max_word" }
-				}
-			}
+			"number_of_replicas": 0
 		},
 		"mappings": {
 			"properties": {
 				"id":             { "type": "long" },
-				"name":           { "type": "text", "analyzer": "ik_max_word", "search_analyzer": "ik_smart", "fields": { "keyword": { "type": "keyword" } } },
+				"name":           { "type": "text", "fields": { "keyword": { "type": "keyword" } } },
 				"brand":          { "type": "keyword" },
-				"description":    { "type": "text", "analyzer": "ik_max_word", "search_analyzer": "ik_smart" },
+				"description":    { "type": "text" },
 				"cover":          { "type": "keyword" },
 				"price":          { "type": "long" },
 				"sales":          { "type": "long" },
@@ -310,10 +321,14 @@ func (es *ESClient) Suggest(ctx context.Context, prefix string, size int) ([]str
 		return nil, err
 	}
 
+	seen := make(map[string]struct{}, size)
 	suggestions := make([]string, 0)
 	if options, ok := result.Suggest["product_suggest"]; ok && len(options) > 0 {
 		for _, opt := range options[0].Options {
-			suggestions = append(suggestions, opt.Text)
+			if _, dup := seen[opt.Text]; !dup {
+				seen[opt.Text] = struct{}{}
+				suggestions = append(suggestions, opt.Text)
+			}
 		}
 	}
 	return suggestions, nil

@@ -46,7 +46,7 @@ func (m *customOrderInfoModel) InsertTx(ctx context.Context, session sqlx.Sessio
 // UpdateTx 事务操作更新
 func (m *customOrderInfoModel) UpdateTx(ctx context.Context, session sqlx.Session, newData *OrderInfo) error {
 	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, orderInfoRowsWithPlaceHolder)
-	_, err := session.ExecCtx(ctx, query, newData.OrderSn, newData.OrderType, newData.IdempotencyKey, newData.UserId, newData.Status, newData.AddressSnap, newData.TotalAmount, newData.FreightAmount, newData.CouponId, newData.CouponDiscount, newData.PayAmount, newData.Remark, newData.PayTime, newData.PayType, newData.DeliveryTime, newData.DeliverySn, newData.DeliveryCorp, newData.ReceiveTime, newData.CancelTime, newData.SeckillActivityId, newData.SeckillPrice, newData.Id)
+	_, err := session.ExecCtx(ctx, query, newData.OrderSn, newData.OrderType, newData.IdempotencyKey, newData.UserId, newData.Status, newData.AddressSnap, newData.TotalAmount, newData.FreightAmount, newData.CouponId, newData.CouponDiscount, newData.PayAmount, newData.Remark, newData.PayTime, newData.PayType, newData.DeliveryTime, newData.DeliverySn, newData.DeliveryCorp, newData.ReceiveTime, newData.CancelTime, newData.CancelReasonType, newData.CancelReason, newData.SeckillActivityId, newData.SeckillPrice, newData.ExpireTime, newData.Id)
 	return err
 }
 

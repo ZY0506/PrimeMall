@@ -124,8 +124,9 @@ type CallbackResp struct {
 }
 
 type CancelOrderReq struct {
-	OrderSn      string `json:"order_sn" validate:"required"`                        // 订单号
+	OrderSn      string `path:"order_sn" validate:"required"`                        // 订单号
 	CancelReason string `json:"cancel_reason,optional" validate:"omitempty,max=200"` // 取消原因
+	ReasonType   int64  `json:"reason_type,optional"`                                // 取消原因类型
 }
 
 type CaptchaReq struct {
@@ -217,8 +218,6 @@ type CreateOrderReq struct {
 	Remark          string   `json:"remark,optional" validate:"omitempty,max=200"`     // 订单备注
 	IdempotencyKey  string   `json:"idempotency_key" validate:"required"`              // 幂等键（前端生成）
 	CartSkuIds      []uint64 `json:"cart_sku_ids,optional"`                            // 购物车商品ID列表
-	AddressId       uint64   `json:"address_id" validate:"required,min=1"`             // 最终使用的地址ID
-	CouponId        uint64   `json:"coupon_id,optional" validate:"omitempty,min=1"`    // 优惠券ID（可选）
 }
 
 type CreateOrderResp struct {

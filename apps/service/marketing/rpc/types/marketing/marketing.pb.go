@@ -1268,6 +1268,7 @@ type UseCouponReq struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	UserCouponId  uint64                 `protobuf:"varint,1,opt,name=user_coupon_id,json=userCouponId,proto3" json:"user_coupon_id,omitempty"`
 	OrderSn       string                 `protobuf:"bytes,2,opt,name=order_sn,json=orderSn,proto3" json:"order_sn,omitempty"`
+	OrderAmount   int64                  `protobuf:"varint,3,opt,name=order_amount,json=orderAmount,proto3" json:"order_amount,omitempty"` // 订单金额（分），用于折扣券精确计算
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -1314,6 +1315,13 @@ func (x *UseCouponReq) GetOrderSn() string {
 		return x.OrderSn
 	}
 	return ""
+}
+
+func (x *UseCouponReq) GetOrderAmount() int64 {
+	if x != nil {
+		return x.OrderAmount
+	}
+	return 0
 }
 
 type UseCouponResp struct {
@@ -1480,6 +1488,102 @@ func (x *UnlockCouponResp) GetErrorMsg() string {
 	return ""
 }
 
+type GetUserCouponReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserCouponId  uint64                 `protobuf:"varint,1,opt,name=user_coupon_id,json=userCouponId,proto3" json:"user_coupon_id,omitempty"` // 用户优惠券ID（优先）
+	CouponId      uint64                 `protobuf:"varint,2,opt,name=coupon_id,json=couponId,proto3" json:"coupon_id,omitempty"`               // 优惠券定义ID（与上下文userId组合查询用户已领取的实例）
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserCouponReq) Reset() {
+	*x = GetUserCouponReq{}
+	mi := &file_apps_service_marketing_rpc_marketing_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserCouponReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserCouponReq) ProtoMessage() {}
+
+func (x *GetUserCouponReq) ProtoReflect() protoreflect.Message {
+	mi := &file_apps_service_marketing_rpc_marketing_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserCouponReq.ProtoReflect.Descriptor instead.
+func (*GetUserCouponReq) Descriptor() ([]byte, []int) {
+	return file_apps_service_marketing_rpc_marketing_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *GetUserCouponReq) GetUserCouponId() uint64 {
+	if x != nil {
+		return x.UserCouponId
+	}
+	return 0
+}
+
+func (x *GetUserCouponReq) GetCouponId() uint64 {
+	if x != nil {
+		return x.CouponId
+	}
+	return 0
+}
+
+type GetUserCouponResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Coupon        *UserCouponInfo        `protobuf:"bytes,1,opt,name=coupon,proto3" json:"coupon,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserCouponResp) Reset() {
+	*x = GetUserCouponResp{}
+	mi := &file_apps_service_marketing_rpc_marketing_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserCouponResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserCouponResp) ProtoMessage() {}
+
+func (x *GetUserCouponResp) ProtoReflect() protoreflect.Message {
+	mi := &file_apps_service_marketing_rpc_marketing_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserCouponResp.ProtoReflect.Descriptor instead.
+func (*GetUserCouponResp) Descriptor() ([]byte, []int) {
+	return file_apps_service_marketing_rpc_marketing_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *GetUserCouponResp) GetCoupon() *UserCouponInfo {
+	if x != nil {
+		return x.Coupon
+	}
+	return nil
+}
+
 var File_apps_service_marketing_rpc_marketing_proto protoreflect.FileDescriptor
 
 const file_apps_service_marketing_rpc_marketing_proto_rawDesc = "" +
@@ -1585,10 +1689,11 @@ const file_apps_service_marketing_rpc_marketing_proto_rawDesc = "" +
 	"\forder_amount\x18\x01 \x01(\x03R\vorderAmount\"\x8c\x01\n" +
 	"\x14AvailableCouponsResp\x127\n" +
 	"\tavailable\x18\x01 \x03(\v2\x19.marketing.UserCouponInfoR\tavailable\x12;\n" +
-	"\vunavailable\x18\x02 \x03(\v2\x19.marketing.UserCouponInfoR\vunavailable\"O\n" +
+	"\vunavailable\x18\x02 \x03(\v2\x19.marketing.UserCouponInfoR\vunavailable\"r\n" +
 	"\fUseCouponReq\x12$\n" +
 	"\x0euser_coupon_id\x18\x01 \x01(\x04R\fuserCouponId\x12\x19\n" +
-	"\border_sn\x18\x02 \x01(\tR\aorderSn\"o\n" +
+	"\border_sn\x18\x02 \x01(\tR\aorderSn\x12!\n" +
+	"\forder_amount\x18\x03 \x01(\x03R\vorderAmount\"o\n" +
 	"\rUseCouponResp\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12'\n" +
 	"\x0fdiscount_amount\x18\x02 \x01(\x03R\x0ediscountAmount\x12\x1b\n" +
@@ -1598,13 +1703,18 @@ const file_apps_service_marketing_rpc_marketing_proto_rawDesc = "" +
 	"\border_sn\x18\x02 \x01(\tR\aorderSn\"I\n" +
 	"\x10UnlockCouponResp\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x1b\n" +
-	"\terror_msg\x18\x02 \x01(\tR\berrorMsg*z\n" +
+	"\terror_msg\x18\x02 \x01(\tR\berrorMsg\"U\n" +
+	"\x10GetUserCouponReq\x12$\n" +
+	"\x0euser_coupon_id\x18\x01 \x01(\x04R\fuserCouponId\x12\x1b\n" +
+	"\tcoupon_id\x18\x02 \x01(\x04R\bcouponId\"F\n" +
+	"\x11GetUserCouponResp\x121\n" +
+	"\x06coupon\x18\x01 \x01(\v2\x19.marketing.UserCouponInfoR\x06coupon*z\n" +
 	"\n" +
 	"CouponType\x12\x17\n" +
 	"\x13COUPON_TYPE_UNKNOWN\x10\x00\x12\x1b\n" +
 	"\x17COUPON_TYPE_FULL_REDUCE\x10\x01\x12\x18\n" +
 	"\x14COUPON_TYPE_DISCOUNT\x10\x02\x12\x1c\n" +
-	"\x18COUPON_TYPE_NO_THRESHOLD\x10\x032\x9b\x05\n" +
+	"\x18COUPON_TYPE_NO_THRESHOLD\x10\x032\xe7\x05\n" +
 	"\tMarketing\x12<\n" +
 	"\fCreateCoupon\x12\x1a.marketing.CreateCouponReq\x1a\x10.marketing.Empty\x12<\n" +
 	"\fUpdateCoupon\x12\x1a.marketing.UpdateCouponReq\x1a\x10.marketing.Empty\x122\n" +
@@ -1615,7 +1725,8 @@ const file_apps_service_marketing_rpc_marketing_proto_rawDesc = "" +
 	"\tMyCoupons\x12\x17.marketing.MyCouponsReq\x1a\x18.marketing.MyCouponsResp\x12S\n" +
 	"\x10AvailableCoupons\x12\x1e.marketing.AvailableCouponsReq\x1a\x1f.marketing.AvailableCouponsResp\x12>\n" +
 	"\tUseCoupon\x12\x17.marketing.UseCouponReq\x1a\x18.marketing.UseCouponResp\x12G\n" +
-	"\fUnlockCoupon\x12\x1a.marketing.UnlockCouponReq\x1a\x1b.marketing.UnlockCouponRespB\rZ\v./marketingb\x06proto3"
+	"\fUnlockCoupon\x12\x1a.marketing.UnlockCouponReq\x1a\x1b.marketing.UnlockCouponResp\x12J\n" +
+	"\rGetUserCoupon\x12\x1b.marketing.GetUserCouponReq\x1a\x1c.marketing.GetUserCouponRespB\rZ\v./marketingb\x06proto3"
 
 var (
 	file_apps_service_marketing_rpc_marketing_proto_rawDescOnce sync.Once
@@ -1630,7 +1741,7 @@ func file_apps_service_marketing_rpc_marketing_proto_rawDescGZIP() []byte {
 }
 
 var file_apps_service_marketing_rpc_marketing_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_apps_service_marketing_rpc_marketing_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
+var file_apps_service_marketing_rpc_marketing_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
 var file_apps_service_marketing_rpc_marketing_proto_goTypes = []any{
 	(CouponType)(0),              // 0: marketing.CouponType
 	(*Empty)(nil),                // 1: marketing.Empty
@@ -1654,6 +1765,8 @@ var file_apps_service_marketing_rpc_marketing_proto_goTypes = []any{
 	(*UseCouponResp)(nil),        // 19: marketing.UseCouponResp
 	(*UnlockCouponReq)(nil),      // 20: marketing.UnlockCouponReq
 	(*UnlockCouponResp)(nil),     // 21: marketing.UnlockCouponResp
+	(*GetUserCouponReq)(nil),     // 22: marketing.GetUserCouponReq
+	(*GetUserCouponResp)(nil),    // 23: marketing.GetUserCouponResp
 }
 var file_apps_service_marketing_rpc_marketing_proto_depIdxs = []int32{
 	0,  // 0: marketing.CreateCouponReq.type:type_name -> marketing.CouponType
@@ -1669,31 +1782,34 @@ var file_apps_service_marketing_rpc_marketing_proto_depIdxs = []int32{
 	14, // 10: marketing.MyCouponsResp.list:type_name -> marketing.UserCouponInfo
 	14, // 11: marketing.AvailableCouponsResp.available:type_name -> marketing.UserCouponInfo
 	14, // 12: marketing.AvailableCouponsResp.unavailable:type_name -> marketing.UserCouponInfo
-	5,  // 13: marketing.Marketing.CreateCoupon:input_type -> marketing.CreateCouponReq
-	6,  // 14: marketing.Marketing.UpdateCoupon:input_type -> marketing.UpdateCouponReq
-	2,  // 15: marketing.Marketing.DeleteCoupon:input_type -> marketing.IdReq
-	2,  // 16: marketing.Marketing.GetCoupon:input_type -> marketing.IdReq
-	9,  // 17: marketing.Marketing.ListCoupons:input_type -> marketing.ListCouponsReq
-	11, // 18: marketing.Marketing.ClaimCoupon:input_type -> marketing.ClaimCouponReq
-	13, // 19: marketing.Marketing.MyCoupons:input_type -> marketing.MyCouponsReq
-	16, // 20: marketing.Marketing.AvailableCoupons:input_type -> marketing.AvailableCouponsReq
-	18, // 21: marketing.Marketing.UseCoupon:input_type -> marketing.UseCouponReq
-	20, // 22: marketing.Marketing.UnlockCoupon:input_type -> marketing.UnlockCouponReq
-	1,  // 23: marketing.Marketing.CreateCoupon:output_type -> marketing.Empty
-	1,  // 24: marketing.Marketing.UpdateCoupon:output_type -> marketing.Empty
-	1,  // 25: marketing.Marketing.DeleteCoupon:output_type -> marketing.Empty
-	8,  // 26: marketing.Marketing.GetCoupon:output_type -> marketing.CouponResp
-	10, // 27: marketing.Marketing.ListCoupons:output_type -> marketing.ListCouponsResp
-	12, // 28: marketing.Marketing.ClaimCoupon:output_type -> marketing.ClaimCouponResp
-	15, // 29: marketing.Marketing.MyCoupons:output_type -> marketing.MyCouponsResp
-	17, // 30: marketing.Marketing.AvailableCoupons:output_type -> marketing.AvailableCouponsResp
-	19, // 31: marketing.Marketing.UseCoupon:output_type -> marketing.UseCouponResp
-	21, // 32: marketing.Marketing.UnlockCoupon:output_type -> marketing.UnlockCouponResp
-	23, // [23:33] is the sub-list for method output_type
-	13, // [13:23] is the sub-list for method input_type
-	13, // [13:13] is the sub-list for extension type_name
-	13, // [13:13] is the sub-list for extension extendee
-	0,  // [0:13] is the sub-list for field type_name
+	14, // 13: marketing.GetUserCouponResp.coupon:type_name -> marketing.UserCouponInfo
+	5,  // 14: marketing.Marketing.CreateCoupon:input_type -> marketing.CreateCouponReq
+	6,  // 15: marketing.Marketing.UpdateCoupon:input_type -> marketing.UpdateCouponReq
+	2,  // 16: marketing.Marketing.DeleteCoupon:input_type -> marketing.IdReq
+	2,  // 17: marketing.Marketing.GetCoupon:input_type -> marketing.IdReq
+	9,  // 18: marketing.Marketing.ListCoupons:input_type -> marketing.ListCouponsReq
+	11, // 19: marketing.Marketing.ClaimCoupon:input_type -> marketing.ClaimCouponReq
+	13, // 20: marketing.Marketing.MyCoupons:input_type -> marketing.MyCouponsReq
+	16, // 21: marketing.Marketing.AvailableCoupons:input_type -> marketing.AvailableCouponsReq
+	18, // 22: marketing.Marketing.UseCoupon:input_type -> marketing.UseCouponReq
+	20, // 23: marketing.Marketing.UnlockCoupon:input_type -> marketing.UnlockCouponReq
+	22, // 24: marketing.Marketing.GetUserCoupon:input_type -> marketing.GetUserCouponReq
+	1,  // 25: marketing.Marketing.CreateCoupon:output_type -> marketing.Empty
+	1,  // 26: marketing.Marketing.UpdateCoupon:output_type -> marketing.Empty
+	1,  // 27: marketing.Marketing.DeleteCoupon:output_type -> marketing.Empty
+	8,  // 28: marketing.Marketing.GetCoupon:output_type -> marketing.CouponResp
+	10, // 29: marketing.Marketing.ListCoupons:output_type -> marketing.ListCouponsResp
+	12, // 30: marketing.Marketing.ClaimCoupon:output_type -> marketing.ClaimCouponResp
+	15, // 31: marketing.Marketing.MyCoupons:output_type -> marketing.MyCouponsResp
+	17, // 32: marketing.Marketing.AvailableCoupons:output_type -> marketing.AvailableCouponsResp
+	19, // 33: marketing.Marketing.UseCoupon:output_type -> marketing.UseCouponResp
+	21, // 34: marketing.Marketing.UnlockCoupon:output_type -> marketing.UnlockCouponResp
+	23, // 35: marketing.Marketing.GetUserCoupon:output_type -> marketing.GetUserCouponResp
+	25, // [25:36] is the sub-list for method output_type
+	14, // [14:25] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_apps_service_marketing_rpc_marketing_proto_init() }
@@ -1707,7 +1823,7 @@ func file_apps_service_marketing_rpc_marketing_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_apps_service_marketing_rpc_marketing_proto_rawDesc), len(file_apps_service_marketing_rpc_marketing_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   21,
+			NumMessages:   23,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

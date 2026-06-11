@@ -82,3 +82,9 @@ func (s *MarketingServer) UnlockCoupon(ctx context.Context, in *marketing.Unlock
 	l := marketinglogic.NewUnlockCouponLogic(ctx, s.svcCtx)
 	return l.UnlockCoupon(in)
 }
+
+// 内部：获取用户优惠券信息（含券定义）
+func (s *MarketingServer) GetUserCoupon(ctx context.Context, in *marketing.GetUserCouponReq) (*marketing.GetUserCouponResp, error) {
+	l := marketinglogic.NewGetUserCouponLogic(ctx, s.svcCtx)
+	return l.GetUserCoupon(in)
+}

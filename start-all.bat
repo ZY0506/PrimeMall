@@ -83,9 +83,10 @@ timeout /t 2 /nobreak >nul
 start "product.rpc"   bin\product.exe -f apps\service\product\rpc\etc\product.yaml
 timeout /t 2 /nobreak >nul
 
-start "order.rpc"     bin\order.exe -f apps\service\order\rpc\etc\order.yaml
 start "payment.rpc"   bin\payment.exe -f apps\service\payment\rpc\etc\payment.yaml
 start "marketing.rpc" bin\marketing.exe -f apps\service\marketing\rpc\etc\marketing.yaml
+timeout /t 2 /nobreak >nul
+start "order.rpc"     bin\order.exe -f apps\service\order\rpc\etc\order.yaml
 start "search.rpc"    bin\search.exe -f apps\service\search\rpc\etc\search.yaml
 start "admin.rpc"     bin\admin.exe -f apps\service\admin\rpc\etc\admin.yaml
 timeout /t 3 /nobreak >nul

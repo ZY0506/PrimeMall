@@ -25,7 +25,7 @@ type (
 		FindByUserID(ctx context.Context, userID uint64, status int64, page, size int64) ([]*UserCoupon, int64, error)
 		FindByUserAndCoupon(ctx context.Context, userID, couponID uint64) (*UserCoupon, error)
 		FindAvailableByUser(ctx context.Context, userID uint64) ([]*UserCoupon, error)
-		UpdateStatus(ctx context.Context, id uint64, status int64, orderSn string, usedTime time.Time) error
+		UpdateStatus(ctx context.Context, id uint64, status int64, orderSn string, usedTime time.Time, expectedStatus int64) (int64, error)
 		CountByUserAndCoupon(ctx context.Context, userID, couponID uint64) (int64, error)
 	}
 )
@@ -89,10 +89,14 @@ func (m *customUserCouponModel) FindAvailableByUser(ctx context.Context, userID 
 	return items, nil
 }
 
-func (m *customUserCouponModel) UpdateStatus(ctx context.Context, id uint64, status int64, orderSn string, usedTime time.Time) error {
-	query := fmt.Sprintf("UPDATE %s SET status = ?, order_sn = ?, used_time = ? WHERE id = ? AND status = 0", m.table)
-	_, err := m.conn.ExecCtx(ctx, query, status, orderSn, usedTime, id)
-	return err
+func (m *customUserCouponModel) UpdateStatus(ctx context.Context, id uint64, status int64, orderSn string, usedTime time.Time, expectedStatus int64) (int64, error) {
+	query := fmt.Sprintf("UPDATE %s SET status = ?, order_sn = ?, used_time = ? WHERE id = ? AND status = ?", m.table)
+	result, err := m.conn.ExecCtx(ctx, query, status, orderSn, usedTime, id, expectedStatus)
+	if err != nil {
+		return 0, err
+	}
+	affected, _ := result.RowsAffected()
+	return affected, nil
 }
 
 func (m *customUserCouponModel) CountByUserAndCoupon(ctx context.Context, userID, couponID uint64) (int64, error) {

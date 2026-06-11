@@ -7,6 +7,8 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/ZY0506/PrimeMall/apps/service/marketing/rpc/client/marketing"
+	marketingtypes "github.com/ZY0506/PrimeMall/apps/service/marketing/rpc/types/marketing"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/types/product"
 	"github.com/ZY0506/PrimeMall/apps/service/user/rpc/types/user"
 	"github.com/ZY0506/PrimeMall/common/constants"
@@ -226,7 +228,27 @@ func (l *PreOrderLogic) PreOrder(in *order.PreOrderRequest) (*order.PreOrderResp
 
 	// ===================== 10. 优惠计算 =====================
 	var couponDiscount int64 = 0
-	// TODO: 计算优惠卷
+	var userCouponId uint64 = 0 // 用户优惠券实例ID，用于下单时 UseCoupon
+	if in.CouponId > 0 {
+		// 注入用户ID到上下文，用于营销RPC鉴权
+		ctxWithUid, err := ctxdata.PutUserIdToCtx(l.ctx, userId)
+		if err == nil {
+			// 传入 coupon_id（券定义ID），服务端自动查找该用户已领取的实例
+			couponResp, rpcErr := l.svcCtx.MarketingRpc.GetUserCoupon(ctxWithUid, &marketing.GetUserCouponReq{
+				CouponId: in.CouponId,
+			})
+			if rpcErr == nil && couponResp != nil && couponResp.Coupon != nil {
+				couponInfo := couponResp.Coupon
+				// 只计算未使用、未过期的优惠券
+				if couponInfo.Status == 0 {
+					couponDiscount = calcCouponDiscount(couponInfo, totalAmount)
+					userCouponId = couponInfo.Id // 保存 user_coupon_id 供下单使用
+				}
+			} else if rpcErr != nil {
+				l.Logger.Errorf("预结算查询优惠券信息失败，coupon_id=%d，error=%v", in.CouponId, rpcErr)
+			}
+		}
+	}
 	payAmount := totalAmount + freightAmount - couponDiscount
 	if payAmount < 0 {
 		payAmount = 0
@@ -258,7 +280,7 @@ func (l *PreOrderLogic) PreOrder(in *order.PreOrderRequest) (*order.PreOrderResp
 	settlementData := SettlementData{
 		UserId:          userId,
 		AddressSnapshot: string(addrSnapshotStr),
-		CouponId:        in.CouponId,
+		CouponId:        userCouponId, // 预结算解析的 user_coupon_id
 		ItemSnapshots:   itemSnapshots,
 		TotalAmount:     totalAmount,
 		FreightAmount:   freightAmount,
@@ -290,4 +312,38 @@ func (l *PreOrderLogic) PreOrder(in *order.PreOrderRequest) (*order.PreOrderResp
 		CouponAmount:    couponDiscount,
 		PayAmount:       payAmount,
 	}, nil
+}
+
+// calcCouponDiscount 根据优惠券类型和订单金额计算折扣
+// coupon: UserCouponInfo（含券定义参数）
+// orderAmount: 商品总金额（分）
+func calcCouponDiscount(coupon *marketingtypes.UserCouponInfo, orderAmount int64) int64 {
+	switch coupon.Type {
+	case marketingtypes.CouponType_COUPON_TYPE_FULL_REDUCE: // 满减券
+		if orderAmount >= coupon.ThresholdAmount {
+			return coupon.ReduceAmount
+		}
+		return 0
+	case marketingtypes.CouponType_COUPON_TYPE_DISCOUNT: // 折扣券
+		if orderAmount <= 0 {
+			return 0
+		}
+		// discountRate是万分比，如 8000 = 8折
+		discount := orderAmount - orderAmount*int64(coupon.DiscountRate)/10000
+		if coupon.MaxDiscountAmount > 0 && discount > coupon.MaxDiscountAmount {
+			discount = coupon.MaxDiscountAmount
+		}
+		if discount < 0 {
+			discount = 0
+		}
+		return discount
+	case marketingtypes.CouponType_COUPON_TYPE_NO_THRESHOLD: // 无门槛券
+		discount := coupon.ReduceAmount
+		if discount > orderAmount {
+			discount = orderAmount
+		}
+		return discount
+	default:
+		return 0
+	}
 }

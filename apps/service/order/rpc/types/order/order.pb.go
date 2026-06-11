@@ -859,8 +859,6 @@ type CreateOrderRequest struct {
 	Remark          string                 `protobuf:"bytes,3,opt,name=remark,proto3" json:"remark,omitempty"`                                          // 订单备注（选填）
 	IdempotencyKey  string                 `protobuf:"bytes,4,opt,name=idempotency_key,json=idempotencyKey,proto3" json:"idempotency_key,omitempty"`    // 幂等键（前端生成唯一ID，防重复提交）
 	CartSkuIds      []uint64               `protobuf:"varint,5,rep,packed,name=cart_sku_ids,json=cartSkuIds,proto3" json:"cart_sku_ids,omitempty"`      // 购物车已结算SKU列表，下单成功后删除
-	AddressId       uint64                 `protobuf:"varint,6,opt,name=address_id,json=addressId,proto3" json:"address_id,omitempty"`                  // 收货地址ID
-	CouponId        uint64                 `protobuf:"varint,7,opt,name=coupon_id,json=couponId,proto3" json:"coupon_id,omitempty"`                     // 优惠券ID（无则传0）
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -928,20 +926,6 @@ func (x *CreateOrderRequest) GetCartSkuIds() []uint64 {
 		return x.CartSkuIds
 	}
 	return nil
-}
-
-func (x *CreateOrderRequest) GetAddressId() uint64 {
-	if x != nil {
-		return x.AddressId
-	}
-	return 0
-}
-
-func (x *CreateOrderRequest) GetCouponId() uint64 {
-	if x != nil {
-		return x.CouponId
-	}
-	return 0
 }
 
 // *
@@ -4092,17 +4076,14 @@ const file_apps_service_order_rpc_order_proto_rawDesc = "" +
 	"\x0efreight_amount\x18\x05 \x01(\x03R\rfreightAmount\x12#\n" +
 	"\rcoupon_amount\x18\x06 \x01(\x03R\fcouponAmount\x12\x1d\n" +
 	"\n" +
-	"pay_amount\x18\a \x01(\x03R\tpayAmount\"\x89\x02\n" +
+	"pay_amount\x18\a \x01(\x03R\tpayAmount\"\xcd\x01\n" +
 	"\x12CreateOrderRequest\x12)\n" +
 	"\x10settlement_token\x18\x01 \x01(\tR\x0fsettlementToken\x12)\n" +
 	"\bpay_type\x18\x02 \x01(\x0e2\x0e.order.PayTypeR\apayType\x12\x16\n" +
 	"\x06remark\x18\x03 \x01(\tR\x06remark\x12'\n" +
 	"\x0fidempotency_key\x18\x04 \x01(\tR\x0eidempotencyKey\x12 \n" +
 	"\fcart_sku_ids\x18\x05 \x03(\x04R\n" +
-	"cartSkuIds\x12\x1d\n" +
-	"\n" +
-	"address_id\x18\x06 \x01(\x04R\taddressId\x12\x1b\n" +
-	"\tcoupon_id\x18\a \x01(\x04R\bcouponId\"g\n" +
+	"cartSkuIds\"g\n" +
 	"\x13CreateOrderResponse\x12\x19\n" +
 	"\border_sn\x18\x01 \x01(\tR\aorderSn\x12\x1d\n" +
 	"\n" +

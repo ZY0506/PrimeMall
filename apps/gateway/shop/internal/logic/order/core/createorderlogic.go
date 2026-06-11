@@ -43,8 +43,6 @@ func (l *CreateOrderLogic) CreateOrder(req *types.CreateOrderReq) (resp *types.C
 		PayType:         order.PayType(req.PayType),
 		IdempotencyKey:  req.IdempotencyKey,
 		CartSkuIds:      req.CartSkuIds,
-		AddressId:       req.AddressId,
-		CouponId:        req.CouponId,
 	})
 	if err != nil {
 		l.Logger.Errorf("调用RPC创建订单失败，error=%v", err)

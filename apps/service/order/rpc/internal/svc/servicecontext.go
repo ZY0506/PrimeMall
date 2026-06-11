@@ -4,12 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"time"
+
+	"github.com/ZY0506/PrimeMall/apps/service/marketing/rpc/client/marketing"
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/internal/config"
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/internal/model"
 	order2 "github.com/ZY0506/PrimeMall/apps/service/order/rpc/types/order"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/client/productinternal"
 	"github.com/ZY0506/PrimeMall/apps/service/user/rpc/client/userinternal"
 	"github.com/ZY0506/PrimeMall/common/constants"
+	"github.com/ZY0506/PrimeMall/common/ctxdata"
 	"github.com/ZY0506/PrimeMall/common/snowflakes"
 	"github.com/ZY0506/PrimeMall/pkg/database"
 	"github.com/ZY0506/PrimeMall/pkg/mq/rabbitmq"
@@ -18,7 +22,6 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 	"github.com/zeromicro/go-zero/zrpc"
-	"time"
 )
 
 type ServiceContext struct {
@@ -32,6 +35,7 @@ type ServiceContext struct {
 	OrderItemModel     model.OrderItemModel
 	ProductRpc         productinternal.ProductInternal
 	UserRpc            userinternal.UserInternal
+	MarketingRpc       marketing.Marketing
 	IDGenerator        *snowflakes.Generator
 	MQClient           *rabbitmq.Client
 	ctx                context.Context
@@ -76,6 +80,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		OrderItemModel:     model.NewOrderItemModel(db),
 		ProductRpc:         productinternal.NewProductInternal(zrpc.MustNewClient(c.ProductRpc)),
 		UserRpc:            userinternal.NewUserInternal(zrpc.MustNewClient(c.UserRpc)),
+		MarketingRpc:       marketing.NewMarketing(zrpc.MustNewClient(c.MarketingRpc)),
 		IDGenerator:        IDGenerator,
 		MQClient:           mqClient,
 		ctx:                ctx,
@@ -148,6 +153,14 @@ func (s *ServiceContext) handleOrderTimeout(msg []byte) error {
 		return err
 	}
 
+	// 1.1 释放优惠券（如果使用了优惠券）
+	if order.CouponId > 0 {
+		ctxWithUid, ctxErr := ctxdata.PutUserIdToCtx(ctx, order.UserId)
+		if ctxErr == nil {
+			s.unlockCouponWithRetry(ctxWithUid, order.CouponId, data.OrderSn)
+		}
+	}
+
 	// 2. 再更新订单状态（本地事务，仅操作数据库）
 	err = s.DB.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
 		order.Status = constants.ORDER_STATUS_CANCELED
@@ -158,9 +171,6 @@ func (s *ServiceContext) handleOrderTimeout(msg []byte) error {
 		if err != nil {
 			return err
 		}
-
-		// TODO: 释放优惠券
-
 		return nil
 	})
 	if err != nil {
@@ -170,4 +180,32 @@ func (s *ServiceContext) handleOrderTimeout(msg []byte) error {
 
 	logx.WithContext(ctx).Infof("订单超时取消成功, order_sn=%s", data.OrderSn)
 	return nil
+}
+
+// unlockCouponWithRetry 解锁优惠券，带重试机制（尽力而为）
+func (s *ServiceContext) unlockCouponWithRetry(ctx context.Context, userCouponId uint64, orderSn string) {
+	for attempt := 0; attempt < 3; attempt++ {
+		if attempt > 0 {
+			time.Sleep(time.Duration(100*(1<<attempt)) * time.Millisecond)
+		}
+		uCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+		resp, err := s.MarketingRpc.UnlockCoupon(uCtx, &marketing.UnlockCouponReq{
+			UserCouponId: userCouponId,
+			OrderSn:      orderSn,
+		})
+		cancel()
+		if err == nil && resp != nil && resp.Success {
+			logx.WithContext(ctx).Infof("解锁优惠券成功, user_coupon_id=%d", userCouponId)
+			return
+		}
+		if resp != nil {
+			logx.WithContext(ctx).Errorf("解锁优惠券失败（第%d次）, user_coupon_id=%d, reason=%s",
+				attempt+1, userCouponId, resp.ErrorMsg)
+		} else {
+			logx.WithContext(ctx).Errorf("解锁优惠券RPC失败（第%d次）, user_coupon_id=%d, err=%v",
+				attempt+1, userCouponId, err)
+		}
+	}
+	logx.WithContext(ctx).Errorf("解锁优惠券最终失败（需人工处理）, user_coupon_id=%d, order_sn=%s",
+		userCouponId, orderSn)
 }

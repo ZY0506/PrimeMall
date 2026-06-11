@@ -4,9 +4,10 @@ import "github.com/zeromicro/go-zero/zrpc"
 
 type Config struct {
 	zrpc.RpcServerConf
-	ProductRpc zrpc.RpcClientConf
-	UserRpc    zrpc.RpcClientConf
-	DB         struct {
+	ProductRpc   zrpc.RpcClientConf
+	UserRpc      zrpc.RpcClientConf
+	MarketingRpc zrpc.RpcClientConf
+	DB           struct {
 		DSN          string `json:"DSN"`
 		MaxIdleConns int    `json:"MaxIdleConns"`
 		MaxOpenConns int    `json:"MaxOpenConns"`

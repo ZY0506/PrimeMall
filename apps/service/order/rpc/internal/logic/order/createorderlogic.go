@@ -107,7 +107,7 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (resp *orde
 		Remark:          in.Remark,
 		IdempotencyKey:  in.IdempotencyKey,
 		CartSkuIds:      in.CartSkuIds,
-		CouponId:        in.CouponId,
+		CouponId:        settlementData.CouponId, // 使用预结算解析的 user_coupon_id
 		AddressSnapshot: settlementData.AddressSnapshot,
 		ItemSnapshots:   itemMsgs,
 		TotalAmount:     settlementData.TotalAmount,

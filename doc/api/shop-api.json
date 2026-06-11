@@ -1365,6 +1365,189 @@
         ]
       }
     },
+    "/api/v1/search/history": {
+      "get": {
+        "summary": "查询搜索历史",
+        "operationId": "getSearchHistory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/SearchHistoryResp"
+            }
+          }
+        },
+        "tags": [
+          "shop-api"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "清除搜索历史",
+        "operationId": "clearSearchHistory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "tags": [
+          "shop-api"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/search/hot-keywords": {
+      "get": {
+        "summary": "热搜词列表",
+        "operationId": "getHotKeywords",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/HotKeywordsResp"
+            }
+          }
+        },
+        "tags": [
+          "shop-api"
+        ]
+      }
+    },
+    "/api/v1/search/products": {
+      "get": {
+        "summary": "ES商品搜索",
+        "operationId": "searchProducts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/SearchProductsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "keyword",
+            "description": " 搜索关键词",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "category_id",
+            "description": " 分类ID",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "brand",
+            "description": " 品牌",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "min_price",
+            "description": " 最低价格（分）",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "max_price",
+            "description": " 最高价格（分）",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "sort_by",
+            "description": " 排序字段",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "sort_type",
+            "description": " 排序方向",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "10"
+          }
+        ],
+        "tags": [
+          "shop-api"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ]
+      }
+    },
+    "/api/v1/search/suggest": {
+      "get": {
+        "summary": "ES搜索建议",
+        "operationId": "searchSuggest",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/SearchSuggestResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "5"
+          }
+        ],
+        "tags": [
+          "shop-api"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ]
+      }
+    },
     "/api/v1/user/account": {
       "delete": {
         "summary": "注销账号",
@@ -2348,19 +2531,17 @@
     "CancelOrderReq": {
       "type": "object",
       "properties": {
-        "order_sn": {
-          "type": "string",
-          "description": " 订单号"
-        },
         "cancel_reason": {
           "type": "string",
           "description": " 取消原因"
+        },
+        "reason_type": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 取消原因类型"
         }
       },
-      "title": "CancelOrderReq",
-      "required": [
-        "order_sn"
-      ]
+      "title": "CancelOrderReq"
     },
     "CaptchaReq": {
       "type": "object",
@@ -2941,6 +3122,48 @@
         "status",
         "status_desc",
         "tracks"
+      ]
+    },
+    "HotKeywordItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "keyword": {
+          "type": "string"
+        },
+        "search_count": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "sort": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "HotKeywordItem",
+      "required": [
+        "id",
+        "keyword",
+        "search_count",
+        "sort"
+      ]
+    },
+    "HotKeywordsResp": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HotKeywordItem"
+          }
+        }
+      },
+      "title": "HotKeywordsResp",
+      "required": [
+        "list"
       ]
     },
     "IdPathReq": {
@@ -4068,6 +4291,190 @@
         "idempotency_key"
       ]
     },
+    "SearchHistoryItem": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "SearchHistoryItem",
+      "required": [
+        "keyword",
+        "created_at"
+      ]
+    },
+    "SearchHistoryResp": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SearchHistoryItem"
+          }
+        }
+      },
+      "title": "SearchHistoryResp",
+      "required": [
+        "list"
+      ]
+    },
+    "SearchProductItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "brand": {
+          "type": "string"
+        },
+        "cover": {
+          "type": "string"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "sales": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "category_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "category_name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "title": "SearchProductItem",
+      "required": [
+        "id",
+        "name",
+        "brand",
+        "cover",
+        "price",
+        "sales",
+        "category_id",
+        "category_name",
+        "description"
+      ]
+    },
+    "SearchProductsReq": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "description": " 搜索关键词"
+        },
+        "category_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 分类ID"
+        },
+        "brand": {
+          "type": "string",
+          "description": " 品牌"
+        },
+        "min_price": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 最低价格（分）"
+        },
+        "max_price": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 最高价格（分）"
+        },
+        "sort_by": {
+          "type": "string",
+          "description": " 排序字段"
+        },
+        "sort_type": {
+          "type": "string",
+          "description": " 排序方向"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10"
+        }
+      },
+      "title": "SearchProductsReq",
+      "required": [
+        "page",
+        "size"
+      ]
+    },
+    "SearchProductsResp": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SearchProductItem"
+          }
+        }
+      },
+      "title": "SearchProductsResp",
+      "required": [
+        "total",
+        "list"
+      ]
+    },
+    "SearchSuggestReq": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "5"
+        }
+      },
+      "title": "SearchSuggestReq",
+      "required": [
+        "keyword",
+        "size"
+      ]
+    },
+    "SearchSuggestResp": {
+      "type": "object",
+      "properties": {
+        "suggestions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "SearchSuggestResp",
+      "required": [
+        "suggestions"
+      ]
+    },
     "SelectCartReq": {
       "type": "object",
       "properties": {
@@ -4373,16 +4780,11 @@
           "type": "integer",
           "format": "int64",
           "description": " 用户优惠券记录ID"
-        },
-        "order_sn": {
-          "type": "string",
-          "description": " 订单号"
         }
       },
       "title": "UseCouponReq",
       "required": [
-        "user_coupon_id",
-        "order_sn"
+        "user_coupon_id"
       ]
     },
     "UseCouponResp": {

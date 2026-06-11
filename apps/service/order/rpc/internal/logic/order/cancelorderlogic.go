@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ZY0506/PrimeMall/apps/service/marketing/rpc/client/marketing"
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/internal/model"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/types/product"
 	"github.com/ZY0506/PrimeMall/common/constants"
@@ -85,7 +86,6 @@ func (l *CancelOrderLogic) CancelOrder(in *order.CancelOrderRequest) (*order.Emp
 	}
 
 	// 1. 先解锁库存（RPC调用放在事务外，避免分布式事务问题）
-	// 待支付订单的库存处于"锁定"状态，使用 UnlockStock 解锁 locked_stock 即可
 	unlockRet, err := l.svcCtx.ProductRpc.UnlockStock(l.ctx, &product.UpdateStockReq{
 		OrderSn: in.OrderSn,
 		Items:   items,
@@ -102,6 +102,14 @@ func (l *CancelOrderLogic) CancelOrder(in *order.CancelOrderRequest) (*order.Emp
 			}
 		}
 		return nil, errorx.NewBizError(response.ErrCodeOrderCancelFailed, strings.Join(msgs, ";"))
+	}
+
+	// 1.1 释放优惠券（如果使用了优惠券）
+	if orderInfo.CouponId > 0 {
+		ctxWithUid, ctxErr := ctxdata.PutUserIdToCtx(l.ctx, userId)
+		if ctxErr == nil {
+			l.unlockCouponWithRetry(ctxWithUid, orderInfo.CouponId, orderInfo.OrderSn)
+		}
 	}
 
 	// 2. 开启数据库事务（仅更新订单状态等本地资源）
@@ -126,4 +134,36 @@ func (l *CancelOrderLogic) CancelOrder(in *order.CancelOrderRequest) (*order.Emp
 
 	l.Logger.Info("取消订单成功")
 	return &order.Empty{}, nil
+}
+
+// unlockCouponWithRetry 解锁优惠券，带重试机制（尽力而为）
+func (l *CancelOrderLogic) unlockCouponWithRetry(ctx context.Context, userCouponId uint64, orderSn string) {
+	var lastErr error
+	for attempt := 0; attempt < 3; attempt++ {
+		if attempt > 0 {
+			time.Sleep(time.Duration(100*(1<<attempt)) * time.Millisecond)
+		}
+		uCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+		resp, err := l.svcCtx.MarketingRpc.UnlockCoupon(uCtx, &marketing.UnlockCouponReq{
+			UserCouponId: userCouponId,
+			OrderSn:      orderSn,
+		})
+		cancel()
+		if err == nil && resp != nil && resp.Success {
+			l.Logger.Infof("解锁优惠券成功, user_coupon_id=%d", userCouponId)
+			return
+		}
+		lastErr = err
+		if resp != nil {
+			l.Logger.Errorf("解锁优惠券失败（第%d次）, user_coupon_id=%d, reason=%s",
+				attempt+1, userCouponId, resp.ErrorMsg)
+		} else {
+			l.Logger.Errorf("解锁优惠券RPC失败（第%d次）, user_coupon_id=%d, err=%v",
+				attempt+1, userCouponId, err)
+		}
+	}
+	if lastErr != nil {
+		l.Logger.Errorf("解锁优惠券最终失败（需人工处理）, user_coupon_id=%d, order_sn=%s",
+			userCouponId, orderSn)
+	}
 }

@@ -46,10 +46,14 @@ func (l *UnlockCouponLogic) UnlockCoupon(in *marketing.UnlockCouponReq) (*market
 
 	// 恢复为未使用状态
 	zeroTime := time.Time{}
-	err = l.svcCtx.UserCouponModel.UpdateStatus(l.ctx, in.UserCouponId, 0, "", zeroTime)
+	affected, err := l.svcCtx.UserCouponModel.UpdateStatus(l.ctx, in.UserCouponId, 0, "", zeroTime, 1)
 	if err != nil {
 		l.Logger.Errorf("解锁优惠券：更新状态失败，错误：%v", err)
 		return &marketing.UnlockCouponResp{Success: false, ErrorMsg: "解锁失败"}, nil
+	}
+	if affected == 0 {
+		l.Logger.Errorf("解锁优惠券：并发竞争，优惠券状态异常，user_coupon_id=%d", in.UserCouponId)
+		return &marketing.UnlockCouponResp{Success: false, ErrorMsg: "优惠券状态异常"}, nil
 	}
 
 	return &marketing.UnlockCouponResp{Success: true}, nil
