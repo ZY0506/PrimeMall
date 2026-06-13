@@ -623,6 +623,162 @@ func (FreightCalcType) EnumDescriptor() ([]byte, []int) {
 	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{10}
 }
 
+type CouponDetailResp struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name              string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Type              int64                  `protobuf:"varint,3,opt,name=type,proto3" json:"type,omitempty"`                                                      // 1-满减券 2-折扣券 3-无门槛券
+	ThresholdAmount   int64                  `protobuf:"varint,4,opt,name=threshold_amount,json=thresholdAmount,proto3" json:"threshold_amount,omitempty"`         // 门槛（分）
+	ReduceAmount      int64                  `protobuf:"varint,5,opt,name=reduce_amount,json=reduceAmount,proto3" json:"reduce_amount,omitempty"`                  // 减免金额（分），满减/无门槛券使用
+	DiscountRate      int64                  `protobuf:"varint,6,opt,name=discount_rate,json=discountRate,proto3" json:"discount_rate,omitempty"`                  // 折扣率（万分比），折扣券使用
+	MaxDiscountAmount int64                  `protobuf:"varint,7,opt,name=max_discount_amount,json=maxDiscountAmount,proto3" json:"max_discount_amount,omitempty"` // 折扣封顶（分）
+	TotalQuantity     int32                  `protobuf:"varint,8,opt,name=total_quantity,json=totalQuantity,proto3" json:"total_quantity,omitempty"`               // 总发行量
+	UsedQuantity      int32                  `protobuf:"varint,9,opt,name=used_quantity,json=usedQuantity,proto3" json:"used_quantity,omitempty"`                  // 已使用量
+	PerUserLimit      int32                  `protobuf:"varint,10,opt,name=per_user_limit,json=perUserLimit,proto3" json:"per_user_limit,omitempty"`               // 每人限领
+	StartTime         int64                  `protobuf:"varint,11,opt,name=start_time,json=startTime,proto3" json:"start_time,omitempty"`                          // Unix秒
+	EndTime           int64                  `protobuf:"varint,12,opt,name=end_time,json=endTime,proto3" json:"end_time,omitempty"`                                // Unix秒
+	Status            int32                  `protobuf:"varint,13,opt,name=status,proto3" json:"status,omitempty"`                                                 // 1-启用 2-禁用
+	Description       string                 `protobuf:"bytes,14,opt,name=description,proto3" json:"description,omitempty"`                                        // 描述
+	CreatedAt         int64                  `protobuf:"varint,15,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`                          // 创建时间 Unix秒
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *CouponDetailResp) Reset() {
+	*x = CouponDetailResp{}
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CouponDetailResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CouponDetailResp) ProtoMessage() {}
+
+func (x *CouponDetailResp) ProtoReflect() protoreflect.Message {
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CouponDetailResp.ProtoReflect.Descriptor instead.
+func (*CouponDetailResp) Descriptor() ([]byte, []int) {
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{0}
+}
+
+func (x *CouponDetailResp) GetId() uint64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *CouponDetailResp) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CouponDetailResp) GetType() int64 {
+	if x != nil {
+		return x.Type
+	}
+	return 0
+}
+
+func (x *CouponDetailResp) GetThresholdAmount() int64 {
+	if x != nil {
+		return x.ThresholdAmount
+	}
+	return 0
+}
+
+func (x *CouponDetailResp) GetReduceAmount() int64 {
+	if x != nil {
+		return x.ReduceAmount
+	}
+	return 0
+}
+
+func (x *CouponDetailResp) GetDiscountRate() int64 {
+	if x != nil {
+		return x.DiscountRate
+	}
+	return 0
+}
+
+func (x *CouponDetailResp) GetMaxDiscountAmount() int64 {
+	if x != nil {
+		return x.MaxDiscountAmount
+	}
+	return 0
+}
+
+func (x *CouponDetailResp) GetTotalQuantity() int32 {
+	if x != nil {
+		return x.TotalQuantity
+	}
+	return 0
+}
+
+func (x *CouponDetailResp) GetUsedQuantity() int32 {
+	if x != nil {
+		return x.UsedQuantity
+	}
+	return 0
+}
+
+func (x *CouponDetailResp) GetPerUserLimit() int32 {
+	if x != nil {
+		return x.PerUserLimit
+	}
+	return 0
+}
+
+func (x *CouponDetailResp) GetStartTime() int64 {
+	if x != nil {
+		return x.StartTime
+	}
+	return 0
+}
+
+func (x *CouponDetailResp) GetEndTime() int64 {
+	if x != nil {
+		return x.EndTime
+	}
+	return 0
+}
+
+func (x *CouponDetailResp) GetStatus() int32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *CouponDetailResp) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *CouponDetailResp) GetCreatedAt() int64 {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return 0
+}
+
 type Empty struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -631,7 +787,7 @@ type Empty struct {
 
 func (x *Empty) Reset() {
 	*x = Empty{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[0]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -643,7 +799,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[0]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -656,7 +812,7 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{0}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{1}
 }
 
 type IdReq struct {
@@ -668,7 +824,7 @@ type IdReq struct {
 
 func (x *IdReq) Reset() {
 	*x = IdReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[1]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -680,7 +836,7 @@ func (x *IdReq) String() string {
 func (*IdReq) ProtoMessage() {}
 
 func (x *IdReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[1]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -693,7 +849,7 @@ func (x *IdReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use IdReq.ProtoReflect.Descriptor instead.
 func (*IdReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{1}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *IdReq) GetId() uint64 {
@@ -713,7 +869,7 @@ type AdminPageReq struct {
 
 func (x *AdminPageReq) Reset() {
 	*x = AdminPageReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[2]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -725,7 +881,7 @@ func (x *AdminPageReq) String() string {
 func (*AdminPageReq) ProtoMessage() {}
 
 func (x *AdminPageReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[2]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -738,7 +894,7 @@ func (x *AdminPageReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminPageReq.ProtoReflect.Descriptor instead.
 func (*AdminPageReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{2}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *AdminPageReq) GetPage() int64 {
@@ -771,7 +927,7 @@ type AdminInfo struct {
 
 func (x *AdminInfo) Reset() {
 	*x = AdminInfo{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[3]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -783,7 +939,7 @@ func (x *AdminInfo) String() string {
 func (*AdminInfo) ProtoMessage() {}
 
 func (x *AdminInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[3]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -796,7 +952,7 @@ func (x *AdminInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminInfo.ProtoReflect.Descriptor instead.
 func (*AdminInfo) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{3}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *AdminInfo) GetId() uint64 {
@@ -866,7 +1022,7 @@ type AdminLoginReq struct {
 
 func (x *AdminLoginReq) Reset() {
 	*x = AdminLoginReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[4]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -878,7 +1034,7 @@ func (x *AdminLoginReq) String() string {
 func (*AdminLoginReq) ProtoMessage() {}
 
 func (x *AdminLoginReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[4]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -891,7 +1047,7 @@ func (x *AdminLoginReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminLoginReq.ProtoReflect.Descriptor instead.
 func (*AdminLoginReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{4}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *AdminLoginReq) GetUsername() string {
@@ -925,7 +1081,7 @@ type AdminLoginResp struct {
 
 func (x *AdminLoginResp) Reset() {
 	*x = AdminLoginResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[5]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -937,7 +1093,7 @@ func (x *AdminLoginResp) String() string {
 func (*AdminLoginResp) ProtoMessage() {}
 
 func (x *AdminLoginResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[5]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -950,7 +1106,7 @@ func (x *AdminLoginResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminLoginResp.ProtoReflect.Descriptor instead.
 func (*AdminLoginResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{5}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *AdminLoginResp) GetToken() string {
@@ -977,7 +1133,7 @@ type GetCurrentAdminResp struct {
 
 func (x *GetCurrentAdminResp) Reset() {
 	*x = GetCurrentAdminResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[6]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -989,7 +1145,7 @@ func (x *GetCurrentAdminResp) String() string {
 func (*GetCurrentAdminResp) ProtoMessage() {}
 
 func (x *GetCurrentAdminResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[6]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1002,7 +1158,7 @@ func (x *GetCurrentAdminResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCurrentAdminResp.ProtoReflect.Descriptor instead.
 func (*GetCurrentAdminResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{6}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetCurrentAdminResp) GetAdmin() *AdminInfo {
@@ -1029,7 +1185,7 @@ type UpdatePasswordReq struct {
 
 func (x *UpdatePasswordReq) Reset() {
 	*x = UpdatePasswordReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[7]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1041,7 +1197,7 @@ func (x *UpdatePasswordReq) String() string {
 func (*UpdatePasswordReq) ProtoMessage() {}
 
 func (x *UpdatePasswordReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[7]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1054,7 +1210,7 @@ func (x *UpdatePasswordReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdatePasswordReq.ProtoReflect.Descriptor instead.
 func (*UpdatePasswordReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{7}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *UpdatePasswordReq) GetOldPassword() string {
@@ -1084,7 +1240,7 @@ type CreateAdminReq struct {
 
 func (x *CreateAdminReq) Reset() {
 	*x = CreateAdminReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[8]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1096,7 +1252,7 @@ func (x *CreateAdminReq) String() string {
 func (*CreateAdminReq) ProtoMessage() {}
 
 func (x *CreateAdminReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[8]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1109,7 +1265,7 @@ func (x *CreateAdminReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateAdminReq.ProtoReflect.Descriptor instead.
 func (*CreateAdminReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{8}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *CreateAdminReq) GetUsername() string {
@@ -1160,7 +1316,7 @@ type UpdateAdminReq struct {
 
 func (x *UpdateAdminReq) Reset() {
 	*x = UpdateAdminReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[9]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1172,7 +1328,7 @@ func (x *UpdateAdminReq) String() string {
 func (*UpdateAdminReq) ProtoMessage() {}
 
 func (x *UpdateAdminReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[9]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1185,7 +1341,7 @@ func (x *UpdateAdminReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateAdminReq.ProtoReflect.Descriptor instead.
 func (*UpdateAdminReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{9}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *UpdateAdminReq) GetId() uint64 {
@@ -1232,7 +1388,7 @@ type DeleteAdminReq struct {
 
 func (x *DeleteAdminReq) Reset() {
 	*x = DeleteAdminReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[10]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1244,7 +1400,7 @@ func (x *DeleteAdminReq) String() string {
 func (*DeleteAdminReq) ProtoMessage() {}
 
 func (x *DeleteAdminReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[10]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1257,7 +1413,7 @@ func (x *DeleteAdminReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteAdminReq.ProtoReflect.Descriptor instead.
 func (*DeleteAdminReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{10}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *DeleteAdminReq) GetId() uint64 {
@@ -1276,7 +1432,7 @@ type GetAdminReq struct {
 
 func (x *GetAdminReq) Reset() {
 	*x = GetAdminReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[11]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1288,7 +1444,7 @@ func (x *GetAdminReq) String() string {
 func (*GetAdminReq) ProtoMessage() {}
 
 func (x *GetAdminReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[11]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1301,7 +1457,7 @@ func (x *GetAdminReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAdminReq.ProtoReflect.Descriptor instead.
 func (*GetAdminReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{11}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *GetAdminReq) GetId() uint64 {
@@ -1320,7 +1476,7 @@ type GetAdminResp struct {
 
 func (x *GetAdminResp) Reset() {
 	*x = GetAdminResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[12]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1332,7 +1488,7 @@ func (x *GetAdminResp) String() string {
 func (*GetAdminResp) ProtoMessage() {}
 
 func (x *GetAdminResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[12]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1345,7 +1501,7 @@ func (x *GetAdminResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetAdminResp.ProtoReflect.Descriptor instead.
 func (*GetAdminResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{12}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *GetAdminResp) GetAdmin() *AdminInfo {
@@ -1367,7 +1523,7 @@ type ListAdminReq struct {
 
 func (x *ListAdminReq) Reset() {
 	*x = ListAdminReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[13]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1379,7 +1535,7 @@ func (x *ListAdminReq) String() string {
 func (*ListAdminReq) ProtoMessage() {}
 
 func (x *ListAdminReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[13]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1392,7 +1548,7 @@ func (x *ListAdminReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAdminReq.ProtoReflect.Descriptor instead.
 func (*ListAdminReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{13}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ListAdminReq) GetPage() int64 {
@@ -1433,7 +1589,7 @@ type ListAdminResp struct {
 
 func (x *ListAdminResp) Reset() {
 	*x = ListAdminResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[14]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1445,7 +1601,7 @@ func (x *ListAdminResp) String() string {
 func (*ListAdminResp) ProtoMessage() {}
 
 func (x *ListAdminResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[14]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1458,7 +1614,7 @@ func (x *ListAdminResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAdminResp.ProtoReflect.Descriptor instead.
 func (*ListAdminResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{14}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ListAdminResp) GetTotal() int64 {
@@ -1488,7 +1644,7 @@ type RoleInfo struct {
 
 func (x *RoleInfo) Reset() {
 	*x = RoleInfo{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[15]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1500,7 +1656,7 @@ func (x *RoleInfo) String() string {
 func (*RoleInfo) ProtoMessage() {}
 
 func (x *RoleInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[15]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1513,7 +1669,7 @@ func (x *RoleInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleInfo.ProtoReflect.Descriptor instead.
 func (*RoleInfo) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{15}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *RoleInfo) GetId() uint64 {
@@ -1560,7 +1716,7 @@ type ListRoleResp struct {
 
 func (x *ListRoleResp) Reset() {
 	*x = ListRoleResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[16]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1572,7 +1728,7 @@ func (x *ListRoleResp) String() string {
 func (*ListRoleResp) ProtoMessage() {}
 
 func (x *ListRoleResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[16]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1585,7 +1741,7 @@ func (x *ListRoleResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListRoleResp.ProtoReflect.Descriptor instead.
 func (*ListRoleResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{16}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *ListRoleResp) GetList() []*RoleInfo {
@@ -1615,7 +1771,7 @@ type AdminLogInfo struct {
 
 func (x *AdminLogInfo) Reset() {
 	*x = AdminLogInfo{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[17]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1627,7 +1783,7 @@ func (x *AdminLogInfo) String() string {
 func (*AdminLogInfo) ProtoMessage() {}
 
 func (x *AdminLogInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[17]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1640,7 +1796,7 @@ func (x *AdminLogInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminLogInfo.ProtoReflect.Descriptor instead.
 func (*AdminLogInfo) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{17}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *AdminLogInfo) GetId() uint64 {
@@ -1738,7 +1894,7 @@ type ListAdminLogReq struct {
 
 func (x *ListAdminLogReq) Reset() {
 	*x = ListAdminLogReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[18]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1750,7 +1906,7 @@ func (x *ListAdminLogReq) String() string {
 func (*ListAdminLogReq) ProtoMessage() {}
 
 func (x *ListAdminLogReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[18]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1763,7 +1919,7 @@ func (x *ListAdminLogReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAdminLogReq.ProtoReflect.Descriptor instead.
 func (*ListAdminLogReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{18}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ListAdminLogReq) GetPage() int64 {
@@ -1797,7 +1953,7 @@ type ListAdminLogResp struct {
 
 func (x *ListAdminLogResp) Reset() {
 	*x = ListAdminLogResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[19]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1809,7 +1965,7 @@ func (x *ListAdminLogResp) String() string {
 func (*ListAdminLogResp) ProtoMessage() {}
 
 func (x *ListAdminLogResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[19]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1822,7 +1978,7 @@ func (x *ListAdminLogResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAdminLogResp.ProtoReflect.Descriptor instead.
 func (*ListAdminLogResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{19}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *ListAdminLogResp) GetTotal() int64 {
@@ -1851,7 +2007,7 @@ type AdminListUsersReq struct {
 
 func (x *AdminListUsersReq) Reset() {
 	*x = AdminListUsersReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[20]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1863,7 +2019,7 @@ func (x *AdminListUsersReq) String() string {
 func (*AdminListUsersReq) ProtoMessage() {}
 
 func (x *AdminListUsersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[20]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1876,7 +2032,7 @@ func (x *AdminListUsersReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminListUsersReq.ProtoReflect.Descriptor instead.
 func (*AdminListUsersReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{20}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *AdminListUsersReq) GetPage() int64 {
@@ -1922,7 +2078,7 @@ type AdminUserItem struct {
 
 func (x *AdminUserItem) Reset() {
 	*x = AdminUserItem{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[21]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1934,7 +2090,7 @@ func (x *AdminUserItem) String() string {
 func (*AdminUserItem) ProtoMessage() {}
 
 func (x *AdminUserItem) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[21]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1947,7 +2103,7 @@ func (x *AdminUserItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminUserItem.ProtoReflect.Descriptor instead.
 func (*AdminUserItem) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{21}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *AdminUserItem) GetId() uint64 {
@@ -2009,7 +2165,7 @@ type AdminListUsersResp struct {
 
 func (x *AdminListUsersResp) Reset() {
 	*x = AdminListUsersResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[22]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2021,7 +2177,7 @@ func (x *AdminListUsersResp) String() string {
 func (*AdminListUsersResp) ProtoMessage() {}
 
 func (x *AdminListUsersResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[22]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2034,7 +2190,7 @@ func (x *AdminListUsersResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminListUsersResp.ProtoReflect.Descriptor instead.
 func (*AdminListUsersResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{22}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *AdminListUsersResp) GetTotal() int64 {
@@ -2060,7 +2216,7 @@ type AdminGetUserDetailReq struct {
 
 func (x *AdminGetUserDetailReq) Reset() {
 	*x = AdminGetUserDetailReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[23]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2072,7 +2228,7 @@ func (x *AdminGetUserDetailReq) String() string {
 func (*AdminGetUserDetailReq) ProtoMessage() {}
 
 func (x *AdminGetUserDetailReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[23]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2085,7 +2241,7 @@ func (x *AdminGetUserDetailReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminGetUserDetailReq.ProtoReflect.Descriptor instead.
 func (*AdminGetUserDetailReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{23}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *AdminGetUserDetailReq) GetUserId() uint64 {
@@ -2115,7 +2271,7 @@ type AdminGetUserDetailResp struct {
 
 func (x *AdminGetUserDetailResp) Reset() {
 	*x = AdminGetUserDetailResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[24]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2127,7 +2283,7 @@ func (x *AdminGetUserDetailResp) String() string {
 func (*AdminGetUserDetailResp) ProtoMessage() {}
 
 func (x *AdminGetUserDetailResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[24]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2140,7 +2296,7 @@ func (x *AdminGetUserDetailResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminGetUserDetailResp.ProtoReflect.Descriptor instead.
 func (*AdminGetUserDetailResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{24}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *AdminGetUserDetailResp) GetId() uint64 {
@@ -2238,7 +2394,7 @@ type AdminBanUserReq struct {
 
 func (x *AdminBanUserReq) Reset() {
 	*x = AdminBanUserReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[25]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2250,7 +2406,7 @@ func (x *AdminBanUserReq) String() string {
 func (*AdminBanUserReq) ProtoMessage() {}
 
 func (x *AdminBanUserReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[25]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2263,7 +2419,7 @@ func (x *AdminBanUserReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminBanUserReq.ProtoReflect.Descriptor instead.
 func (*AdminBanUserReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{25}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *AdminBanUserReq) GetUserId() uint64 {
@@ -2297,7 +2453,7 @@ type AdminUnbanUserReq struct {
 
 func (x *AdminUnbanUserReq) Reset() {
 	*x = AdminUnbanUserReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[26]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2309,7 +2465,7 @@ func (x *AdminUnbanUserReq) String() string {
 func (*AdminUnbanUserReq) ProtoMessage() {}
 
 func (x *AdminUnbanUserReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[26]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2322,7 +2478,7 @@ func (x *AdminUnbanUserReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminUnbanUserReq.ProtoReflect.Descriptor instead.
 func (*AdminUnbanUserReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{26}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{27}
 }
 
 func (x *AdminUnbanUserReq) GetUserId() uint64 {
@@ -2355,7 +2511,7 @@ type AdminCategoryItem struct {
 
 func (x *AdminCategoryItem) Reset() {
 	*x = AdminCategoryItem{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[27]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2367,7 +2523,7 @@ func (x *AdminCategoryItem) String() string {
 func (*AdminCategoryItem) ProtoMessage() {}
 
 func (x *AdminCategoryItem) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[27]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2380,7 +2536,7 @@ func (x *AdminCategoryItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminCategoryItem.ProtoReflect.Descriptor instead.
 func (*AdminCategoryItem) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{27}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *AdminCategoryItem) GetId() uint64 {
@@ -2448,7 +2604,7 @@ type AdminCategoryTreeResp struct {
 
 func (x *AdminCategoryTreeResp) Reset() {
 	*x = AdminCategoryTreeResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[28]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2460,7 +2616,7 @@ func (x *AdminCategoryTreeResp) String() string {
 func (*AdminCategoryTreeResp) ProtoMessage() {}
 
 func (x *AdminCategoryTreeResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[28]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2473,7 +2629,7 @@ func (x *AdminCategoryTreeResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminCategoryTreeResp.ProtoReflect.Descriptor instead.
 func (*AdminCategoryTreeResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{28}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *AdminCategoryTreeResp) GetList() []*AdminCategoryItem {
@@ -2495,7 +2651,7 @@ type AdminCreateCategoryReq struct {
 
 func (x *AdminCreateCategoryReq) Reset() {
 	*x = AdminCreateCategoryReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[29]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[30]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2507,7 +2663,7 @@ func (x *AdminCreateCategoryReq) String() string {
 func (*AdminCreateCategoryReq) ProtoMessage() {}
 
 func (x *AdminCreateCategoryReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[29]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[30]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2520,7 +2676,7 @@ func (x *AdminCreateCategoryReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminCreateCategoryReq.ProtoReflect.Descriptor instead.
 func (*AdminCreateCategoryReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{29}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{30}
 }
 
 func (x *AdminCreateCategoryReq) GetParentId() uint64 {
@@ -2564,7 +2720,7 @@ type AdminUpdateCategoryReq struct {
 
 func (x *AdminUpdateCategoryReq) Reset() {
 	*x = AdminUpdateCategoryReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[30]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[31]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2576,7 +2732,7 @@ func (x *AdminUpdateCategoryReq) String() string {
 func (*AdminUpdateCategoryReq) ProtoMessage() {}
 
 func (x *AdminUpdateCategoryReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[30]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[31]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2589,7 +2745,7 @@ func (x *AdminUpdateCategoryReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminUpdateCategoryReq.ProtoReflect.Descriptor instead.
 func (*AdminUpdateCategoryReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{30}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{31}
 }
 
 func (x *AdminUpdateCategoryReq) GetId() uint64 {
@@ -2637,7 +2793,7 @@ type AdminSpecItem struct {
 
 func (x *AdminSpecItem) Reset() {
 	*x = AdminSpecItem{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[31]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[32]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2649,7 +2805,7 @@ func (x *AdminSpecItem) String() string {
 func (*AdminSpecItem) ProtoMessage() {}
 
 func (x *AdminSpecItem) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[31]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[32]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2662,7 +2818,7 @@ func (x *AdminSpecItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminSpecItem.ProtoReflect.Descriptor instead.
 func (*AdminSpecItem) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{31}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{32}
 }
 
 func (x *AdminSpecItem) GetKey() string {
@@ -2695,7 +2851,7 @@ type AdminSkuItem struct {
 
 func (x *AdminSkuItem) Reset() {
 	*x = AdminSkuItem{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[32]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[33]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2707,7 +2863,7 @@ func (x *AdminSkuItem) String() string {
 func (*AdminSkuItem) ProtoMessage() {}
 
 func (x *AdminSkuItem) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[32]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[33]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2720,7 +2876,7 @@ func (x *AdminSkuItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminSkuItem.ProtoReflect.Descriptor instead.
 func (*AdminSkuItem) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{32}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{33}
 }
 
 func (x *AdminSkuItem) GetSkuCode() string {
@@ -2797,7 +2953,7 @@ type AdminCreateProductReq struct {
 
 func (x *AdminCreateProductReq) Reset() {
 	*x = AdminCreateProductReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[33]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2809,7 +2965,7 @@ func (x *AdminCreateProductReq) String() string {
 func (*AdminCreateProductReq) ProtoMessage() {}
 
 func (x *AdminCreateProductReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[33]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2822,7 +2978,7 @@ func (x *AdminCreateProductReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminCreateProductReq.ProtoReflect.Descriptor instead.
 func (*AdminCreateProductReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{33}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *AdminCreateProductReq) GetCategoryId() uint64 {
@@ -2915,7 +3071,7 @@ type AdminUpdateProductReq struct {
 
 func (x *AdminUpdateProductReq) Reset() {
 	*x = AdminUpdateProductReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[34]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[35]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -2927,7 +3083,7 @@ func (x *AdminUpdateProductReq) String() string {
 func (*AdminUpdateProductReq) ProtoMessage() {}
 
 func (x *AdminUpdateProductReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[34]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[35]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2940,7 +3096,7 @@ func (x *AdminUpdateProductReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminUpdateProductReq.ProtoReflect.Descriptor instead.
 func (*AdminUpdateProductReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{34}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{35}
 }
 
 func (x *AdminUpdateProductReq) GetId() uint64 {
@@ -3037,7 +3193,7 @@ type AdminUpdateProductStatusReq struct {
 
 func (x *AdminUpdateProductStatusReq) Reset() {
 	*x = AdminUpdateProductStatusReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[35]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[36]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3049,7 +3205,7 @@ func (x *AdminUpdateProductStatusReq) String() string {
 func (*AdminUpdateProductStatusReq) ProtoMessage() {}
 
 func (x *AdminUpdateProductStatusReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[35]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[36]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3062,7 +3218,7 @@ func (x *AdminUpdateProductStatusReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminUpdateProductStatusReq.ProtoReflect.Descriptor instead.
 func (*AdminUpdateProductStatusReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{35}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{36}
 }
 
 func (x *AdminUpdateProductStatusReq) GetId() uint64 {
@@ -3095,7 +3251,7 @@ type AdminProductItem struct {
 
 func (x *AdminProductItem) Reset() {
 	*x = AdminProductItem{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[36]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[37]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3107,7 +3263,7 @@ func (x *AdminProductItem) String() string {
 func (*AdminProductItem) ProtoMessage() {}
 
 func (x *AdminProductItem) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[36]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[37]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3120,7 +3276,7 @@ func (x *AdminProductItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminProductItem.ProtoReflect.Descriptor instead.
 func (*AdminProductItem) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{36}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{37}
 }
 
 func (x *AdminProductItem) GetId() uint64 {
@@ -3192,7 +3348,7 @@ type AdminListProductsReq struct {
 
 func (x *AdminListProductsReq) Reset() {
 	*x = AdminListProductsReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[37]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[38]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3204,7 +3360,7 @@ func (x *AdminListProductsReq) String() string {
 func (*AdminListProductsReq) ProtoMessage() {}
 
 func (x *AdminListProductsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[37]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[38]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3217,7 +3373,7 @@ func (x *AdminListProductsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminListProductsReq.ProtoReflect.Descriptor instead.
 func (*AdminListProductsReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{37}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{38}
 }
 
 func (x *AdminListProductsReq) GetPage() int64 {
@@ -3265,7 +3421,7 @@ type AdminListProductsResp struct {
 
 func (x *AdminListProductsResp) Reset() {
 	*x = AdminListProductsResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[38]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[39]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3277,7 +3433,7 @@ func (x *AdminListProductsResp) String() string {
 func (*AdminListProductsResp) ProtoMessage() {}
 
 func (x *AdminListProductsResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[38]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[39]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3290,7 +3446,7 @@ func (x *AdminListProductsResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminListProductsResp.ProtoReflect.Descriptor instead.
 func (*AdminListProductsResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{38}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{39}
 }
 
 func (x *AdminListProductsResp) GetTotal() int64 {
@@ -3330,7 +3486,7 @@ type AdminProductDetailResp struct {
 
 func (x *AdminProductDetailResp) Reset() {
 	*x = AdminProductDetailResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[39]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[40]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3342,7 +3498,7 @@ func (x *AdminProductDetailResp) String() string {
 func (*AdminProductDetailResp) ProtoMessage() {}
 
 func (x *AdminProductDetailResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[39]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[40]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3355,7 +3511,7 @@ func (x *AdminProductDetailResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminProductDetailResp.ProtoReflect.Descriptor instead.
 func (*AdminProductDetailResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{39}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{40}
 }
 
 func (x *AdminProductDetailResp) GetId() uint64 {
@@ -3482,7 +3638,7 @@ type AdminSkuDetailItem struct {
 
 func (x *AdminSkuDetailItem) Reset() {
 	*x = AdminSkuDetailItem{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[40]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[41]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3494,7 +3650,7 @@ func (x *AdminSkuDetailItem) String() string {
 func (*AdminSkuDetailItem) ProtoMessage() {}
 
 func (x *AdminSkuDetailItem) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[40]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[41]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3507,7 +3663,7 @@ func (x *AdminSkuDetailItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminSkuDetailItem.ProtoReflect.Descriptor instead.
 func (*AdminSkuDetailItem) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{40}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{41}
 }
 
 func (x *AdminSkuDetailItem) GetId() uint64 {
@@ -3606,7 +3762,7 @@ type AdminFreightTemplateInfo struct {
 
 func (x *AdminFreightTemplateInfo) Reset() {
 	*x = AdminFreightTemplateInfo{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[41]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[42]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3618,7 +3774,7 @@ func (x *AdminFreightTemplateInfo) String() string {
 func (*AdminFreightTemplateInfo) ProtoMessage() {}
 
 func (x *AdminFreightTemplateInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[41]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[42]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3631,7 +3787,7 @@ func (x *AdminFreightTemplateInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminFreightTemplateInfo.ProtoReflect.Descriptor instead.
 func (*AdminFreightTemplateInfo) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{41}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{42}
 }
 
 func (x *AdminFreightTemplateInfo) GetId() uint64 {
@@ -3727,7 +3883,7 @@ type AdminCreateFreightTemplateReq struct {
 
 func (x *AdminCreateFreightTemplateReq) Reset() {
 	*x = AdminCreateFreightTemplateReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[42]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[43]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3739,7 +3895,7 @@ func (x *AdminCreateFreightTemplateReq) String() string {
 func (*AdminCreateFreightTemplateReq) ProtoMessage() {}
 
 func (x *AdminCreateFreightTemplateReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[42]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[43]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3752,7 +3908,7 @@ func (x *AdminCreateFreightTemplateReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminCreateFreightTemplateReq.ProtoReflect.Descriptor instead.
 func (*AdminCreateFreightTemplateReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{42}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{43}
 }
 
 func (x *AdminCreateFreightTemplateReq) GetName() string {
@@ -3829,7 +3985,7 @@ type AdminUpdateFreightTemplateReq struct {
 
 func (x *AdminUpdateFreightTemplateReq) Reset() {
 	*x = AdminUpdateFreightTemplateReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[43]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[44]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3841,7 +3997,7 @@ func (x *AdminUpdateFreightTemplateReq) String() string {
 func (*AdminUpdateFreightTemplateReq) ProtoMessage() {}
 
 func (x *AdminUpdateFreightTemplateReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[43]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[44]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3854,7 +4010,7 @@ func (x *AdminUpdateFreightTemplateReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminUpdateFreightTemplateReq.ProtoReflect.Descriptor instead.
 func (*AdminUpdateFreightTemplateReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{43}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{44}
 }
 
 func (x *AdminUpdateFreightTemplateReq) GetId() uint64 {
@@ -3937,7 +4093,7 @@ type AdminListFreightTemplatesResp struct {
 
 func (x *AdminListFreightTemplatesResp) Reset() {
 	*x = AdminListFreightTemplatesResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[44]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[45]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3949,7 +4105,7 @@ func (x *AdminListFreightTemplatesResp) String() string {
 func (*AdminListFreightTemplatesResp) ProtoMessage() {}
 
 func (x *AdminListFreightTemplatesResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[44]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[45]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3962,7 +4118,7 @@ func (x *AdminListFreightTemplatesResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminListFreightTemplatesResp.ProtoReflect.Descriptor instead.
 func (*AdminListFreightTemplatesResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{44}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{45}
 }
 
 func (x *AdminListFreightTemplatesResp) GetTotal() int64 {
@@ -3989,7 +4145,7 @@ type AdminSkuStockItem struct {
 
 func (x *AdminSkuStockItem) Reset() {
 	*x = AdminSkuStockItem{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[45]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[46]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4001,7 +4157,7 @@ func (x *AdminSkuStockItem) String() string {
 func (*AdminSkuStockItem) ProtoMessage() {}
 
 func (x *AdminSkuStockItem) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[45]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[46]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4014,7 +4170,7 @@ func (x *AdminSkuStockItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminSkuStockItem.ProtoReflect.Descriptor instead.
 func (*AdminSkuStockItem) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{45}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{46}
 }
 
 func (x *AdminSkuStockItem) GetSkuId() uint64 {
@@ -4041,7 +4197,7 @@ type AdminAdjustStockReq struct {
 
 func (x *AdminAdjustStockReq) Reset() {
 	*x = AdminAdjustStockReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[46]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[47]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4053,7 +4209,7 @@ func (x *AdminAdjustStockReq) String() string {
 func (*AdminAdjustStockReq) ProtoMessage() {}
 
 func (x *AdminAdjustStockReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[46]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[47]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4066,7 +4222,7 @@ func (x *AdminAdjustStockReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminAdjustStockReq.ProtoReflect.Descriptor instead.
 func (*AdminAdjustStockReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{46}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{47}
 }
 
 func (x *AdminAdjustStockReq) GetItems() []*AdminSkuStockItem {
@@ -4096,7 +4252,7 @@ type AdminSkuStockResult struct {
 
 func (x *AdminSkuStockResult) Reset() {
 	*x = AdminSkuStockResult{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[47]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4108,7 +4264,7 @@ func (x *AdminSkuStockResult) String() string {
 func (*AdminSkuStockResult) ProtoMessage() {}
 
 func (x *AdminSkuStockResult) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[47]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4121,7 +4277,7 @@ func (x *AdminSkuStockResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminSkuStockResult.ProtoReflect.Descriptor instead.
 func (*AdminSkuStockResult) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{47}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *AdminSkuStockResult) GetSkuId() uint64 {
@@ -4169,7 +4325,7 @@ type AdminStockChangeResp struct {
 
 func (x *AdminStockChangeResp) Reset() {
 	*x = AdminStockChangeResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[48]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4181,7 +4337,7 @@ func (x *AdminStockChangeResp) String() string {
 func (*AdminStockChangeResp) ProtoMessage() {}
 
 func (x *AdminStockChangeResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[48]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4194,7 +4350,7 @@ func (x *AdminStockChangeResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminStockChangeResp.ProtoReflect.Descriptor instead.
 func (*AdminStockChangeResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{48}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *AdminStockChangeResp) GetSuccess() bool {
@@ -4228,7 +4384,7 @@ type AdminStockLogItem struct {
 
 func (x *AdminStockLogItem) Reset() {
 	*x = AdminStockLogItem{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[49]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4240,7 +4396,7 @@ func (x *AdminStockLogItem) String() string {
 func (*AdminStockLogItem) ProtoMessage() {}
 
 func (x *AdminStockLogItem) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[49]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4253,7 +4409,7 @@ func (x *AdminStockLogItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminStockLogItem.ProtoReflect.Descriptor instead.
 func (*AdminStockLogItem) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{49}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *AdminStockLogItem) GetId() uint64 {
@@ -4333,7 +4489,7 @@ type AdminListStockLogsReq struct {
 
 func (x *AdminListStockLogsReq) Reset() {
 	*x = AdminListStockLogsReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[50]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4345,7 +4501,7 @@ func (x *AdminListStockLogsReq) String() string {
 func (*AdminListStockLogsReq) ProtoMessage() {}
 
 func (x *AdminListStockLogsReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[50]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4358,7 +4514,7 @@ func (x *AdminListStockLogsReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminListStockLogsReq.ProtoReflect.Descriptor instead.
 func (*AdminListStockLogsReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{50}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *AdminListStockLogsReq) GetSkuId() uint64 {
@@ -4413,7 +4569,7 @@ type AdminListStockLogsResp struct {
 
 func (x *AdminListStockLogsResp) Reset() {
 	*x = AdminListStockLogsResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[51]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4425,7 +4581,7 @@ func (x *AdminListStockLogsResp) String() string {
 func (*AdminListStockLogsResp) ProtoMessage() {}
 
 func (x *AdminListStockLogsResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[51]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4438,7 +4594,7 @@ func (x *AdminListStockLogsResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminListStockLogsResp.ProtoReflect.Descriptor instead.
 func (*AdminListStockLogsResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{51}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *AdminListStockLogsResp) GetTotal() int64 {
@@ -4469,7 +4625,7 @@ type AdminListOrdersReq struct {
 
 func (x *AdminListOrdersReq) Reset() {
 	*x = AdminListOrdersReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[52]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4481,7 +4637,7 @@ func (x *AdminListOrdersReq) String() string {
 func (*AdminListOrdersReq) ProtoMessage() {}
 
 func (x *AdminListOrdersReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[52]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4494,7 +4650,7 @@ func (x *AdminListOrdersReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminListOrdersReq.ProtoReflect.Descriptor instead.
 func (*AdminListOrdersReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{52}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *AdminListOrdersReq) GetPage() int64 {
@@ -4554,7 +4710,7 @@ type AdminOrderItem struct {
 
 func (x *AdminOrderItem) Reset() {
 	*x = AdminOrderItem{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[53]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4566,7 +4722,7 @@ func (x *AdminOrderItem) String() string {
 func (*AdminOrderItem) ProtoMessage() {}
 
 func (x *AdminOrderItem) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[53]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4579,7 +4735,7 @@ func (x *AdminOrderItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminOrderItem.ProtoReflect.Descriptor instead.
 func (*AdminOrderItem) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{53}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *AdminOrderItem) GetOrderSn() string {
@@ -4641,7 +4797,7 @@ type AdminListOrdersResp struct {
 
 func (x *AdminListOrdersResp) Reset() {
 	*x = AdminListOrdersResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[54]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[55]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4653,7 +4809,7 @@ func (x *AdminListOrdersResp) String() string {
 func (*AdminListOrdersResp) ProtoMessage() {}
 
 func (x *AdminListOrdersResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[54]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[55]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4666,7 +4822,7 @@ func (x *AdminListOrdersResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminListOrdersResp.ProtoReflect.Descriptor instead.
 func (*AdminListOrdersResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{54}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{55}
 }
 
 func (x *AdminListOrdersResp) GetTotal() int64 {
@@ -4692,7 +4848,7 @@ type AdminGetOrderReq struct {
 
 func (x *AdminGetOrderReq) Reset() {
 	*x = AdminGetOrderReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[55]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4704,7 +4860,7 @@ func (x *AdminGetOrderReq) String() string {
 func (*AdminGetOrderReq) ProtoMessage() {}
 
 func (x *AdminGetOrderReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[55]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4717,7 +4873,7 @@ func (x *AdminGetOrderReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminGetOrderReq.ProtoReflect.Descriptor instead.
 func (*AdminGetOrderReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{55}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *AdminGetOrderReq) GetOrderSn() string {
@@ -4743,7 +4899,7 @@ type AdminOrderProductItem struct {
 
 func (x *AdminOrderProductItem) Reset() {
 	*x = AdminOrderProductItem{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[56]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4755,7 +4911,7 @@ func (x *AdminOrderProductItem) String() string {
 func (*AdminOrderProductItem) ProtoMessage() {}
 
 func (x *AdminOrderProductItem) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[56]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4768,7 +4924,7 @@ func (x *AdminOrderProductItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminOrderProductItem.ProtoReflect.Descriptor instead.
 func (*AdminOrderProductItem) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{56}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{57}
 }
 
 func (x *AdminOrderProductItem) GetSkuId() uint64 {
@@ -4841,7 +4997,7 @@ type AdminOrderAddress struct {
 
 func (x *AdminOrderAddress) Reset() {
 	*x = AdminOrderAddress{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[57]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[58]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4853,7 +5009,7 @@ func (x *AdminOrderAddress) String() string {
 func (*AdminOrderAddress) ProtoMessage() {}
 
 func (x *AdminOrderAddress) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[57]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[58]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4866,7 +5022,7 @@ func (x *AdminOrderAddress) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminOrderAddress.ProtoReflect.Descriptor instead.
 func (*AdminOrderAddress) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{57}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{58}
 }
 
 func (x *AdminOrderAddress) GetReceiverName() string {
@@ -4940,7 +5096,7 @@ type AdminOrderDetailResp struct {
 
 func (x *AdminOrderDetailResp) Reset() {
 	*x = AdminOrderDetailResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[58]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[59]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -4952,7 +5108,7 @@ func (x *AdminOrderDetailResp) String() string {
 func (*AdminOrderDetailResp) ProtoMessage() {}
 
 func (x *AdminOrderDetailResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[58]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[59]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -4965,7 +5121,7 @@ func (x *AdminOrderDetailResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminOrderDetailResp.ProtoReflect.Descriptor instead.
 func (*AdminOrderDetailResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{58}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{59}
 }
 
 func (x *AdminOrderDetailResp) GetOrderSn() string {
@@ -5127,7 +5283,7 @@ type AdminShipOrderReq struct {
 
 func (x *AdminShipOrderReq) Reset() {
 	*x = AdminShipOrderReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[59]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5139,7 +5295,7 @@ func (x *AdminShipOrderReq) String() string {
 func (*AdminShipOrderReq) ProtoMessage() {}
 
 func (x *AdminShipOrderReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[59]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5152,7 +5308,7 @@ func (x *AdminShipOrderReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminShipOrderReq.ProtoReflect.Descriptor instead.
 func (*AdminShipOrderReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{59}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{60}
 }
 
 func (x *AdminShipOrderReq) GetOrderSn() string {
@@ -5194,7 +5350,7 @@ type AdminListAfterSalesReq struct {
 
 func (x *AdminListAfterSalesReq) Reset() {
 	*x = AdminListAfterSalesReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[60]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[61]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5206,7 +5362,7 @@ func (x *AdminListAfterSalesReq) String() string {
 func (*AdminListAfterSalesReq) ProtoMessage() {}
 
 func (x *AdminListAfterSalesReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[60]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[61]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5219,7 +5375,7 @@ func (x *AdminListAfterSalesReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminListAfterSalesReq.ProtoReflect.Descriptor instead.
 func (*AdminListAfterSalesReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{60}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{61}
 }
 
 func (x *AdminListAfterSalesReq) GetPage() int64 {
@@ -5261,7 +5417,7 @@ type AdminAfterSaleItem struct {
 
 func (x *AdminAfterSaleItem) Reset() {
 	*x = AdminAfterSaleItem{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[61]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[62]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5273,7 +5429,7 @@ func (x *AdminAfterSaleItem) String() string {
 func (*AdminAfterSaleItem) ProtoMessage() {}
 
 func (x *AdminAfterSaleItem) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[61]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[62]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5286,7 +5442,7 @@ func (x *AdminAfterSaleItem) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminAfterSaleItem.ProtoReflect.Descriptor instead.
 func (*AdminAfterSaleItem) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{61}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{62}
 }
 
 func (x *AdminAfterSaleItem) GetAfterSaleId() uint64 {
@@ -5369,7 +5525,7 @@ type AdminListAfterSalesResp struct {
 
 func (x *AdminListAfterSalesResp) Reset() {
 	*x = AdminListAfterSalesResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[62]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[63]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5381,7 +5537,7 @@ func (x *AdminListAfterSalesResp) String() string {
 func (*AdminListAfterSalesResp) ProtoMessage() {}
 
 func (x *AdminListAfterSalesResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[62]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[63]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5394,7 +5550,7 @@ func (x *AdminListAfterSalesResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminListAfterSalesResp.ProtoReflect.Descriptor instead.
 func (*AdminListAfterSalesResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{62}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{63}
 }
 
 func (x *AdminListAfterSalesResp) GetTotal() int64 {
@@ -5420,7 +5576,7 @@ type AdminGetAfterSaleReq struct {
 
 func (x *AdminGetAfterSaleReq) Reset() {
 	*x = AdminGetAfterSaleReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[63]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[64]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5432,7 +5588,7 @@ func (x *AdminGetAfterSaleReq) String() string {
 func (*AdminGetAfterSaleReq) ProtoMessage() {}
 
 func (x *AdminGetAfterSaleReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[63]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[64]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5445,7 +5601,7 @@ func (x *AdminGetAfterSaleReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminGetAfterSaleReq.ProtoReflect.Descriptor instead.
 func (*AdminGetAfterSaleReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{63}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{64}
 }
 
 func (x *AdminGetAfterSaleReq) GetAfterSaleId() uint64 {
@@ -5479,7 +5635,7 @@ type AdminAfterSaleDetailResp struct {
 
 func (x *AdminAfterSaleDetailResp) Reset() {
 	*x = AdminAfterSaleDetailResp{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[64]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[65]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5491,7 +5647,7 @@ func (x *AdminAfterSaleDetailResp) String() string {
 func (*AdminAfterSaleDetailResp) ProtoMessage() {}
 
 func (x *AdminAfterSaleDetailResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[64]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[65]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5504,7 +5660,7 @@ func (x *AdminAfterSaleDetailResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminAfterSaleDetailResp.ProtoReflect.Descriptor instead.
 func (*AdminAfterSaleDetailResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{64}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{65}
 }
 
 func (x *AdminAfterSaleDetailResp) GetAfterSaleId() uint64 {
@@ -5630,7 +5786,7 @@ type AdminHandleAfterSaleReq struct {
 
 func (x *AdminHandleAfterSaleReq) Reset() {
 	*x = AdminHandleAfterSaleReq{}
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[65]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[66]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -5642,7 +5798,7 @@ func (x *AdminHandleAfterSaleReq) String() string {
 func (*AdminHandleAfterSaleReq) ProtoMessage() {}
 
 func (x *AdminHandleAfterSaleReq) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[65]
+	mi := &file_apps_service_admin_rpc_admin_proto_msgTypes[66]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -5655,7 +5811,7 @@ func (x *AdminHandleAfterSaleReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AdminHandleAfterSaleReq.ProtoReflect.Descriptor instead.
 func (*AdminHandleAfterSaleReq) Descriptor() ([]byte, []int) {
-	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{65}
+	return file_apps_service_admin_rpc_admin_proto_rawDescGZIP(), []int{66}
 }
 
 func (x *AdminHandleAfterSaleReq) GetAfterSaleId() uint64 {
@@ -5683,7 +5839,26 @@ var File_apps_service_admin_rpc_admin_proto protoreflect.FileDescriptor
 
 const file_apps_service_admin_rpc_admin_proto_rawDesc = "" +
 	"\n" +
-	"\"apps/service/admin/rpc/admin.proto\x12\x05admin\x1a\x1fgoogle/protobuf/timestamp.proto\"\a\n" +
+	"\"apps/service/admin/rpc/admin.proto\x12\x05admin\x1a\x1fgoogle/protobuf/timestamp.proto\"\xf4\x03\n" +
+	"\x10CouponDetailResp\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
+	"\x04type\x18\x03 \x01(\x03R\x04type\x12)\n" +
+	"\x10threshold_amount\x18\x04 \x01(\x03R\x0fthresholdAmount\x12#\n" +
+	"\rreduce_amount\x18\x05 \x01(\x03R\freduceAmount\x12#\n" +
+	"\rdiscount_rate\x18\x06 \x01(\x03R\fdiscountRate\x12.\n" +
+	"\x13max_discount_amount\x18\a \x01(\x03R\x11maxDiscountAmount\x12%\n" +
+	"\x0etotal_quantity\x18\b \x01(\x05R\rtotalQuantity\x12#\n" +
+	"\rused_quantity\x18\t \x01(\x05R\fusedQuantity\x12$\n" +
+	"\x0eper_user_limit\x18\n" +
+	" \x01(\x05R\fperUserLimit\x12\x1d\n" +
+	"\n" +
+	"start_time\x18\v \x01(\x03R\tstartTime\x12\x19\n" +
+	"\bend_time\x18\f \x01(\x03R\aendTime\x12\x16\n" +
+	"\x06status\x18\r \x01(\x05R\x06status\x12 \n" +
+	"\vdescription\x18\x0e \x01(\tR\vdescription\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x0f \x01(\x03R\tcreatedAt\"\a\n" +
 	"\x05Empty\"\x17\n" +
 	"\x05IdReq\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\"?\n" +
@@ -6258,7 +6433,9 @@ const file_apps_service_admin_rpc_admin_proto_rawDesc = "" +
 	"\x0eAdminAfterSale\x12O\n" +
 	"\x0eListAfterSales\x12\x1d.admin.AdminListAfterSalesReq\x1a\x1e.admin.AdminListAfterSalesResp\x12L\n" +
 	"\fGetAfterSale\x12\x1b.admin.AdminGetAfterSaleReq\x1a\x1f.admin.AdminAfterSaleDetailResp\x12?\n" +
-	"\x0fHandleAfterSale\x12\x1e.admin.AdminHandleAfterSaleReq\x1a\f.admin.EmptyB\tZ\a./adminb\x06proto3"
+	"\x0fHandleAfterSale\x12\x1e.admin.AdminHandleAfterSaleReq\x1a\f.admin.Empty2G\n" +
+	"\vAdminCoupon\x128\n" +
+	"\x0fGetCouponDetail\x12\f.admin.IdReq\x1a\x17.admin.CouponDetailRespB\tZ\a./adminb\x06proto3"
 
 var (
 	file_apps_service_admin_rpc_admin_proto_rawDescOnce sync.Once
@@ -6273,7 +6450,7 @@ func file_apps_service_admin_rpc_admin_proto_rawDescGZIP() []byte {
 }
 
 var file_apps_service_admin_rpc_admin_proto_enumTypes = make([]protoimpl.EnumInfo, 11)
-var file_apps_service_admin_rpc_admin_proto_msgTypes = make([]protoimpl.MessageInfo, 66)
+var file_apps_service_admin_rpc_admin_proto_msgTypes = make([]protoimpl.MessageInfo, 67)
 var file_apps_service_admin_rpc_admin_proto_goTypes = []any{
 	(AdminStatus)(0),                      // 0: admin.AdminStatus
 	(SwitchStatus)(0),                     // 1: admin.SwitchStatus
@@ -6286,226 +6463,229 @@ var file_apps_service_admin_rpc_admin_proto_goTypes = []any{
 	(AdminPayType)(0),                     // 8: admin.AdminPayType
 	(AdminCouponType)(0),                  // 9: admin.AdminCouponType
 	(FreightCalcType)(0),                  // 10: admin.FreightCalcType
-	(*Empty)(nil),                         // 11: admin.Empty
-	(*IdReq)(nil),                         // 12: admin.IdReq
-	(*AdminPageReq)(nil),                  // 13: admin.AdminPageReq
-	(*AdminInfo)(nil),                     // 14: admin.AdminInfo
-	(*AdminLoginReq)(nil),                 // 15: admin.AdminLoginReq
-	(*AdminLoginResp)(nil),                // 16: admin.AdminLoginResp
-	(*GetCurrentAdminResp)(nil),           // 17: admin.GetCurrentAdminResp
-	(*UpdatePasswordReq)(nil),             // 18: admin.UpdatePasswordReq
-	(*CreateAdminReq)(nil),                // 19: admin.CreateAdminReq
-	(*UpdateAdminReq)(nil),                // 20: admin.UpdateAdminReq
-	(*DeleteAdminReq)(nil),                // 21: admin.DeleteAdminReq
-	(*GetAdminReq)(nil),                   // 22: admin.GetAdminReq
-	(*GetAdminResp)(nil),                  // 23: admin.GetAdminResp
-	(*ListAdminReq)(nil),                  // 24: admin.ListAdminReq
-	(*ListAdminResp)(nil),                 // 25: admin.ListAdminResp
-	(*RoleInfo)(nil),                      // 26: admin.RoleInfo
-	(*ListRoleResp)(nil),                  // 27: admin.ListRoleResp
-	(*AdminLogInfo)(nil),                  // 28: admin.AdminLogInfo
-	(*ListAdminLogReq)(nil),               // 29: admin.ListAdminLogReq
-	(*ListAdminLogResp)(nil),              // 30: admin.ListAdminLogResp
-	(*AdminListUsersReq)(nil),             // 31: admin.AdminListUsersReq
-	(*AdminUserItem)(nil),                 // 32: admin.AdminUserItem
-	(*AdminListUsersResp)(nil),            // 33: admin.AdminListUsersResp
-	(*AdminGetUserDetailReq)(nil),         // 34: admin.AdminGetUserDetailReq
-	(*AdminGetUserDetailResp)(nil),        // 35: admin.AdminGetUserDetailResp
-	(*AdminBanUserReq)(nil),               // 36: admin.AdminBanUserReq
-	(*AdminUnbanUserReq)(nil),             // 37: admin.AdminUnbanUserReq
-	(*AdminCategoryItem)(nil),             // 38: admin.AdminCategoryItem
-	(*AdminCategoryTreeResp)(nil),         // 39: admin.AdminCategoryTreeResp
-	(*AdminCreateCategoryReq)(nil),        // 40: admin.AdminCreateCategoryReq
-	(*AdminUpdateCategoryReq)(nil),        // 41: admin.AdminUpdateCategoryReq
-	(*AdminSpecItem)(nil),                 // 42: admin.AdminSpecItem
-	(*AdminSkuItem)(nil),                  // 43: admin.AdminSkuItem
-	(*AdminCreateProductReq)(nil),         // 44: admin.AdminCreateProductReq
-	(*AdminUpdateProductReq)(nil),         // 45: admin.AdminUpdateProductReq
-	(*AdminUpdateProductStatusReq)(nil),   // 46: admin.AdminUpdateProductStatusReq
-	(*AdminProductItem)(nil),              // 47: admin.AdminProductItem
-	(*AdminListProductsReq)(nil),          // 48: admin.AdminListProductsReq
-	(*AdminListProductsResp)(nil),         // 49: admin.AdminListProductsResp
-	(*AdminProductDetailResp)(nil),        // 50: admin.AdminProductDetailResp
-	(*AdminSkuDetailItem)(nil),            // 51: admin.AdminSkuDetailItem
-	(*AdminFreightTemplateInfo)(nil),      // 52: admin.AdminFreightTemplateInfo
-	(*AdminCreateFreightTemplateReq)(nil), // 53: admin.AdminCreateFreightTemplateReq
-	(*AdminUpdateFreightTemplateReq)(nil), // 54: admin.AdminUpdateFreightTemplateReq
-	(*AdminListFreightTemplatesResp)(nil), // 55: admin.AdminListFreightTemplatesResp
-	(*AdminSkuStockItem)(nil),             // 56: admin.AdminSkuStockItem
-	(*AdminAdjustStockReq)(nil),           // 57: admin.AdminAdjustStockReq
-	(*AdminSkuStockResult)(nil),           // 58: admin.AdminSkuStockResult
-	(*AdminStockChangeResp)(nil),          // 59: admin.AdminStockChangeResp
-	(*AdminStockLogItem)(nil),             // 60: admin.AdminStockLogItem
-	(*AdminListStockLogsReq)(nil),         // 61: admin.AdminListStockLogsReq
-	(*AdminListStockLogsResp)(nil),        // 62: admin.AdminListStockLogsResp
-	(*AdminListOrdersReq)(nil),            // 63: admin.AdminListOrdersReq
-	(*AdminOrderItem)(nil),                // 64: admin.AdminOrderItem
-	(*AdminListOrdersResp)(nil),           // 65: admin.AdminListOrdersResp
-	(*AdminGetOrderReq)(nil),              // 66: admin.AdminGetOrderReq
-	(*AdminOrderProductItem)(nil),         // 67: admin.AdminOrderProductItem
-	(*AdminOrderAddress)(nil),             // 68: admin.AdminOrderAddress
-	(*AdminOrderDetailResp)(nil),          // 69: admin.AdminOrderDetailResp
-	(*AdminShipOrderReq)(nil),             // 70: admin.AdminShipOrderReq
-	(*AdminListAfterSalesReq)(nil),        // 71: admin.AdminListAfterSalesReq
-	(*AdminAfterSaleItem)(nil),            // 72: admin.AdminAfterSaleItem
-	(*AdminListAfterSalesResp)(nil),       // 73: admin.AdminListAfterSalesResp
-	(*AdminGetAfterSaleReq)(nil),          // 74: admin.AdminGetAfterSaleReq
-	(*AdminAfterSaleDetailResp)(nil),      // 75: admin.AdminAfterSaleDetailResp
-	(*AdminHandleAfterSaleReq)(nil),       // 76: admin.AdminHandleAfterSaleReq
-	(*timestamppb.Timestamp)(nil),         // 77: google.protobuf.Timestamp
+	(*CouponDetailResp)(nil),              // 11: admin.CouponDetailResp
+	(*Empty)(nil),                         // 12: admin.Empty
+	(*IdReq)(nil),                         // 13: admin.IdReq
+	(*AdminPageReq)(nil),                  // 14: admin.AdminPageReq
+	(*AdminInfo)(nil),                     // 15: admin.AdminInfo
+	(*AdminLoginReq)(nil),                 // 16: admin.AdminLoginReq
+	(*AdminLoginResp)(nil),                // 17: admin.AdminLoginResp
+	(*GetCurrentAdminResp)(nil),           // 18: admin.GetCurrentAdminResp
+	(*UpdatePasswordReq)(nil),             // 19: admin.UpdatePasswordReq
+	(*CreateAdminReq)(nil),                // 20: admin.CreateAdminReq
+	(*UpdateAdminReq)(nil),                // 21: admin.UpdateAdminReq
+	(*DeleteAdminReq)(nil),                // 22: admin.DeleteAdminReq
+	(*GetAdminReq)(nil),                   // 23: admin.GetAdminReq
+	(*GetAdminResp)(nil),                  // 24: admin.GetAdminResp
+	(*ListAdminReq)(nil),                  // 25: admin.ListAdminReq
+	(*ListAdminResp)(nil),                 // 26: admin.ListAdminResp
+	(*RoleInfo)(nil),                      // 27: admin.RoleInfo
+	(*ListRoleResp)(nil),                  // 28: admin.ListRoleResp
+	(*AdminLogInfo)(nil),                  // 29: admin.AdminLogInfo
+	(*ListAdminLogReq)(nil),               // 30: admin.ListAdminLogReq
+	(*ListAdminLogResp)(nil),              // 31: admin.ListAdminLogResp
+	(*AdminListUsersReq)(nil),             // 32: admin.AdminListUsersReq
+	(*AdminUserItem)(nil),                 // 33: admin.AdminUserItem
+	(*AdminListUsersResp)(nil),            // 34: admin.AdminListUsersResp
+	(*AdminGetUserDetailReq)(nil),         // 35: admin.AdminGetUserDetailReq
+	(*AdminGetUserDetailResp)(nil),        // 36: admin.AdminGetUserDetailResp
+	(*AdminBanUserReq)(nil),               // 37: admin.AdminBanUserReq
+	(*AdminUnbanUserReq)(nil),             // 38: admin.AdminUnbanUserReq
+	(*AdminCategoryItem)(nil),             // 39: admin.AdminCategoryItem
+	(*AdminCategoryTreeResp)(nil),         // 40: admin.AdminCategoryTreeResp
+	(*AdminCreateCategoryReq)(nil),        // 41: admin.AdminCreateCategoryReq
+	(*AdminUpdateCategoryReq)(nil),        // 42: admin.AdminUpdateCategoryReq
+	(*AdminSpecItem)(nil),                 // 43: admin.AdminSpecItem
+	(*AdminSkuItem)(nil),                  // 44: admin.AdminSkuItem
+	(*AdminCreateProductReq)(nil),         // 45: admin.AdminCreateProductReq
+	(*AdminUpdateProductReq)(nil),         // 46: admin.AdminUpdateProductReq
+	(*AdminUpdateProductStatusReq)(nil),   // 47: admin.AdminUpdateProductStatusReq
+	(*AdminProductItem)(nil),              // 48: admin.AdminProductItem
+	(*AdminListProductsReq)(nil),          // 49: admin.AdminListProductsReq
+	(*AdminListProductsResp)(nil),         // 50: admin.AdminListProductsResp
+	(*AdminProductDetailResp)(nil),        // 51: admin.AdminProductDetailResp
+	(*AdminSkuDetailItem)(nil),            // 52: admin.AdminSkuDetailItem
+	(*AdminFreightTemplateInfo)(nil),      // 53: admin.AdminFreightTemplateInfo
+	(*AdminCreateFreightTemplateReq)(nil), // 54: admin.AdminCreateFreightTemplateReq
+	(*AdminUpdateFreightTemplateReq)(nil), // 55: admin.AdminUpdateFreightTemplateReq
+	(*AdminListFreightTemplatesResp)(nil), // 56: admin.AdminListFreightTemplatesResp
+	(*AdminSkuStockItem)(nil),             // 57: admin.AdminSkuStockItem
+	(*AdminAdjustStockReq)(nil),           // 58: admin.AdminAdjustStockReq
+	(*AdminSkuStockResult)(nil),           // 59: admin.AdminSkuStockResult
+	(*AdminStockChangeResp)(nil),          // 60: admin.AdminStockChangeResp
+	(*AdminStockLogItem)(nil),             // 61: admin.AdminStockLogItem
+	(*AdminListStockLogsReq)(nil),         // 62: admin.AdminListStockLogsReq
+	(*AdminListStockLogsResp)(nil),        // 63: admin.AdminListStockLogsResp
+	(*AdminListOrdersReq)(nil),            // 64: admin.AdminListOrdersReq
+	(*AdminOrderItem)(nil),                // 65: admin.AdminOrderItem
+	(*AdminListOrdersResp)(nil),           // 66: admin.AdminListOrdersResp
+	(*AdminGetOrderReq)(nil),              // 67: admin.AdminGetOrderReq
+	(*AdminOrderProductItem)(nil),         // 68: admin.AdminOrderProductItem
+	(*AdminOrderAddress)(nil),             // 69: admin.AdminOrderAddress
+	(*AdminOrderDetailResp)(nil),          // 70: admin.AdminOrderDetailResp
+	(*AdminShipOrderReq)(nil),             // 71: admin.AdminShipOrderReq
+	(*AdminListAfterSalesReq)(nil),        // 72: admin.AdminListAfterSalesReq
+	(*AdminAfterSaleItem)(nil),            // 73: admin.AdminAfterSaleItem
+	(*AdminListAfterSalesResp)(nil),       // 74: admin.AdminListAfterSalesResp
+	(*AdminGetAfterSaleReq)(nil),          // 75: admin.AdminGetAfterSaleReq
+	(*AdminAfterSaleDetailResp)(nil),      // 76: admin.AdminAfterSaleDetailResp
+	(*AdminHandleAfterSaleReq)(nil),       // 77: admin.AdminHandleAfterSaleReq
+	(*timestamppb.Timestamp)(nil),         // 78: google.protobuf.Timestamp
 }
 var file_apps_service_admin_rpc_admin_proto_depIdxs = []int32{
 	0,   // 0: admin.AdminInfo.status:type_name -> admin.AdminStatus
-	77,  // 1: admin.AdminInfo.created_at:type_name -> google.protobuf.Timestamp
-	14,  // 2: admin.GetCurrentAdminResp.admin:type_name -> admin.AdminInfo
+	78,  // 1: admin.AdminInfo.created_at:type_name -> google.protobuf.Timestamp
+	15,  // 2: admin.GetCurrentAdminResp.admin:type_name -> admin.AdminInfo
 	0,   // 3: admin.UpdateAdminReq.status:type_name -> admin.AdminStatus
-	14,  // 4: admin.GetAdminResp.admin:type_name -> admin.AdminInfo
+	15,  // 4: admin.GetAdminResp.admin:type_name -> admin.AdminInfo
 	0,   // 5: admin.ListAdminReq.status:type_name -> admin.AdminStatus
-	14,  // 6: admin.ListAdminResp.list:type_name -> admin.AdminInfo
-	77,  // 7: admin.RoleInfo.created_at:type_name -> google.protobuf.Timestamp
-	26,  // 8: admin.ListRoleResp.list:type_name -> admin.RoleInfo
+	15,  // 6: admin.ListAdminResp.list:type_name -> admin.AdminInfo
+	78,  // 7: admin.RoleInfo.created_at:type_name -> google.protobuf.Timestamp
+	27,  // 8: admin.ListRoleResp.list:type_name -> admin.RoleInfo
 	2,   // 9: admin.AdminLogInfo.module:type_name -> admin.LogModule
-	77,  // 10: admin.AdminLogInfo.created_at:type_name -> google.protobuf.Timestamp
+	78,  // 10: admin.AdminLogInfo.created_at:type_name -> google.protobuf.Timestamp
 	2,   // 11: admin.ListAdminLogReq.module:type_name -> admin.LogModule
-	28,  // 12: admin.ListAdminLogResp.list:type_name -> admin.AdminLogInfo
-	77,  // 13: admin.AdminUserItem.created_at:type_name -> google.protobuf.Timestamp
-	32,  // 14: admin.AdminListUsersResp.list:type_name -> admin.AdminUserItem
-	77,  // 15: admin.AdminGetUserDetailResp.last_login_time:type_name -> google.protobuf.Timestamp
-	77,  // 16: admin.AdminGetUserDetailResp.created_at:type_name -> google.protobuf.Timestamp
+	29,  // 12: admin.ListAdminLogResp.list:type_name -> admin.AdminLogInfo
+	78,  // 13: admin.AdminUserItem.created_at:type_name -> google.protobuf.Timestamp
+	33,  // 14: admin.AdminListUsersResp.list:type_name -> admin.AdminUserItem
+	78,  // 15: admin.AdminGetUserDetailResp.last_login_time:type_name -> google.protobuf.Timestamp
+	78,  // 16: admin.AdminGetUserDetailResp.created_at:type_name -> google.protobuf.Timestamp
 	1,   // 17: admin.AdminCategoryItem.status:type_name -> admin.SwitchStatus
-	38,  // 18: admin.AdminCategoryItem.children:type_name -> admin.AdminCategoryItem
-	38,  // 19: admin.AdminCategoryTreeResp.list:type_name -> admin.AdminCategoryItem
+	39,  // 18: admin.AdminCategoryItem.children:type_name -> admin.AdminCategoryItem
+	39,  // 19: admin.AdminCategoryTreeResp.list:type_name -> admin.AdminCategoryItem
 	1,   // 20: admin.AdminUpdateCategoryReq.status:type_name -> admin.SwitchStatus
-	42,  // 21: admin.AdminSkuItem.specs:type_name -> admin.AdminSpecItem
-	43,  // 22: admin.AdminCreateProductReq.skus:type_name -> admin.AdminSkuItem
+	43,  // 21: admin.AdminSkuItem.specs:type_name -> admin.AdminSpecItem
+	44,  // 22: admin.AdminCreateProductReq.skus:type_name -> admin.AdminSkuItem
 	3,   // 23: admin.AdminUpdateProductReq.status:type_name -> admin.AdminProductStatus
-	43,  // 24: admin.AdminUpdateProductReq.skus:type_name -> admin.AdminSkuItem
+	44,  // 24: admin.AdminUpdateProductReq.skus:type_name -> admin.AdminSkuItem
 	3,   // 25: admin.AdminUpdateProductStatusReq.status:type_name -> admin.AdminProductStatus
 	3,   // 26: admin.AdminProductItem.status:type_name -> admin.AdminProductStatus
-	77,  // 27: admin.AdminProductItem.created_at:type_name -> google.protobuf.Timestamp
+	78,  // 27: admin.AdminProductItem.created_at:type_name -> google.protobuf.Timestamp
 	3,   // 28: admin.AdminListProductsReq.status:type_name -> admin.AdminProductStatus
-	47,  // 29: admin.AdminListProductsResp.list:type_name -> admin.AdminProductItem
+	48,  // 29: admin.AdminListProductsResp.list:type_name -> admin.AdminProductItem
 	3,   // 30: admin.AdminProductDetailResp.status:type_name -> admin.AdminProductStatus
-	77,  // 31: admin.AdminProductDetailResp.created_at:type_name -> google.protobuf.Timestamp
-	51,  // 32: admin.AdminProductDetailResp.skus:type_name -> admin.AdminSkuDetailItem
-	42,  // 33: admin.AdminSkuDetailItem.specs:type_name -> admin.AdminSpecItem
+	78,  // 31: admin.AdminProductDetailResp.created_at:type_name -> google.protobuf.Timestamp
+	52,  // 32: admin.AdminProductDetailResp.skus:type_name -> admin.AdminSkuDetailItem
+	43,  // 33: admin.AdminSkuDetailItem.specs:type_name -> admin.AdminSpecItem
 	1,   // 34: admin.AdminSkuDetailItem.status:type_name -> admin.SwitchStatus
 	10,  // 35: admin.AdminFreightTemplateInfo.calc_type:type_name -> admin.FreightCalcType
 	1,   // 36: admin.AdminFreightTemplateInfo.status:type_name -> admin.SwitchStatus
-	77,  // 37: admin.AdminFreightTemplateInfo.created_at:type_name -> google.protobuf.Timestamp
+	78,  // 37: admin.AdminFreightTemplateInfo.created_at:type_name -> google.protobuf.Timestamp
 	10,  // 38: admin.AdminCreateFreightTemplateReq.calc_type:type_name -> admin.FreightCalcType
 	10,  // 39: admin.AdminUpdateFreightTemplateReq.calc_type:type_name -> admin.FreightCalcType
 	1,   // 40: admin.AdminUpdateFreightTemplateReq.status:type_name -> admin.SwitchStatus
-	52,  // 41: admin.AdminListFreightTemplatesResp.list:type_name -> admin.AdminFreightTemplateInfo
-	56,  // 42: admin.AdminAdjustStockReq.items:type_name -> admin.AdminSkuStockItem
-	58,  // 43: admin.AdminStockChangeResp.results:type_name -> admin.AdminSkuStockResult
-	77,  // 44: admin.AdminStockLogItem.created_at:type_name -> google.protobuf.Timestamp
-	77,  // 45: admin.AdminListStockLogsReq.start_time:type_name -> google.protobuf.Timestamp
-	77,  // 46: admin.AdminListStockLogsReq.end_time:type_name -> google.protobuf.Timestamp
-	60,  // 47: admin.AdminListStockLogsResp.list:type_name -> admin.AdminStockLogItem
+	53,  // 41: admin.AdminListFreightTemplatesResp.list:type_name -> admin.AdminFreightTemplateInfo
+	57,  // 42: admin.AdminAdjustStockReq.items:type_name -> admin.AdminSkuStockItem
+	59,  // 43: admin.AdminStockChangeResp.results:type_name -> admin.AdminSkuStockResult
+	78,  // 44: admin.AdminStockLogItem.created_at:type_name -> google.protobuf.Timestamp
+	78,  // 45: admin.AdminListStockLogsReq.start_time:type_name -> google.protobuf.Timestamp
+	78,  // 46: admin.AdminListStockLogsReq.end_time:type_name -> google.protobuf.Timestamp
+	61,  // 47: admin.AdminListStockLogsResp.list:type_name -> admin.AdminStockLogItem
 	4,   // 48: admin.AdminListOrdersReq.status:type_name -> admin.AdminOrderStatus
-	77,  // 49: admin.AdminListOrdersReq.start_time:type_name -> google.protobuf.Timestamp
-	77,  // 50: admin.AdminListOrdersReq.end_time:type_name -> google.protobuf.Timestamp
+	78,  // 49: admin.AdminListOrdersReq.start_time:type_name -> google.protobuf.Timestamp
+	78,  // 50: admin.AdminListOrdersReq.end_time:type_name -> google.protobuf.Timestamp
 	4,   // 51: admin.AdminOrderItem.status:type_name -> admin.AdminOrderStatus
-	77,  // 52: admin.AdminOrderItem.created_at:type_name -> google.protobuf.Timestamp
-	64,  // 53: admin.AdminListOrdersResp.list:type_name -> admin.AdminOrderItem
+	78,  // 52: admin.AdminOrderItem.created_at:type_name -> google.protobuf.Timestamp
+	65,  // 53: admin.AdminListOrdersResp.list:type_name -> admin.AdminOrderItem
 	4,   // 54: admin.AdminOrderDetailResp.status:type_name -> admin.AdminOrderStatus
 	8,   // 55: admin.AdminOrderDetailResp.pay_type:type_name -> admin.AdminPayType
-	68,  // 56: admin.AdminOrderDetailResp.address:type_name -> admin.AdminOrderAddress
-	67,  // 57: admin.AdminOrderDetailResp.items:type_name -> admin.AdminOrderProductItem
-	77,  // 58: admin.AdminOrderDetailResp.create_time:type_name -> google.protobuf.Timestamp
-	77,  // 59: admin.AdminOrderDetailResp.pay_time:type_name -> google.protobuf.Timestamp
-	77,  // 60: admin.AdminOrderDetailResp.delivery_time:type_name -> google.protobuf.Timestamp
-	77,  // 61: admin.AdminOrderDetailResp.finish_time:type_name -> google.protobuf.Timestamp
-	77,  // 62: admin.AdminOrderDetailResp.cancel_time:type_name -> google.protobuf.Timestamp
+	69,  // 56: admin.AdminOrderDetailResp.address:type_name -> admin.AdminOrderAddress
+	68,  // 57: admin.AdminOrderDetailResp.items:type_name -> admin.AdminOrderProductItem
+	78,  // 58: admin.AdminOrderDetailResp.create_time:type_name -> google.protobuf.Timestamp
+	78,  // 59: admin.AdminOrderDetailResp.pay_time:type_name -> google.protobuf.Timestamp
+	78,  // 60: admin.AdminOrderDetailResp.delivery_time:type_name -> google.protobuf.Timestamp
+	78,  // 61: admin.AdminOrderDetailResp.finish_time:type_name -> google.protobuf.Timestamp
+	78,  // 62: admin.AdminOrderDetailResp.cancel_time:type_name -> google.protobuf.Timestamp
 	5,   // 63: admin.AdminListAfterSalesReq.status:type_name -> admin.AdminAfterSaleStatus
 	6,   // 64: admin.AdminAfterSaleItem.type:type_name -> admin.AdminAfterSaleType
 	5,   // 65: admin.AdminAfterSaleItem.status:type_name -> admin.AdminAfterSaleStatus
-	77,  // 66: admin.AdminAfterSaleItem.created_at:type_name -> google.protobuf.Timestamp
-	72,  // 67: admin.AdminListAfterSalesResp.list:type_name -> admin.AdminAfterSaleItem
+	78,  // 66: admin.AdminAfterSaleItem.created_at:type_name -> google.protobuf.Timestamp
+	73,  // 67: admin.AdminListAfterSalesResp.list:type_name -> admin.AdminAfterSaleItem
 	6,   // 68: admin.AdminAfterSaleDetailResp.type:type_name -> admin.AdminAfterSaleType
 	5,   // 69: admin.AdminAfterSaleDetailResp.status:type_name -> admin.AdminAfterSaleStatus
-	77,  // 70: admin.AdminAfterSaleDetailResp.created_at:type_name -> google.protobuf.Timestamp
-	77,  // 71: admin.AdminAfterSaleDetailResp.audit_time:type_name -> google.protobuf.Timestamp
-	77,  // 72: admin.AdminAfterSaleDetailResp.refund_time:type_name -> google.protobuf.Timestamp
-	67,  // 73: admin.AdminAfterSaleDetailResp.product_item:type_name -> admin.AdminOrderProductItem
+	78,  // 70: admin.AdminAfterSaleDetailResp.created_at:type_name -> google.protobuf.Timestamp
+	78,  // 71: admin.AdminAfterSaleDetailResp.audit_time:type_name -> google.protobuf.Timestamp
+	78,  // 72: admin.AdminAfterSaleDetailResp.refund_time:type_name -> google.protobuf.Timestamp
+	68,  // 73: admin.AdminAfterSaleDetailResp.product_item:type_name -> admin.AdminOrderProductItem
 	7,   // 74: admin.AdminHandleAfterSaleReq.action:type_name -> admin.AfterSaleAuditAction
-	15,  // 75: admin.Admin.AdminLogin:input_type -> admin.AdminLoginReq
-	11,  // 76: admin.Admin.GetCurrentAdmin:input_type -> admin.Empty
-	18,  // 77: admin.Admin.UpdatePassword:input_type -> admin.UpdatePasswordReq
-	19,  // 78: admin.Admin.CreateAdmin:input_type -> admin.CreateAdminReq
-	20,  // 79: admin.Admin.UpdateAdmin:input_type -> admin.UpdateAdminReq
-	21,  // 80: admin.Admin.DeleteAdmin:input_type -> admin.DeleteAdminReq
-	22,  // 81: admin.Admin.GetAdmin:input_type -> admin.GetAdminReq
-	24,  // 82: admin.Admin.ListAdmin:input_type -> admin.ListAdminReq
-	11,  // 83: admin.Admin.ListRole:input_type -> admin.Empty
-	29,  // 84: admin.Admin.ListAdminLog:input_type -> admin.ListAdminLogReq
-	31,  // 85: admin.AdminUser.ListUsers:input_type -> admin.AdminListUsersReq
-	34,  // 86: admin.AdminUser.GetUserDetail:input_type -> admin.AdminGetUserDetailReq
-	36,  // 87: admin.AdminUser.BanUser:input_type -> admin.AdminBanUserReq
-	37,  // 88: admin.AdminUser.UnbanUser:input_type -> admin.AdminUnbanUserReq
-	11,  // 89: admin.AdminProduct.CategoryTree:input_type -> admin.Empty
-	40,  // 90: admin.AdminProduct.CreateCategory:input_type -> admin.AdminCreateCategoryReq
-	41,  // 91: admin.AdminProduct.UpdateCategory:input_type -> admin.AdminUpdateCategoryReq
-	12,  // 92: admin.AdminProduct.DeleteCategory:input_type -> admin.IdReq
-	44,  // 93: admin.AdminProduct.CreateProduct:input_type -> admin.AdminCreateProductReq
-	45,  // 94: admin.AdminProduct.UpdateProduct:input_type -> admin.AdminUpdateProductReq
-	12,  // 95: admin.AdminProduct.DeleteProduct:input_type -> admin.IdReq
-	12,  // 96: admin.AdminProduct.GetProduct:input_type -> admin.IdReq
-	48,  // 97: admin.AdminProduct.ListProducts:input_type -> admin.AdminListProductsReq
-	46,  // 98: admin.AdminProduct.UpdateProductStatus:input_type -> admin.AdminUpdateProductStatusReq
-	53,  // 99: admin.AdminProduct.CreateFreightTemplate:input_type -> admin.AdminCreateFreightTemplateReq
-	54,  // 100: admin.AdminProduct.UpdateFreightTemplate:input_type -> admin.AdminUpdateFreightTemplateReq
-	12,  // 101: admin.AdminProduct.DeleteFreightTemplate:input_type -> admin.IdReq
-	13,  // 102: admin.AdminProduct.ListFreightTemplates:input_type -> admin.AdminPageReq
-	12,  // 103: admin.AdminProduct.GetFreightTemplate:input_type -> admin.IdReq
-	57,  // 104: admin.AdminProduct.AdjustStock:input_type -> admin.AdminAdjustStockReq
-	61,  // 105: admin.AdminProduct.ListStockLogs:input_type -> admin.AdminListStockLogsReq
-	63,  // 106: admin.AdminOrder.ListOrders:input_type -> admin.AdminListOrdersReq
-	66,  // 107: admin.AdminOrder.GetOrder:input_type -> admin.AdminGetOrderReq
-	70,  // 108: admin.AdminOrder.ShipOrder:input_type -> admin.AdminShipOrderReq
-	71,  // 109: admin.AdminAfterSale.ListAfterSales:input_type -> admin.AdminListAfterSalesReq
-	74,  // 110: admin.AdminAfterSale.GetAfterSale:input_type -> admin.AdminGetAfterSaleReq
-	76,  // 111: admin.AdminAfterSale.HandleAfterSale:input_type -> admin.AdminHandleAfterSaleReq
-	16,  // 112: admin.Admin.AdminLogin:output_type -> admin.AdminLoginResp
-	17,  // 113: admin.Admin.GetCurrentAdmin:output_type -> admin.GetCurrentAdminResp
-	11,  // 114: admin.Admin.UpdatePassword:output_type -> admin.Empty
-	11,  // 115: admin.Admin.CreateAdmin:output_type -> admin.Empty
-	11,  // 116: admin.Admin.UpdateAdmin:output_type -> admin.Empty
-	11,  // 117: admin.Admin.DeleteAdmin:output_type -> admin.Empty
-	23,  // 118: admin.Admin.GetAdmin:output_type -> admin.GetAdminResp
-	25,  // 119: admin.Admin.ListAdmin:output_type -> admin.ListAdminResp
-	27,  // 120: admin.Admin.ListRole:output_type -> admin.ListRoleResp
-	30,  // 121: admin.Admin.ListAdminLog:output_type -> admin.ListAdminLogResp
-	33,  // 122: admin.AdminUser.ListUsers:output_type -> admin.AdminListUsersResp
-	35,  // 123: admin.AdminUser.GetUserDetail:output_type -> admin.AdminGetUserDetailResp
-	11,  // 124: admin.AdminUser.BanUser:output_type -> admin.Empty
-	11,  // 125: admin.AdminUser.UnbanUser:output_type -> admin.Empty
-	39,  // 126: admin.AdminProduct.CategoryTree:output_type -> admin.AdminCategoryTreeResp
-	11,  // 127: admin.AdminProduct.CreateCategory:output_type -> admin.Empty
-	11,  // 128: admin.AdminProduct.UpdateCategory:output_type -> admin.Empty
-	11,  // 129: admin.AdminProduct.DeleteCategory:output_type -> admin.Empty
-	11,  // 130: admin.AdminProduct.CreateProduct:output_type -> admin.Empty
-	11,  // 131: admin.AdminProduct.UpdateProduct:output_type -> admin.Empty
-	11,  // 132: admin.AdminProduct.DeleteProduct:output_type -> admin.Empty
-	50,  // 133: admin.AdminProduct.GetProduct:output_type -> admin.AdminProductDetailResp
-	49,  // 134: admin.AdminProduct.ListProducts:output_type -> admin.AdminListProductsResp
-	11,  // 135: admin.AdminProduct.UpdateProductStatus:output_type -> admin.Empty
-	11,  // 136: admin.AdminProduct.CreateFreightTemplate:output_type -> admin.Empty
-	11,  // 137: admin.AdminProduct.UpdateFreightTemplate:output_type -> admin.Empty
-	11,  // 138: admin.AdminProduct.DeleteFreightTemplate:output_type -> admin.Empty
-	55,  // 139: admin.AdminProduct.ListFreightTemplates:output_type -> admin.AdminListFreightTemplatesResp
-	52,  // 140: admin.AdminProduct.GetFreightTemplate:output_type -> admin.AdminFreightTemplateInfo
-	59,  // 141: admin.AdminProduct.AdjustStock:output_type -> admin.AdminStockChangeResp
-	62,  // 142: admin.AdminProduct.ListStockLogs:output_type -> admin.AdminListStockLogsResp
-	65,  // 143: admin.AdminOrder.ListOrders:output_type -> admin.AdminListOrdersResp
-	69,  // 144: admin.AdminOrder.GetOrder:output_type -> admin.AdminOrderDetailResp
-	11,  // 145: admin.AdminOrder.ShipOrder:output_type -> admin.Empty
-	73,  // 146: admin.AdminAfterSale.ListAfterSales:output_type -> admin.AdminListAfterSalesResp
-	75,  // 147: admin.AdminAfterSale.GetAfterSale:output_type -> admin.AdminAfterSaleDetailResp
-	11,  // 148: admin.AdminAfterSale.HandleAfterSale:output_type -> admin.Empty
-	112, // [112:149] is the sub-list for method output_type
-	75,  // [75:112] is the sub-list for method input_type
+	16,  // 75: admin.Admin.AdminLogin:input_type -> admin.AdminLoginReq
+	12,  // 76: admin.Admin.GetCurrentAdmin:input_type -> admin.Empty
+	19,  // 77: admin.Admin.UpdatePassword:input_type -> admin.UpdatePasswordReq
+	20,  // 78: admin.Admin.CreateAdmin:input_type -> admin.CreateAdminReq
+	21,  // 79: admin.Admin.UpdateAdmin:input_type -> admin.UpdateAdminReq
+	22,  // 80: admin.Admin.DeleteAdmin:input_type -> admin.DeleteAdminReq
+	23,  // 81: admin.Admin.GetAdmin:input_type -> admin.GetAdminReq
+	25,  // 82: admin.Admin.ListAdmin:input_type -> admin.ListAdminReq
+	12,  // 83: admin.Admin.ListRole:input_type -> admin.Empty
+	30,  // 84: admin.Admin.ListAdminLog:input_type -> admin.ListAdminLogReq
+	32,  // 85: admin.AdminUser.ListUsers:input_type -> admin.AdminListUsersReq
+	35,  // 86: admin.AdminUser.GetUserDetail:input_type -> admin.AdminGetUserDetailReq
+	37,  // 87: admin.AdminUser.BanUser:input_type -> admin.AdminBanUserReq
+	38,  // 88: admin.AdminUser.UnbanUser:input_type -> admin.AdminUnbanUserReq
+	12,  // 89: admin.AdminProduct.CategoryTree:input_type -> admin.Empty
+	41,  // 90: admin.AdminProduct.CreateCategory:input_type -> admin.AdminCreateCategoryReq
+	42,  // 91: admin.AdminProduct.UpdateCategory:input_type -> admin.AdminUpdateCategoryReq
+	13,  // 92: admin.AdminProduct.DeleteCategory:input_type -> admin.IdReq
+	45,  // 93: admin.AdminProduct.CreateProduct:input_type -> admin.AdminCreateProductReq
+	46,  // 94: admin.AdminProduct.UpdateProduct:input_type -> admin.AdminUpdateProductReq
+	13,  // 95: admin.AdminProduct.DeleteProduct:input_type -> admin.IdReq
+	13,  // 96: admin.AdminProduct.GetProduct:input_type -> admin.IdReq
+	49,  // 97: admin.AdminProduct.ListProducts:input_type -> admin.AdminListProductsReq
+	47,  // 98: admin.AdminProduct.UpdateProductStatus:input_type -> admin.AdminUpdateProductStatusReq
+	54,  // 99: admin.AdminProduct.CreateFreightTemplate:input_type -> admin.AdminCreateFreightTemplateReq
+	55,  // 100: admin.AdminProduct.UpdateFreightTemplate:input_type -> admin.AdminUpdateFreightTemplateReq
+	13,  // 101: admin.AdminProduct.DeleteFreightTemplate:input_type -> admin.IdReq
+	14,  // 102: admin.AdminProduct.ListFreightTemplates:input_type -> admin.AdminPageReq
+	13,  // 103: admin.AdminProduct.GetFreightTemplate:input_type -> admin.IdReq
+	58,  // 104: admin.AdminProduct.AdjustStock:input_type -> admin.AdminAdjustStockReq
+	62,  // 105: admin.AdminProduct.ListStockLogs:input_type -> admin.AdminListStockLogsReq
+	64,  // 106: admin.AdminOrder.ListOrders:input_type -> admin.AdminListOrdersReq
+	67,  // 107: admin.AdminOrder.GetOrder:input_type -> admin.AdminGetOrderReq
+	71,  // 108: admin.AdminOrder.ShipOrder:input_type -> admin.AdminShipOrderReq
+	72,  // 109: admin.AdminAfterSale.ListAfterSales:input_type -> admin.AdminListAfterSalesReq
+	75,  // 110: admin.AdminAfterSale.GetAfterSale:input_type -> admin.AdminGetAfterSaleReq
+	77,  // 111: admin.AdminAfterSale.HandleAfterSale:input_type -> admin.AdminHandleAfterSaleReq
+	13,  // 112: admin.AdminCoupon.GetCouponDetail:input_type -> admin.IdReq
+	17,  // 113: admin.Admin.AdminLogin:output_type -> admin.AdminLoginResp
+	18,  // 114: admin.Admin.GetCurrentAdmin:output_type -> admin.GetCurrentAdminResp
+	12,  // 115: admin.Admin.UpdatePassword:output_type -> admin.Empty
+	12,  // 116: admin.Admin.CreateAdmin:output_type -> admin.Empty
+	12,  // 117: admin.Admin.UpdateAdmin:output_type -> admin.Empty
+	12,  // 118: admin.Admin.DeleteAdmin:output_type -> admin.Empty
+	24,  // 119: admin.Admin.GetAdmin:output_type -> admin.GetAdminResp
+	26,  // 120: admin.Admin.ListAdmin:output_type -> admin.ListAdminResp
+	28,  // 121: admin.Admin.ListRole:output_type -> admin.ListRoleResp
+	31,  // 122: admin.Admin.ListAdminLog:output_type -> admin.ListAdminLogResp
+	34,  // 123: admin.AdminUser.ListUsers:output_type -> admin.AdminListUsersResp
+	36,  // 124: admin.AdminUser.GetUserDetail:output_type -> admin.AdminGetUserDetailResp
+	12,  // 125: admin.AdminUser.BanUser:output_type -> admin.Empty
+	12,  // 126: admin.AdminUser.UnbanUser:output_type -> admin.Empty
+	40,  // 127: admin.AdminProduct.CategoryTree:output_type -> admin.AdminCategoryTreeResp
+	12,  // 128: admin.AdminProduct.CreateCategory:output_type -> admin.Empty
+	12,  // 129: admin.AdminProduct.UpdateCategory:output_type -> admin.Empty
+	12,  // 130: admin.AdminProduct.DeleteCategory:output_type -> admin.Empty
+	12,  // 131: admin.AdminProduct.CreateProduct:output_type -> admin.Empty
+	12,  // 132: admin.AdminProduct.UpdateProduct:output_type -> admin.Empty
+	12,  // 133: admin.AdminProduct.DeleteProduct:output_type -> admin.Empty
+	51,  // 134: admin.AdminProduct.GetProduct:output_type -> admin.AdminProductDetailResp
+	50,  // 135: admin.AdminProduct.ListProducts:output_type -> admin.AdminListProductsResp
+	12,  // 136: admin.AdminProduct.UpdateProductStatus:output_type -> admin.Empty
+	12,  // 137: admin.AdminProduct.CreateFreightTemplate:output_type -> admin.Empty
+	12,  // 138: admin.AdminProduct.UpdateFreightTemplate:output_type -> admin.Empty
+	12,  // 139: admin.AdminProduct.DeleteFreightTemplate:output_type -> admin.Empty
+	56,  // 140: admin.AdminProduct.ListFreightTemplates:output_type -> admin.AdminListFreightTemplatesResp
+	53,  // 141: admin.AdminProduct.GetFreightTemplate:output_type -> admin.AdminFreightTemplateInfo
+	60,  // 142: admin.AdminProduct.AdjustStock:output_type -> admin.AdminStockChangeResp
+	63,  // 143: admin.AdminProduct.ListStockLogs:output_type -> admin.AdminListStockLogsResp
+	66,  // 144: admin.AdminOrder.ListOrders:output_type -> admin.AdminListOrdersResp
+	70,  // 145: admin.AdminOrder.GetOrder:output_type -> admin.AdminOrderDetailResp
+	12,  // 146: admin.AdminOrder.ShipOrder:output_type -> admin.Empty
+	74,  // 147: admin.AdminAfterSale.ListAfterSales:output_type -> admin.AdminListAfterSalesResp
+	76,  // 148: admin.AdminAfterSale.GetAfterSale:output_type -> admin.AdminAfterSaleDetailResp
+	12,  // 149: admin.AdminAfterSale.HandleAfterSale:output_type -> admin.Empty
+	11,  // 150: admin.AdminCoupon.GetCouponDetail:output_type -> admin.CouponDetailResp
+	113, // [113:151] is the sub-list for method output_type
+	75,  // [75:113] is the sub-list for method input_type
 	75,  // [75:75] is the sub-list for extension type_name
 	75,  // [75:75] is the sub-list for extension extendee
 	0,   // [0:75] is the sub-list for field type_name
@@ -6522,9 +6702,9 @@ func file_apps_service_admin_rpc_admin_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_apps_service_admin_rpc_admin_proto_rawDesc), len(file_apps_service_admin_rpc_admin_proto_rawDesc)),
 			NumEnums:      11,
-			NumMessages:   66,
+			NumMessages:   67,
 			NumExtensions: 0,
-			NumServices:   5,
+			NumServices:   6,
 		},
 		GoTypes:           file_apps_service_admin_rpc_admin_proto_goTypes,
 		DependencyIndexes: file_apps_service_admin_rpc_admin_proto_depIdxs,

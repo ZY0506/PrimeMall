@@ -38,7 +38,7 @@ type ServiceContext struct {
 	MarketingRpc       marketing.Marketing
 	IDGenerator        *snowflakes.Generator
 	MQClient           *rabbitmq.Client
-	ctx                context.Context
+	Ctx                context.Context
 	cancelFunc         context.CancelFunc
 }
 
@@ -83,7 +83,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		MarketingRpc:       marketing.NewMarketing(zrpc.MustNewClient(c.MarketingRpc)),
 		IDGenerator:        IDGenerator,
 		MQClient:           mqClient,
-		ctx:                ctx,
+		Ctx:                ctx,
 		cancelFunc:         cancelFunc,
 	}
 
@@ -103,12 +103,12 @@ func (s *ServiceContext) Close() {
 
 func (s *ServiceContext) registerConsumers() {
 	// 订单超时
-	if err := s.MQClient.Subscribe(s.ctx, "order.timeout", s.handleOrderTimeout); err != nil {
+	if err := s.MQClient.Subscribe(s.Ctx, "order.timeout", s.handleOrderTimeout); err != nil {
 		logx.Errorf("order.timeout subscribe failed,error:%v", err.Error())
 	}
 
 	// 订单创建（异步下单）
-	if err := s.MQClient.Subscribe(s.ctx, constants.ORDER_CREATE_ROUTING_KEY, s.orderCreateHandler); err != nil {
+	if err := s.MQClient.Subscribe(s.Ctx, constants.ORDER_CREATE_ROUTING_KEY, s.orderCreateHandler); err != nil {
 		logx.Errorf("order.create subscribe failed,error:%v", err.Error())
 	}
 }
@@ -116,7 +116,7 @@ func (s *ServiceContext) registerConsumers() {
 // 订单超时处理器
 func (s *ServiceContext) handleOrderTimeout(msg []byte) error {
 	// 创建一个超时处理上下文
-	ctx, cancel := context.WithTimeout(s.ctx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(s.Ctx, 5*time.Second)
 	defer cancel()
 
 	var data order2.OrderTimeoutMessage

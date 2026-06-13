@@ -46,3 +46,10 @@ OrderRpc:
       - ${ETCD_HOST}:${ETCD_PORT}
     Key: order.rpc
   Timeout: 5000
+
+MarketingRpc:
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}:${ETCD_PORT}
+    Key: marketing.rpc
+  Timeout: 5000

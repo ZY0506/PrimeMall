@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
+	"github.com/ZY0506/PrimeMall/common/constants"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
@@ -17,6 +19,7 @@ type (
 		InsertTx(ctx context.Context, session sqlx.Session, data *OrderInfo) (sql.Result, error)
 		UpdateTx(ctx context.Context, session sqlx.Session, newData *OrderInfo) error
 		FindList(ctx context.Context, userId uint64, status, page, pageSize int64) ([]*OrderInfo, int64, error)
+		FindExpiredOrders(ctx context.Context, limit int64) ([]*OrderInfo, error)
 		withSession(session sqlx.Session) OrderInfoModel
 	}
 
@@ -30,6 +33,15 @@ func NewOrderInfoModel(conn sqlx.SqlConn) OrderInfoModel {
 	return &customOrderInfoModel{
 		defaultOrderInfoModel: newOrderInfoModel(conn),
 	}
+}
+
+// FindExpiredOrders 查询已过期且未取消的待支付订单
+func (m *customOrderInfoModel) FindExpiredOrders(ctx context.Context, limit int64) ([]*OrderInfo, error) {
+	query := fmt.Sprintf("select %s from %s where `status` = ? and `expire_time` is not null and `expire_time` <= now() and `cancel_time` is null order by `expire_time` asc limit ?",
+		orderInfoRows, m.table)
+	var resp []*OrderInfo
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, constants.ORDER_STATUS_PENDING_PAY, limit)
+	return resp, err
 }
 
 func (m *customOrderInfoModel) withSession(session sqlx.Session) OrderInfoModel {

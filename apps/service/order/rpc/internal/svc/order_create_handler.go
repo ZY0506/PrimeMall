@@ -52,7 +52,7 @@ type OrderItemMessage struct {
 
 // orderCreateHandler 处理订单创建消息：锁库存 → 使用优惠券 → 落库 → 后置处理
 func (sc *ServiceContext) orderCreateHandler(msg []byte) error {
-	ctx, cancel := context.WithTimeout(sc.ctx, 10*time.Second)
+	ctx, cancel := context.WithTimeout(sc.Ctx, 10*time.Second)
 	defer cancel()
 	var createMsg OrderCreateMessage
 	if err := json.Unmarshal(msg, &createMsg); err != nil {

@@ -34,6 +34,24 @@ type AdminCouponListResp struct {
 	List  []AdminCouponItem `json:"list"`
 }
 
+type AdminCouponDetailResp struct {
+	Id                uint64 `json:"id"`
+	Name              string `json:"name"`
+	Type              int64  `json:"type"`
+	ThresholdAmount   int64  `json:"threshold_amount"`
+	ReduceAmount      int64  `json:"reduce_amount"`
+	DiscountRate      int64  `json:"discount_rate"`
+	MaxDiscountAmount int64  `json:"max_discount_amount"`
+	TotalQuantity     int64  `json:"total_quantity"`
+	UsedQuantity      int64  `json:"used_quantity"`
+	PerUserLimit      int64  `json:"per_user_limit"`
+	StartTime         int64  `json:"start_time"`
+	EndTime           int64  `json:"end_time"`
+	Status            int64  `json:"status"`
+	Description       string `json:"description"`
+	CreatedAt         int64  `json:"created_at"`
+}
+
 type AdminInfoResp struct {
 	Id       uint64 `json:"id"`
 	Username string `json:"username"`

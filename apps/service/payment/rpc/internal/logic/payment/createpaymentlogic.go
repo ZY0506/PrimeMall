@@ -87,6 +87,12 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.CreatePaymentRequest) (*p
 		return nil, errorx.NewBizError(response.ErrCodeOrderNotFound, "订单不存在")
 	}
 
+	// 校验订单状态：仅待支付订单可以发起支付
+	if int32(orderDetail.Base.Status) != constants.ORDER_STATUS_PENDING_PAY {
+		l.Logger.Errorf("订单状态不允许支付, orderSn=%s, status=%v", in.OrderSn, orderDetail.Base.Status)
+		return nil, errorx.NewBizError(response.ErrCodeOrderExpired, "订单已超时或状态异常，无法支付")
+	}
+
 	// 生成支付流水号
 	paymentSn, err := l.svcCtx.IDGenerator.GenWithPrefix("PAY")
 	if err != nil {

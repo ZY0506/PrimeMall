@@ -3,6 +3,7 @@ package svc
 import (
 	"github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/config"
 	"github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/model"
+	"github.com/ZY0506/PrimeMall/apps/service/marketing/rpc/client/marketing"
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/client/orderadmin"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/client/productadmin"
 	"github.com/ZY0506/PrimeMall/apps/service/user/rpc/client/admin"
@@ -28,6 +29,7 @@ type ServiceContext struct {
 	ProductRpc          productadmin.ProductAdmin
 	UserRpc             admin.Admin
 	OrderRpc            orderadmin.OrderAdmin
+	MarketingRpc        marketing.Marketing
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
@@ -57,5 +59,6 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		ProductRpc:          productadmin.NewProductAdmin(zrpc.MustNewClient(c.ProductRpc)),
 		UserRpc:             admin.NewAdmin(zrpc.MustNewClient(c.UserRpc)),
 		OrderRpc:            orderadmin.NewOrderAdmin(zrpc.MustNewClient(c.OrderRpc)),
+		MarketingRpc:        marketing.NewMarketing(zrpc.MustNewClient(c.MarketingRpc)),
 	}
 }

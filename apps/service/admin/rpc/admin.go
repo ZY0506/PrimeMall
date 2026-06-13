@@ -10,6 +10,7 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/config"
 	adminserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/admin"
 	adminaftersaleserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/adminaftersale"
+	admincouponserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/admincoupo
 	adminorderserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/adminorder"
 	adminproductserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/adminproduct"
 	adminuserserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/adminuser"
@@ -47,6 +48,7 @@ func main() {
 		admin.RegisterAdminProductServer(grpcServer, adminproductserver.NewAdminProductServer(ctx))
 		admin.RegisterAdminOrderServer(grpcServer, adminorderserver.NewAdminOrderServer(ctx))
 		admin.RegisterAdminAfterSaleServer(grpcServer, adminaftersaleserver.NewAdminAfterSaleServer(ctx))
+		admin.RegisterAdminCouponServer(grpcServer, admincouponserver.NewAdminCouponServer(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)

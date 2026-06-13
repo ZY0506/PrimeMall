@@ -70,12 +70,17 @@ func (l *GetUserInfoLogic) GetUserInfo(in *user.EmptyReq) (*user.UserInfoResp, e
 	l.Logger.Infof("获取用户信息成功,userId=%d", userId)
 
 	return &user.UserInfoResp{
-		Id:         res.Id,
-		Phone:      res.Phone,
-		Nickname:   res.Nickname,
-		Avatar:     res.Avatar,
-		Gender:     res.Gender,
-		Birthday:   timestamppb.New(res.Birthday.Time),
+		Id:       res.Id,
+		Phone:    res.Phone,
+		Nickname: res.Nickname,
+		Avatar:   res.Avatar,
+		Gender:   res.Gender,
+		Birthday: func() *timestamppb.Timestamp {
+			if res.Birthday.Valid {
+				return timestamppb.New(res.Birthday.Time)
+			}
+			return nil
+		}(),
 		Status:     user.UserStatus(res.Status),
 		StatusDesc: statusDesc,
 	}, nil

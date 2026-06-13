@@ -4,9 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"time"
+
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/internal/model"
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/types/order"
+	"github.com/ZY0506/PrimeMall/common/constants"
 	"github.com/ZY0506/PrimeMall/common/ctxdata"
 	"github.com/ZY0506/PrimeMall/common/errorx"
 	"github.com/ZY0506/PrimeMall/common/response"
@@ -49,6 +52,16 @@ func (l *OrderDetailLogic) OrderDetail(in *order.OrderDetailRequest) (*order.Ord
 		l.Logger.Errorf("用户ID不匹配,error=%v", err)
 		return nil, errorx.NewBizError(response.ErrCodePermissionDenied, "用户无权限操作")
 	}
+
+	// 懒检查：如果订单是待支付且已过期，自动取消
+	if orderInfo.Status == constants.ORDER_STATUS_PENDING_PAY && orderInfo.ExpireTime.Valid && time.Now().After(orderInfo.ExpireTime.Time) {
+		l.Infof("懒检查：订单已过期，自动取消, order_sn=%s", in.OrderSn)
+		if l.svcCtx.AutoCancelExpiredOrder(l.ctx, in.OrderSn) {
+			// 刷新订单状态
+			orderInfo.Status = constants.ORDER_STATUS_CANCELED
+		}
+	}
+
 	// 查找订单项
 	orderItems, err := l.svcCtx.OrderItemModel.FindListByOrderId(l.ctx, orderInfo.Id)
 	if err != nil {

@@ -188,6 +188,31 @@ service AdminAfterSale {
   rpc HandleAfterSale(AdminHandleAfterSaleReq) returns (Empty);
 }
 
+// ==================== AdminCoupon ====================
+// 优惠券管理（聚合 MarketingRpc）
+service AdminCoupon {
+  rpc GetCouponDetail(IdReq) returns (CouponDetailResp);
+}
+
+message CouponDetailResp {
+  uint64 id = 1;
+  string name = 2;
+  int64 type = 3;                         // 1-满减券 2-折扣券 3-无门槛券
+  int64 threshold_amount = 4;             // 门槛（分）
+  int64 reduce_amount = 5;                // 减免金额（分），满减/无门槛券使用
+  int64 discount_rate = 6;                // 折扣率（万分比），折扣券使用
+  int64 max_discount_amount = 7;          // 折扣封顶（分）
+  int32 total_quantity = 8;               // 总发行量
+  int32 used_quantity = 9;                // 已使用量
+  int32 per_user_limit = 10;              // 每人限领
+  int64 start_time = 11;                  // Unix秒
+  int64 end_time = 12;                    // Unix秒
+  int32 status = 13;                      // 1-启用 2-禁用
+  string description = 14;                // 描述
+  int64 created_at = 15;                  // 创建时间 Unix秒
+}
+
+
 // =============================================
 // 通用结构
 // =============================================

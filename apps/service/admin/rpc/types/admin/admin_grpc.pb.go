@@ -1789,3 +1789,111 @@ var AdminAfterSale_ServiceDesc = grpc.ServiceDesc{
 	Streams:  []grpc.StreamDesc{},
 	Metadata: "apps/service/admin/rpc/admin.proto",
 }
+
+const (
+	AdminCoupon_GetCouponDetail_FullMethodName = "/admin.AdminCoupon/GetCouponDetail"
+)
+
+// AdminCouponClient is the client API for AdminCoupon service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// ==================== AdminCoupon ====================
+// 优惠券管理（聚合 MarketingRpc）
+type AdminCouponClient interface {
+	GetCouponDetail(ctx context.Context, in *IdReq, opts ...grpc.CallOption) (*CouponDetailResp, error)
+}
+
+type adminCouponClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewAdminCouponClient(cc grpc.ClientConnInterface) AdminCouponClient {
+	return &adminCouponClient{cc}
+}
+
+func (c *adminCouponClient) GetCouponDetail(ctx context.Context, in *IdReq, opts ...grpc.CallOption) (*CouponDetailResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CouponDetailResp)
+	err := c.cc.Invoke(ctx, AdminCoupon_GetCouponDetail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// AdminCouponServer is the server API for AdminCoupon service.
+// All implementations must embed UnimplementedAdminCouponServer
+// for forward compatibility.
+//
+// ==================== AdminCoupon ====================
+// 优惠券管理（聚合 MarketingRpc）
+type AdminCouponServer interface {
+	GetCouponDetail(context.Context, *IdReq) (*CouponDetailResp, error)
+	mustEmbedUnimplementedAdminCouponServer()
+}
+
+// UnimplementedAdminCouponServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedAdminCouponServer struct{}
+
+func (UnimplementedAdminCouponServer) GetCouponDetail(context.Context, *IdReq) (*CouponDetailResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCouponDetail not implemented")
+}
+func (UnimplementedAdminCouponServer) mustEmbedUnimplementedAdminCouponServer() {}
+func (UnimplementedAdminCouponServer) testEmbeddedByValue()                     {}
+
+// UnsafeAdminCouponServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to AdminCouponServer will
+// result in compilation errors.
+type UnsafeAdminCouponServer interface {
+	mustEmbedUnimplementedAdminCouponServer()
+}
+
+func RegisterAdminCouponServer(s grpc.ServiceRegistrar, srv AdminCouponServer) {
+	// If the following call pancis, it indicates UnimplementedAdminCouponServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&AdminCoupon_ServiceDesc, srv)
+}
+
+func _AdminCoupon_GetCouponDetail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IdReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCouponServer).GetCouponDetail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminCoupon_GetCouponDetail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCouponServer).GetCouponDetail(ctx, req.(*IdReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// AdminCoupon_ServiceDesc is the grpc.ServiceDesc for AdminCoupon service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var AdminCoupon_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "admin.AdminCoupon",
+	HandlerType: (*AdminCouponServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "GetCouponDetail",
+			Handler:    _AdminCoupon_GetCouponDetail_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "apps/service/admin/rpc/admin.proto",
+}
