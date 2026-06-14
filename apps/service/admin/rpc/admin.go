@@ -10,7 +10,7 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/config"
 	adminserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/admin"
 	adminaftersaleserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/adminaftersale"
-	admincouponserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/admincoupo
+	admincouponserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/admincoupon"
 	adminorderserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/adminorder"
 	adminproductserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/adminproduct"
 	adminuserserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/adminuser"

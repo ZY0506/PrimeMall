@@ -197,6 +197,10 @@ type Coupon struct {
 	ReduceAmount      int64  `json:"reduce_amount"`       // 满减金额（单位：分），仅满减券有效
 	DiscountRate      int64  `json:"discount_rate"`       // 折扣率：80 表示8折，仅折扣券有效
 	MaxDiscountAmount int64  `json:"max_discount_amount"` // 折扣封顶金额（单位：分），仅折扣券有效
+	TotalQuantity     int64  `json:"total_quantity"`      // 总库存
+	UsedQuantity      int64  `json:"used_quantity"`       // 已使用数量
+	PerUserLimit      int64  `json:"per_user_limit"`      // 每人限领数量
+	UserClaimCount    int64  `json:"user_claim_count"`    // 当前用户已领取次数
 	StartTime         int64  `json:"start_time"`          // 生效开始时间（Unix时间戳秒）
 	EndTime           int64  `json:"end_time"`            // 生效结束时间（Unix时间戳秒）
 	Description       string `json:"description"`         // 优惠券描述

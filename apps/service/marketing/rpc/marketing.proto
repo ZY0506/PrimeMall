@@ -103,6 +103,7 @@ message CouponInfo {
   int32 status = 13;
   string description = 14;
   int64 created_at = 15;
+  int32 user_claim_count = 16; // 当前用户已领取次数
 }
 
 message CouponResp {

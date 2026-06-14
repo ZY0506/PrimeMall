@@ -548,6 +548,7 @@ type CouponInfo struct {
 	Status            int32                  `protobuf:"varint,13,opt,name=status,proto3" json:"status,omitempty"`
 	Description       string                 `protobuf:"bytes,14,opt,name=description,proto3" json:"description,omitempty"`
 	CreatedAt         int64                  `protobuf:"varint,15,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UserClaimCount    int32                  `protobuf:"varint,16,opt,name=user_claim_count,json=userClaimCount,proto3" json:"user_claim_count,omitempty"` // 当前用户已领取次数
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -683,6 +684,13 @@ func (x *CouponInfo) GetDescription() string {
 func (x *CouponInfo) GetCreatedAt() int64 {
 	if x != nil {
 		return x.CreatedAt
+	}
+	return 0
+}
+
+func (x *CouponInfo) GetUserClaimCount() int32 {
+	if x != nil {
+		return x.UserClaimCount
 	}
 	return 0
 }
@@ -1628,7 +1636,7 @@ const file_apps_service_marketing_rpc_marketing_proto_rawDesc = "" +
 	" \x01(\x03R\tstartTime\x12\x19\n" +
 	"\bend_time\x18\v \x01(\x03R\aendTime\x12 \n" +
 	"\vdescription\x18\f \x01(\tR\vdescription\x12\x16\n" +
-	"\x06status\x18\r \x01(\x05R\x06status\"\x85\x04\n" +
+	"\x06status\x18\r \x01(\x05R\x06status\"\xaf\x04\n" +
 	"\n" +
 	"CouponInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x12\n" +
@@ -1648,7 +1656,8 @@ const file_apps_service_marketing_rpc_marketing_proto_rawDesc = "" +
 	"\x06status\x18\r \x01(\x05R\x06status\x12 \n" +
 	"\vdescription\x18\x0e \x01(\tR\vdescription\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x0f \x01(\x03R\tcreatedAt\";\n" +
+	"created_at\x18\x0f \x01(\x03R\tcreatedAt\x12(\n" +
+	"\x10user_claim_count\x18\x10 \x01(\x05R\x0euserClaimCount\";\n" +
 	"\n" +
 	"CouponResp\x12-\n" +
 	"\x06coupon\x18\x01 \x01(\v2\x15.marketing.CouponInfoR\x06coupon\"8\n" +
