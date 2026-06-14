@@ -62,6 +62,9 @@ func NewPreOrderLogic(ctx context.Context, svcCtx *svc.ServiceContext) *PreOrder
 // 核心职责：校验参数/用户/商品/地址 → 计算价格/运费 → 生成订单项快照 → 缓存结算上下文
 func (l *PreOrderLogic) PreOrder(in *order.PreOrderRequest) (*order.PreOrderResponse, error) {
 	// ===================== 1. 基础参数校验 =====================
+	if len(in.Items) > 50 {
+		return nil, errorx.NewBizError(response.ErrCodeInvalidParam, "下单商品最多支持50种")
+	}
 	for _, item := range in.Items {
 		if item.SkuId <= 0 || item.Quantity <= 0 {
 			return nil, errorx.NewBizError(response.ErrCodeInvalidParam, "商品参数错误")
@@ -232,22 +235,31 @@ func (l *PreOrderLogic) PreOrder(in *order.PreOrderRequest) (*order.PreOrderResp
 	if in.CouponId > 0 {
 		// 注入用户ID到上下文，用于营销RPC鉴权
 		ctxWithUid, err := ctxdata.PutUserIdToCtx(l.ctx, userId)
-		if err == nil {
-			// 传入 coupon_id（券定义ID），服务端自动查找该用户已领取的实例
-			couponResp, rpcErr := l.svcCtx.MarketingRpc.GetUserCoupon(ctxWithUid, &marketing.GetUserCouponReq{
-				CouponId: in.CouponId,
-			})
-			if rpcErr == nil && couponResp != nil && couponResp.Coupon != nil {
-				couponInfo := couponResp.Coupon
-				// 只计算未使用、未过期的优惠券
-				if couponInfo.Status == 0 {
-					couponDiscount = calcCouponDiscount(couponInfo, totalAmount)
-					userCouponId = couponInfo.Id // 保存 user_coupon_id 供下单使用
-				}
-			} else if rpcErr != nil {
-				l.Logger.Errorf("预结算查询优惠券信息失败，coupon_id=%d，error=%v", in.CouponId, rpcErr)
-			}
+		if err != nil {
+			l.Logger.Errorf("预结算注入用户ID失败，error=%v", err)
+			return nil, errorx.NewBizError(response.ErrCodeInvalidParam, "用户信息异常")
 		}
+		// 传入 coupon_id（券定义ID），服务端自动查找该用户已领取的实例
+		couponResp, rpcErr := l.svcCtx.MarketingRpc.GetUserCoupon(ctxWithUid, &marketing.GetUserCouponReq{
+			CouponId: in.CouponId,
+		})
+		if rpcErr != nil {
+			l.Logger.Errorf("预结算查询优惠券信息失败，coupon_id=%d，error=%v", in.CouponId, rpcErr)
+			return nil, errorx.NewBizError(response.ErrCodeCouponNotFound, "优惠券信息查询失败")
+		}
+		if couponResp == nil || couponResp.Coupon == nil {
+			return nil, errorx.NewBizError(response.ErrCodeCouponNotFound, "优惠券不存在或您未领取该优惠券")
+		}
+		couponInfo := couponResp.Coupon
+		if couponInfo.Status != 0 {
+			msg := "优惠券不可用"
+			if couponInfo.UnavailableReason != "" {
+				msg = "优惠券" + couponInfo.UnavailableReason
+			}
+			return nil, errorx.NewBizError(response.ErrCodeCouponNotAvailable, msg)
+		}
+		couponDiscount = calcCouponDiscount(couponInfo, totalAmount)
+		userCouponId = couponInfo.Id // 保存 user_coupon_id 供下单使用
 	}
 	payAmount := totalAmount + freightAmount - couponDiscount
 	if payAmount < 0 {
