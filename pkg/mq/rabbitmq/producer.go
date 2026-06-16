@@ -43,7 +43,32 @@ func (c *Client) InitDelayQueue(delayQueueName, dlxExchange, dlxRoutingKey strin
 		return fmt.Errorf("声明延迟队列失败: %w", err)
 	}
 
-	// 4. 声明业务超时处理队列（消费者实际监听的队列）
+	// 4. 声明延迟消息发布交换机，绑定延迟队列
+	delayExchange := delayQueueName + "_exchange"
+	err = c.channel.ExchangeDeclare(
+		delayExchange,
+		"direct",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("声明延迟交换机失败: %w", err)
+	}
+	err = c.channel.QueueBind(
+		delayQueueName,
+		delayQueueName,
+		delayExchange,
+		false,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("绑定延迟队列失败: %w", err)
+	}
+
+	// 5. 声明业务超时处理队列（消费者实际监听的队列）
 	_, err = c.channel.QueueDeclare(
 		dlxRoutingKey,
 		true,

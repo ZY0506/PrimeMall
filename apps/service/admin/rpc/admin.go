@@ -10,6 +10,7 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/config"
 	adminserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/admin"
 	adminaftersaleserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/adminaftersale"
+	admincouponserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/admincoupon"
 	adminorderserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/adminorder"
 	adminproductserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/adminproduct"
 	adminuserserver "github.com/ZY0506/PrimeMall/apps/service/admin/rpc/internal/server/adminuser"
@@ -23,7 +24,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var configFile = flag.String("f", "etc/admin.yaml", "the config file")
+var configFile = flag.String("f", "apps/service/admin/rpc/etc/admin.yaml", "the config file")
 
 func main() {
 	flag.Parse()
@@ -47,6 +48,7 @@ func main() {
 		admin.RegisterAdminProductServer(grpcServer, adminproductserver.NewAdminProductServer(ctx))
 		admin.RegisterAdminOrderServer(grpcServer, adminorderserver.NewAdminOrderServer(ctx))
 		admin.RegisterAdminAfterSaleServer(grpcServer, adminaftersaleserver.NewAdminAfterSaleServer(ctx))
+		admin.RegisterAdminCouponServer(grpcServer, admincouponserver.NewAdminCouponServer(ctx))
 
 		if c.Mode == service.DevMode || c.Mode == service.TestMode {
 			reflection.Register(grpcServer)

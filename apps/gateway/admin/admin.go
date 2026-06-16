@@ -34,6 +34,9 @@ func main() {
 	defer server.Stop()
 
 	ctx := svc.NewServiceContext(c)
+	// 注册全局中间件
+	server.Use(ctx.ClientInfoMiddleware.Handle) // 请求头信息处理中间件
+
 	handler.RegisterHandlers(server, ctx)
 
 	fmt.Printf("Starting admin gateway at %s:%d...\n", c.Host, c.Port)

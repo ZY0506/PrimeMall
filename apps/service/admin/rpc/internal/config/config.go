@@ -26,7 +26,8 @@ type Config struct {
 	Snowflake struct {
 		NodeID int64 `json:"NodeID"`
 	}
-	UserRpc    zrpc.RpcClientConf `json:"UserRpc"`
-	ProductRpc zrpc.RpcClientConf `json:"ProductRpc"`
-	OrderRpc   zrpc.RpcClientConf `json:"OrderRpc"`
+	UserRpc      zrpc.RpcClientConf `json:"UserRpc"`
+	ProductRpc   zrpc.RpcClientConf `json:"ProductRpc"`
+	OrderRpc     zrpc.RpcClientConf `json:"OrderRpc"`
+	MarketingRpc zrpc.RpcClientConf `json:"MarketingRpc"`
 }

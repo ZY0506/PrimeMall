@@ -24,6 +24,12 @@ func NewService(rdb *redis.Client) *Service {
 
 // Send 发送验证码（频率校验 + 生成 + 存储 + 发送回调）
 func (s *Service) Send(ctx context.Context, phone, scene string, sendFunc func(phone, code string) error) error {
+	// 校验scene参数合法性
+	validScenes := map[string]bool{"login": true, "register": true, "reset_pwd": true, "update_pwd": true, "update_phone": true}
+	if !validScenes[scene] {
+		return errorx.NewBizError(response.ErrCodeInvalidParam, "scene参数无效，必须是login/register/reset_pwd/update_pwd/update_phone")
+	}
+
 	// 冷却检查、生成、存储、调用 sendFunc（暂时不实现）、失败回滚
 
 	// 频率校验

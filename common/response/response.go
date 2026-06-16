@@ -210,7 +210,7 @@ func LogicError(ctx context.Context, w http.ResponseWriter, err error) {
 	var bizError *BizError
 	if errors.As(err, &bizError) {
 		logx.WithContext(ctx).Errorf("Business Warning: code=%d, msg=%v", bizError.Code, bizError.Msg)
-		httpx.WriteJsonCtx(ctx, w, http.StatusBadRequest, Response{
+		httpx.WriteJsonCtx(ctx, w, http.StatusOK, Response{
 			Code: bizError.Code,
 			Msg:  bizError.Msg,
 			Data: nil,
@@ -218,7 +218,7 @@ func LogicError(ctx context.Context, w http.ResponseWriter, err error) {
 		return
 	} else {
 		if code, msg, ok := errorx.ParseBizError(err); ok {
-			httpx.WriteJsonCtx(ctx, w, http.StatusBadRequest, Response{
+			httpx.WriteJsonCtx(ctx, w, http.StatusOK, Response{
 				Code: int(code),
 				Msg:  msg,
 				Data: nil,

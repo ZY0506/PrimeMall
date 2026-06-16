@@ -697,18 +697,19 @@
 - **请求**：`GET /api/v1/product/list`
 - **请求参数**（Query）：
 
-| 参数          | 类型   | 必填 | 说明                                                    |
-|---------------|--------|------|--------------------------------------------------------|
-| category_id   | uint64 | 否   | 分类 ID                                                 |
-| brand         | string | 否   | 品牌模糊匹配                                              |
-| min_price     | int64  | 否   | 最低价格（分）                                             |
-| max_price     | int64  | 否   | 最高价格（分）                                             |
-| keyword       | string | 否   | 商品名称关键词搜索                                          |
-| is_new        | bool   | 否   | 是否新品（创建时间 < 7 天）                                  |
-| sort_by       | string | 否   | 排序字段：`price`, `sales`, `created_at`                   |
-| sort_type     | string | 否   | 排序方向：`asc`, `desc`                                   |
-| page          | int64  | 否   | 默认 1                                                   |
-| size          | int64  | 否   | 默认 10，最大 100                                         |
+| 参数          | 类型     | 必填 | 说明                                                    |
+|---------------|----------|------|--------------------------------------------------------|
+| category_id   | uint64   | 否   | 分类 ID                                                 |
+| brand         | string   | 否   | 品牌模糊匹配                                              |
+| min_price     | int64    | 否   | 最低价格（分）                                             |
+| max_price     | int64    | 否   | 最高价格（分）                                             |
+| keyword       | string   | 否   | 商品名称关键词搜索                                          |
+| attrs         | []object | 否   | 属性过滤，如 `[{"name":"颜色","values":["黑色"]}]`          |
+| is_new        | bool     | 否   | 是否新品（创建时间 < 7 天）                                  |
+| sort_by       | string   | 否   | 排序字段：`price`, `sales`, `created_at`                   |
+| sort_type     | string   | 否   | 排序方向：`asc`, `desc`                                   |
+| page          | int64    | 否   | 默认 1                                                   |
+| size          | int64    | 否   | 默认 10，最大 100                                         |
 
 **响应体**：
 
@@ -1214,8 +1215,6 @@
 ```json
 {
   "settlement_token": "abc123...",
-  "address_id": 101,
-  "coupon_id": 301,
   "pay_type": 1,
   "remark": "请放快递柜",
   "idempotency_key": "uuid-xxxx",
@@ -1223,15 +1222,15 @@
 }
 ```
 
-| 字段              | 类型     | 必填 | 说明                          |
-|-------------------|----------|------|-------------------------------|
-| settlement_token  | string   | 是   | 结算令牌（预下单返回）            |
-| address_id        | uint64   | 是   | 最终使用的地址 ID               |
-| coupon_id         | uint64   | 否   | 优惠券 ID（可选）               |
-| pay_type          | int64    | 否   | 支付方式：1-微信，2-支付宝        |
-| remark            | string   | 否   | 订单备注（最多 200 字符）         |
-| idempotency_key   | string   | 是   | 幂等键（前端生成）               |
-| cart_sku_ids      | []uint64 | 否   | 购物车商品 SKU ID 列表（直购时用） |
+| 字段              | 类型     | 必填 | 说明                                  |
+|-------------------|----------|------|---------------------------------------|
+| settlement_token  | string   | 是   | 结算令牌（预下单返回，含地址与优惠券信息） |
+| pay_type          | int64    | 否   | 支付方式：1-微信，2-支付宝                |
+| remark            | string   | 否   | 订单备注（最多 200 字符）                 |
+| idempotency_key   | string   | 是   | 幂等键（前端生成）                       |
+| cart_sku_ids      | []uint64 | 否   | 购物车商品 SKU ID 列表，直购时传空或不传   |
+
+**注意**：收货地址和优惠券在预下单（6.1）时选定，结算令牌已包含这些信息，正式提交时无需重复传入。
 
 **响应体**：
 
@@ -1382,13 +1381,15 @@
 
 ```json
 {
-  "cancel_reason": "不想要了"
+  "cancel_reason": "不想要了",
+  "reason_type": 1
 }
 ```
 
-| 字段          | 类型   | 必填 | 说明               |
-|---------------|--------|------|--------------------|
+| 字段          | 类型   | 必填 | 说明                  |
+|---------------|--------|------|-----------------------|
 | cancel_reason | string | 否   | 取消原因（最多 200 字符） |
+| reason_type   | int64  | 否   | 取消原因类型             |
 
 **响应体**：`{"code":0,"msg":"success","data":null}`
 
@@ -1564,6 +1565,7 @@
 |-----------------------|--------|-----------------------------------------------------|
 | after_sale_type       | int64  | 1-仅退款，2-退货退款                                   |
 | status                | int64  | 1-待审核，2-待退货，3-退款中，4-已完成，5-已拒绝            |
+| return_tracking_corp  | string | 退货物流公司（退货退款时）                                |
 | return_tracking_sn    | string | 退货物流单号（退货退款时）                                |
 
 ---
@@ -1869,7 +1871,9 @@
 
 ### 9.1 领券中心列表
 
+- **认证**：需要 JWT（已登录用户可查看 `is_claimed` 状态）
 - **请求**：`GET /api/v1/marketing/coupon/list`
+- **请求头**：`Authorization: Bearer <access_token>`
 
 **请求参数**（Query）：
 
@@ -3263,7 +3267,7 @@
 | 支付     | GET      | `/api/v1/payment/refund/detail/:order_sn`       | 是   | 否   |
 | 支付     | POST     | `/api/v1/payment/callback/alipay`               | 否   | 否*  |
 | 支付     | POST     | `/api/v1/payment/callback/wechat`               | 否   | 否*  |
-| 营销     | GET      | `/api/v1/marketing/coupon/list`                 | 否   | 否   |
+| 营销     | GET      | `/api/v1/marketing/coupon/list`                 | 是   | 否   |
 | 营销     | POST     | `/api/v1/marketing/coupon/claim`                | 是   | 是   |
 | 营销     | GET      | `/api/v1/marketing/coupon/mine`                 | 是   | 否   |
 | 营销     | POST     | `/api/v1/marketing/coupon/available`            | 是   | 否   |

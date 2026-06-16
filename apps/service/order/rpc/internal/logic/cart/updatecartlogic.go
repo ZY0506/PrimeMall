@@ -76,6 +76,8 @@ func (l *UpdateCartLogic) UpdateCart(in *order.UpdateCartRequest) (resp *order.E
 				l.Logger.Errorf("添加商品失败,error=%v", err)
 				return nil, err
 			}
+			l.Logger.Info("添加购物车成功")
+			return &order.Empty{}, nil
 		} else {
 			l.Logger.Errorf("查询商品失败,error=%v", err)
 			return nil, err

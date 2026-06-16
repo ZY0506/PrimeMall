@@ -9,6 +9,7 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/types"
 	"github.com/ZY0506/PrimeMall/common/response"
 	"github.com/zeromicro/go-zero/rest/httpx"
+	"github.com/zeromicro/go-zero/rest/pathvar"
 	"net/http"
 )
 
@@ -17,7 +18,20 @@ func CancelOrderHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.CancelOrderReq
 		if err := httpx.Parse(r, &req); err != nil {
-			response.ClientError(r.Context(), w, response.RequestError, err.Error())
+			response.ClientError(r.Context(), w, response.ErrCodeInvalidParam, err.Error())
+			return
+		}
+
+		// 尝试从 path 参数获取 order_sn（httpx.Parse 在某些版本中可能不会自动映射 path 参数到 path tag）
+		if req.OrderSn == "" {
+			vars := pathvar.Vars(r)
+			if sn, ok := vars["order_sn"]; ok {
+				req.OrderSn = sn
+			}
+		}
+
+		if req.OrderSn == "" {
+			response.ClientError(r.Context(), w, response.ErrCodeInvalidParam, "订单号不能为空")
 			return
 		}
 

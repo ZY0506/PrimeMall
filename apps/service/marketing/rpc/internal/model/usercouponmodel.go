@@ -25,8 +25,9 @@ type (
 		FindByUserID(ctx context.Context, userID uint64, status int64, page, size int64) ([]*UserCoupon, int64, error)
 		FindByUserAndCoupon(ctx context.Context, userID, couponID uint64) (*UserCoupon, error)
 		FindAvailableByUser(ctx context.Context, userID uint64) ([]*UserCoupon, error)
-		UpdateStatus(ctx context.Context, id uint64, status int64, orderSn string, usedTime time.Time) error
+		UpdateStatus(ctx context.Context, id uint64, status int64, orderSn string, usedTime time.Time, expectedStatus int64) (int64, error)
 		CountByUserAndCoupon(ctx context.Context, userID, couponID uint64) (int64, error)
+		CountByUserAndCouponIDs(ctx context.Context, userID uint64, couponIDs []uint64) (map[uint64]int64, error)
 	}
 )
 
@@ -89,10 +90,14 @@ func (m *customUserCouponModel) FindAvailableByUser(ctx context.Context, userID 
 	return items, nil
 }
 
-func (m *customUserCouponModel) UpdateStatus(ctx context.Context, id uint64, status int64, orderSn string, usedTime time.Time) error {
-	query := fmt.Sprintf("UPDATE %s SET status = ?, order_sn = ?, used_time = ? WHERE id = ? AND status = 0", m.table)
-	_, err := m.conn.ExecCtx(ctx, query, status, orderSn, usedTime, id)
-	return err
+func (m *customUserCouponModel) UpdateStatus(ctx context.Context, id uint64, status int64, orderSn string, usedTime time.Time, expectedStatus int64) (int64, error) {
+	query := fmt.Sprintf("UPDATE %s SET status = ?, order_sn = ?, used_time = ? WHERE id = ? AND status = ?", m.table)
+	result, err := m.conn.ExecCtx(ctx, query, status, orderSn, usedTime, id, expectedStatus)
+	if err != nil {
+		return 0, err
+	}
+	affected, _ := result.RowsAffected()
+	return affected, nil
 }
 
 func (m *customUserCouponModel) CountByUserAndCoupon(ctx context.Context, userID, couponID uint64) (int64, error) {
@@ -100,4 +105,31 @@ func (m *customUserCouponModel) CountByUserAndCoupon(ctx context.Context, userID
 	var count int64
 	err := m.conn.QueryRowCtx(ctx, &count, query, userID, couponID)
 	return count, err
+}
+
+func (m *customUserCouponModel) CountByUserAndCouponIDs(ctx context.Context, userID uint64, couponIDs []uint64) (map[uint64]int64, error) {
+	countMap := make(map[uint64]int64, len(couponIDs))
+	if len(couponIDs) == 0 {
+		return countMap, nil
+	}
+	placeholders := make([]string, len(couponIDs))
+	args := make([]interface{}, 0, len(couponIDs)+1)
+	args = append(args, userID)
+	for i, id := range couponIDs {
+		placeholders[i] = "?"
+		args = append(args, id)
+	}
+	query := fmt.Sprintf("SELECT coupon_id, COUNT(*) as cnt FROM %s WHERE user_id = ? AND coupon_id IN (%s) GROUP BY coupon_id", m.table, strings.Join(placeholders, ","))
+	type countResult struct {
+		CouponId uint64 `db:"coupon_id"`
+		Cnt      int64  `db:"cnt"`
+	}
+	var results []countResult
+	if err := m.conn.QueryRowsCtx(ctx, &results, query, args...); err != nil {
+		return nil, err
+	}
+	for _, r := range results {
+		countMap[r.CouponId] = r.Cnt
+	}
+	return countMap, nil
 }

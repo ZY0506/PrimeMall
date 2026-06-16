@@ -9,6 +9,7 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/client/cart"
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/client/order"
 	"github.com/ZY0506/PrimeMall/apps/service/payment/rpc/client/payment"
+	"github.com/ZY0506/PrimeMall/apps/service/payment/rpc/client/paymentinternal"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/client/product"
 	"github.com/ZY0506/PrimeMall/apps/service/search/rpc/client/search"
 	"github.com/ZY0506/PrimeMall/apps/service/user/rpc/client/user"
@@ -31,6 +32,7 @@ type ServiceContext struct {
 	OrderRpc                 order.Order
 	CartRpc                  cart.Cart
 	PaymentRpc               payment.Payment
+	PaymentInternalRpc       paymentinternal.PaymentInternal
 	MarketingRpc             marketing.Marketing
 	SearchRpc                search.Search
 	CorsMiddleware           *middleware.CorsMiddleware
@@ -76,6 +78,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		OrderRpc:                 order.NewOrder(zrpc.MustNewClient(c.OrderRpc)),
 		CartRpc:                  cart.NewCart(zrpc.MustNewClient(c.OrderRpc)),
 		PaymentRpc:               payment.NewPayment(zrpc.MustNewClient(c.PaymentRpc)),
+		PaymentInternalRpc:       paymentinternal.NewPaymentInternal(zrpc.MustNewClient(c.PaymentInternalRpc)),
 		MarketingRpc:             marketing.NewMarketing(zrpc.MustNewClient(c.MarketingRpc)),
 		SearchRpc:                search.NewSearch(zrpc.MustNewClient(c.SearchRpc)),
 		Client:                   client,

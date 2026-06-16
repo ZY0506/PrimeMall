@@ -26,7 +26,7 @@ func NewGetCouponLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetCoup
 func (l *GetCouponLogic) GetCoupon(in *marketing.IdReq) (*marketing.CouponResp, error) {
 	coupon, err := l.svcCtx.CouponModel.FindOne(l.ctx, in.Id)
 	if err != nil {
-		l.Logger.Errorf("GetCoupon FindOne error: %v", err)
+		l.Logger.Errorf("获取优惠券详情：查询失败，错误：%v", err)
 		return nil, err
 	}
 	return &marketing.CouponResp{

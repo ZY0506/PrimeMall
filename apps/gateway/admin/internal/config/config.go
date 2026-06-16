@@ -11,8 +11,9 @@ import (
 type Config struct {
 	rest.RestConf
 	JwtAuth struct {
-		AccessSecret string
-		AccessExpire int64
+		AccessSecret  string
+		AccessExpire  int64
+		RefreshSecret string
 	}
 	AdminRpc zrpc.RpcClientConf
 }

@@ -1,6 +1,7 @@
 Name: shop-api
 Host: 0.0.0.0
 Port: 9091
+Timeout: 15000
 
 UserRpc:
   Etcd:
@@ -21,6 +22,12 @@ OrderRpc:
     Key: order.rpc
 
 PaymentRpc:
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}:${ETCD_PORT}
+    Key: payment.rpc
+
+PaymentInternalRpc:
   Etcd:
     Hosts:
       - ${ETCD_HOST}:${ETCD_PORT}
@@ -49,7 +56,7 @@ RDB:
   Addr: ${REDIS_HOST}:${REDIS_PORT}
   RedisPassword: "${REDIS_PASSWORD}"
   RedisDB: 0
-  RedisPoolSize: 200
+  RedisPoolSize: 100
   RedisMinIdleConns: 20
 
 OssConfig:
@@ -70,9 +77,9 @@ OssConfig:
     - webp
 
 CasbinConf:
-  ModelPath: etc/rbac_model.conf
-  PolicyPath: etc/policy.csv
+  ModelPath: apps/gateway/shop/etc/rbac_model.conf
+  PolicyPath: apps/gateway/shop/etc/policy.csv
 
 RateLimit:
-  PerIPSpeed: 500
-  PerIPBurst: 1000
+  PerIPSpeed: 100000
+  PerIPBurst: 200000

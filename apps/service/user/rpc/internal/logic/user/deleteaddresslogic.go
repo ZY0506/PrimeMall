@@ -53,6 +53,12 @@ func (l *DeleteAddressLogic) DeleteAddress(in *user.IdPathReq) (*user.EmptyResp,
 		return nil, errorx.NewBizError(response.ErrCodePermissionDenied, "用户无权限删除该地址")
 	}
 
+	// 检查是否为默认地址
+	if addr.IsDefault == 1 {
+		l.Logger.Infof("默认地址不可直接删除,addressId=%d", in.Id)
+		return nil, errorx.NewBizError(response.ErrCodeDefaultAddressDelete, "默认地址不可直接删除，请先设置其他默认地址")
+	}
+
 	// 删除
 	err = l.svcCtx.AddressModel.Delete(l.ctx, in.Id)
 	if err != nil {

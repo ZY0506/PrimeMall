@@ -1,0 +1,4948 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "PrimeMall API Gateway",
+    "description": "统一网关入口，负责用户、商品、订单、支付、营销等所有业务模块的请求转发与鉴权",
+    "version": "v1.0"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/address/": {
+      "post": {
+        "summary": "添加收货地址（幂等）",
+        "operationId": "addAddress",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 地址添加请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AddAddressReq"
+            }
+          }
+        ],
+        "tags": [
+          "user/address"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "更新收货地址",
+        "operationId": "updateAddress",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 地址更新请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateAddressReq"
+            }
+          }
+        ],
+        "tags": [
+          "user/address"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/address/default/{id}": {
+      "patch": {
+        "summary": "设置默认收货地址",
+        "operationId": "setDefaultAddress",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "description": " 通用路径参数：ID",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IdPathReq"
+            }
+          }
+        ],
+        "tags": [
+          "user/address"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/address/list": {
+      "get": {
+        "summary": "获取地址列表（分页）",
+        "operationId": "listAddress",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AddressListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "description": " 页码，默认1",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "size",
+            "description": " 每页数量，默认10",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "10"
+          }
+        ],
+        "tags": [
+          "user/address"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/address/{id}": {
+      "delete": {
+        "summary": "删除收货地址",
+        "operationId": "deleteAddress",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "description": " 通用路径参数：ID",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IdPathReq"
+            }
+          }
+        ],
+        "tags": [
+          "user/address"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/marketing/coupon/available": {
+      "post": {
+        "summary": "结算页：根据订单金额获取可用优惠券",
+        "operationId": "availableCoupons",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AvailableCouponsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AvailableCouponsReq"
+            }
+          }
+        ],
+        "tags": [
+          "marketing/coupon"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/marketing/coupon/claim": {
+      "post": {
+        "summary": "用户领取优惠券（幂等）",
+        "operationId": "claimCoupon",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ClaimCouponResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ClaimCouponReq"
+            }
+          }
+        ],
+        "tags": [
+          "marketing/coupon"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/marketing/coupon/list": {
+      "get": {
+        "summary": "领券中心：获取全场可领取优惠券",
+        "operationId": "couponList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/CouponListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "description": " 页码，默认1",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "size",
+            "description": " 每页数量，默认10",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "10"
+          }
+        ],
+        "tags": [
+          "marketing/coupon"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/marketing/coupon/mine": {
+      "get": {
+        "summary": "我的优惠券：查看个人卡券包",
+        "operationId": "myCoupons",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/MyCouponListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "status",
+            "description": " 0-未使用，1-已使用，2-已过期",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "0"
+          },
+          {
+            "name": "page",
+            "description": " 页码，默认1",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "size",
+            "description": " 每页数量，默认10",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "10"
+          }
+        ],
+        "tags": [
+          "marketing/coupon"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/order/aftersale/apply": {
+      "post": {
+        "summary": "申请售后（幂等）",
+        "operationId": "applyAfterSale",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AfterSaleResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 售后申请",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AfterSaleReq"
+            }
+          }
+        ],
+        "tags": [
+          "order/aftersale"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/order/aftersale/cancel/{id}": {
+      "post": {
+        "summary": "取消售后申请（仅待审核状态可取消）",
+        "operationId": "cancelAfterSale",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "description": " 通用路径参数：ID",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IdPathReq"
+            }
+          }
+        ],
+        "tags": [
+          "order/aftersale"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/order/aftersale/detail/{id}": {
+      "get": {
+        "summary": "查询售后详情",
+        "operationId": "afterSaleDetail",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AfterSaleDetailResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "order/aftersale"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/order/aftersale/list": {
+      "get": {
+        "summary": "获取我的售后单列表（分页）",
+        "operationId": "afterSaleList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AfterSaleListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "status",
+            "description": " 售后单状态: 1待审核 2待退货 3退款中 4已完成 5已拒绝，不传则查全部",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "page",
+            "description": " 页码，默认1",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "size",
+            "description": " 每页数量，默认10",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "10"
+          }
+        ],
+        "tags": [
+          "order/aftersale"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/order/cancel/{order_sn}": {
+      "post": {
+        "summary": "取消订单（仅待支付状态可取消）",
+        "operationId": "cancelOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "order_sn",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CancelOrderReq"
+            }
+          }
+        ],
+        "tags": [
+          "order/core"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/order/cart/clear": {
+      "delete": {
+        "summary": "清空购物车",
+        "operationId": "clearCart",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "tags": [
+          "order/cart"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/order/cart/list": {
+      "get": {
+        "summary": "获取购物车列表",
+        "operationId": "cartList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/CartListResp"
+            }
+          }
+        },
+        "tags": [
+          "order/cart"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/order/cart/remove": {
+      "delete": {
+        "summary": "批量删除购物车商品",
+        "operationId": "removeCart",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 批量SKU ID请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SkuIdsReq"
+            }
+          }
+        ],
+        "tags": [
+          "order/cart"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/order/cart/select": {
+      "post": {
+        "summary": "修改购物车商品的勾选状态",
+        "operationId": "selectCart",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SelectCartReq"
+            }
+          }
+        ],
+        "tags": [
+          "order/cart"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/order/cart/update": {
+      "post": {
+        "summary": "添加/更新购物车商品（数量为0则删除，幂等）",
+        "operationId": "updateCart",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateCartReq"
+            }
+          }
+        ],
+        "tags": [
+          "order/cart"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/order/confirm/{order_sn}": {
+      "post": {
+        "summary": "确认收货",
+        "operationId": "confirmReceipt",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "order_sn",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "description": " 通用路径参数：订单号",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OrderSnPathReq"
+            }
+          }
+        ],
+        "tags": [
+          "order/core"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/order/create": {
+      "post": {
+        "summary": "正式提交订单（幂等）",
+        "operationId": "createOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/CreateOrderResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreateOrderReq"
+            }
+          }
+        ],
+        "tags": [
+          "order/core"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/order/delivery/track/{order_sn}": {
+      "get": {
+        "summary": "查询物流轨迹",
+        "operationId": "track",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/DeliveryTrackResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "order_sn",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "order/delivery"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/order/detail/{order_sn}": {
+      "get": {
+        "summary": "订单详情",
+        "operationId": "orderDetail",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/OrderDetailResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "order_sn",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "order/core"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/order/list": {
+      "get": {
+        "summary": "订单列表",
+        "operationId": "orderList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/OrderListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "status",
+            "description": " 0:全部 10,20,30,40,50,60",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "0"
+          },
+          {
+            "name": "page",
+            "description": " 页码，默认1",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "size",
+            "description": " 每页数量，默认10",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "10"
+          }
+        ],
+        "tags": [
+          "order/core"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/order/pre-order": {
+      "post": {
+        "summary": "预下单（确认订单页，生成结算令牌）",
+        "operationId": "preOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/PreOrderResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PreOrderReq"
+            }
+          }
+        ],
+        "tags": [
+          "order/core"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/payment/callback/alipay": {
+      "post": {
+        "summary": "支付宝异步回调（服务端自行幂等）",
+        "operationId": "alipayCallback",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/CallbackResp"
+            }
+          }
+        },
+        "tags": [
+          "payment/callback"
+        ]
+      }
+    },
+    "/api/v1/payment/callback/wechat": {
+      "post": {
+        "summary": "微信支付异步回调（服务端自行幂等）",
+        "operationId": "wechatCallback",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/CallbackResp"
+            }
+          }
+        },
+        "tags": [
+          "payment/callback"
+        ]
+      }
+    },
+    "/api/v1/payment/close/{payment_sn}": {
+      "post": {
+        "summary": "关闭支付单（未支付时）",
+        "operationId": "closePayment",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "payment_sn",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "description": " 通用路径参数：支付流水号",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/PaymentSnPathReq"
+            }
+          }
+        ],
+        "tags": [
+          "payment/core"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/payment/create": {
+      "post": {
+        "summary": "创建支付单（获取第三方支付拉起参数，幂等）",
+        "operationId": "createPayment",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/CreatePaymentResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 发起支付请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CreatePaymentReq"
+            }
+          }
+        ],
+        "tags": [
+          "payment/core"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/payment/refund/apply": {
+      "post": {
+        "summary": "申请退款（由订单服务售后调用，幂等）",
+        "operationId": "refundApply",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RefundApplyResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 退款申请（由订单服务售后调用）",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RefundApplyReq"
+            }
+          }
+        ],
+        "tags": [
+          "payment/core"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/payment/refund/detail/{order_sn}": {
+      "get": {
+        "summary": "查询退款详情",
+        "operationId": "refundDetail",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/RefundDetailResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "order_sn",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "payment/core"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/payment/status/order/{order_sn}": {
+      "get": {
+        "summary": "根据订单号查询支付状态",
+        "operationId": "statusByOrderSn",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/PaymentStatusResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "order_sn",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "payment/core"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/payment/status/payment/{payment_sn}": {
+      "get": {
+        "summary": "根据支付流水号查询支付状态",
+        "operationId": "statusByPaymentSn",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/PaymentStatusResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "payment_sn",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "payment/core"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/product/category/tree": {
+      "get": {
+        "summary": "获取商品全部分类树",
+        "operationId": "categoryTree",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/CategoryTreeResp"
+            }
+          }
+        },
+        "tags": [
+          "product/category"
+        ]
+      }
+    },
+    "/api/v1/product/category/{id}": {
+      "get": {
+        "summary": "获取单个分类详情",
+        "operationId": "categoryInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/CategoryResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "product/category"
+        ]
+      }
+    },
+    "/api/v1/product/detail/{id}": {
+      "get": {
+        "summary": "商品详情",
+        "operationId": "productDetail",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ProductDetailResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "product/list"
+        ]
+      }
+    },
+    "/api/v1/product/list": {
+      "get": {
+        "summary": "商品列表与筛选",
+        "operationId": "list",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ProductListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "category_id",
+            "description": " 分类ID",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "brand",
+            "description": " 品牌名称（模糊匹配）",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "min_price",
+            "description": " 最低价格（单位：分）",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "max_price",
+            "description": " 最高价格（单位：分）",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "keyword",
+            "description": " 简单关键词搜索（大数据量建议使用独立搜索服务）",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "attrs",
+            "description": " 属性过滤",
+            "in": "query",
+            "required": false,
+            "type": "invalid",
+            "format": "UNKNOWN"
+          },
+          {
+            "name": "is_new",
+            "description": " 是否新品（按创建时间\u003c7天）",
+            "in": "query",
+            "required": false,
+            "type": "boolean",
+            "format": "boolean"
+          },
+          {
+            "name": "sort_by",
+            "description": " 排序字段",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "sort_type",
+            "description": " 排序方向",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "description": " 页码，默认1",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "size",
+            "description": " 每页数量，默认10",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "10"
+          }
+        ],
+        "tags": [
+          "product/list"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ]
+      }
+    },
+    "/api/v1/product/recommend": {
+      "get": {
+        "summary": "个性化推荐",
+        "operationId": "recommend",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/ProductListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "scene",
+            "description": " 场景：home(首页), cart(购物车), detail(详情页)",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "description": " 返回数量",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "10"
+          },
+          {
+            "name": "current_id",
+            "description": " 当前商品ID（详情页推荐时使用）",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "product/list"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ]
+      }
+    },
+    "/api/v1/product/skus/batch": {
+      "post": {
+        "summary": "批量获取SKU信息（价格、库存）",
+        "operationId": "batchSku",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/BatchSkuResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 批量SKU ID请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SkuIdsReq"
+            }
+          }
+        ],
+        "tags": [
+          "product/list"
+        ]
+      }
+    },
+    "/api/v1/search/history": {
+      "get": {
+        "summary": "查询搜索历史",
+        "operationId": "getSearchHistory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/SearchHistoryResp"
+            }
+          }
+        },
+        "tags": [
+          "shop-api"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "清除搜索历史",
+        "operationId": "clearSearchHistory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "tags": [
+          "shop-api"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/search/hot-keywords": {
+      "get": {
+        "summary": "热搜词列表",
+        "operationId": "getHotKeywords",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/HotKeywordsResp"
+            }
+          }
+        },
+        "tags": [
+          "shop-api"
+        ]
+      }
+    },
+    "/api/v1/search/products": {
+      "get": {
+        "summary": "ES商品搜索",
+        "operationId": "searchProducts",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/SearchProductsResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "keyword",
+            "description": " 搜索关键词",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "category_id",
+            "description": " 分类ID",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "brand",
+            "description": " 品牌",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "min_price",
+            "description": " 最低价格（分）",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "max_price",
+            "description": " 最高价格（分）",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "sort_by",
+            "description": " 排序字段",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "sort_type",
+            "description": " 排序方向",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "10"
+          }
+        ],
+        "tags": [
+          "shop-api"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ]
+      }
+    },
+    "/api/v1/search/suggest": {
+      "get": {
+        "summary": "ES搜索建议",
+        "operationId": "searchSuggest",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/SearchSuggestResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "5"
+          }
+        ],
+        "tags": [
+          "shop-api"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ]
+      }
+    },
+    "/api/v1/user/account": {
+      "delete": {
+        "summary": "注销账号",
+        "operationId": "deleteAccount",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/DeleteAccountReq"
+            }
+          }
+        ],
+        "tags": [
+          "user/profile"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/user/captcha": {
+      "post": {
+        "summary": "获取短信验证码（幂等）",
+        "operationId": "captcha",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 基础鉴权请求",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/CaptchaReq"
+            }
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/user/info": {
+      "get": {
+        "summary": "获取个人资料",
+        "operationId": "detail",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UserInfoResp"
+            }
+          }
+        },
+        "tags": [
+          "user/profile"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "更新个人资料",
+        "operationId": "updateInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateUserInfoReq"
+            }
+          }
+        ],
+        "tags": [
+          "user/profile"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/user/login": {
+      "post": {
+        "summary": "手机号密码登录",
+        "operationId": "login",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/LoginResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LoginReq"
+            }
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/user/login/mobile": {
+      "post": {
+        "summary": "手机号验证码登录",
+        "operationId": "mobileLogin",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/LoginResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/MobileLoginReq"
+            }
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/user/logout": {
+      "post": {
+        "summary": "退出登录",
+        "operationId": "logout",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RefreshTokenReq"
+            }
+          }
+        ],
+        "tags": [
+          "user/profile"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/user/password/reset": {
+      "post": {
+        "summary": "忘记密码重置（幂等）",
+        "operationId": "resetPassword",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ResetPasswordReq"
+            }
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/user/password/update": {
+      "put": {
+        "summary": "修改登录密码",
+        "operationId": "updatePassword",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdatePasswordReq"
+            }
+          }
+        ],
+        "tags": [
+          "user/profile"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/user/phone": {
+      "put": {
+        "summary": "修改手机号（幂等）",
+        "operationId": "updatePhone",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdatePhoneReq"
+            }
+          }
+        ],
+        "tags": [
+          "user/profile"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/user/register": {
+      "post": {
+        "summary": "用户注册（幂等）",
+        "operationId": "register",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/LoginResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegisterReq"
+            }
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/user/token/refresh": {
+      "post": {
+        "summary": "token刷新",
+        "operationId": "refreshToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/LoginResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RefreshTokenReq"
+            }
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/user/upload/avatar/callback": {
+      "post": {
+        "summary": "OSS上传回调（服务端自行幂等）",
+        "operationId": "ossCallback",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " OSS 回调请求（JSON 格式）",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OssCallbackReq"
+            }
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/user/upload/avatar/token": {
+      "post": {
+        "summary": "获取OSS上传凭证",
+        "operationId": "getOssToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/OssTokenResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " 获取上传凭证",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/OssTokenReq"
+            }
+          }
+        ],
+        "tags": [
+          "user/profile"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/internal/v1/coupon/unlock": {
+      "post": {
+        "summary": "订单服务：解锁优惠券（订单取消时回滚）",
+        "operationId": "unlockCoupon",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UnlockCouponResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UnlockCouponReq"
+            }
+          }
+        ],
+        "tags": [
+          "marketing/internal_api"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/internal/v1/coupon/use": {
+      "post": {
+        "summary": "订单服务：使用优惠券（锁定并扣减）",
+        "operationId": "useCoupon",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/UseCouponResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "description": " ---------- 内部接口（供订单服务调用） ----------, 注意：以下接口仅供内部服务调用，普通用户不应直接访问。, 后续将通过 IP 白名单、独立 JWT 或 mTLS 等方式限制访问来源。",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UseCouponReq"
+            }
+          }
+        ],
+        "tags": [
+          "marketing/internal_api"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "AddAddressReq": {
+      "type": "object",
+      "properties": {
+        "receiver_name": {
+          "type": "string",
+          "description": " 收货人姓名"
+        },
+        "receiver_phone": {
+          "type": "string",
+          "description": " 收货人电话"
+        },
+        "is_default": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 是否默认地址：0-否，1-是"
+        },
+        "tag": {
+          "type": "string",
+          "description": " 地址标签：HOME-家，OFFICE-公司，SCHOOL-学校"
+        },
+        "detail": {
+          "$ref": "#/definitions/AddressDetail",
+          "description": " 地址详细信息（内部字段已校验）"
+        }
+      },
+      "title": "AddAddressReq",
+      "required": [
+        "receiver_name",
+        "receiver_phone",
+        "is_default",
+        "detail"
+      ]
+    },
+    "AddressDetail": {
+      "type": "object",
+      "properties": {
+        "province": {
+          "type": "string",
+          "description": " 省份"
+        },
+        "city": {
+          "type": "string",
+          "description": " 城市"
+        },
+        "district": {
+          "type": "string",
+          "description": " 区/县"
+        },
+        "detail_address": {
+          "type": "string",
+          "description": " 详细地址"
+        },
+        "postal_code": {
+          "type": "string",
+          "description": " 邮政编码"
+        }
+      },
+      "title": "AddressDetail",
+      "required": [
+        "province",
+        "city",
+        "district",
+        "detail_address"
+      ]
+    },
+    "AddressItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 地址ID"
+        },
+        "receiver_name": {
+          "type": "string",
+          "description": " 收货人姓名"
+        },
+        "receiver_phone": {
+          "type": "string",
+          "description": " 收货人电话"
+        },
+        "is_default": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 是否默认地址：0-否，1-是"
+        },
+        "tag": {
+          "type": "string",
+          "description": " 地址标签：HOME-家，OFFICE-公司，SCHOOL-学校"
+        },
+        "detail": {
+          "$ref": "#/definitions/AddressDetail",
+          "description": " 地址详细信息（内部字段已校验）"
+        }
+      },
+      "title": "AddressItem",
+      "required": [
+        "id"
+      ]
+    },
+    "AddressListReq": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1",
+          "description": " 页码，默认1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10",
+          "description": " 每页数量，默认10"
+        }
+      },
+      "title": "AddressListReq"
+    },
+    "AddressListResp": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 地址总数"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AddressItem"
+          },
+          "description": " 地址列表"
+        }
+      },
+      "title": "AddressListResp",
+      "required": [
+        "total",
+        "list"
+      ]
+    },
+    "AddressSnapshot": {
+      "type": "object",
+      "properties": {
+        "receiver_name": {
+          "type": "string",
+          "description": " 收货人姓名"
+        },
+        "receiver_phone": {
+          "type": "string",
+          "description": " 收货人电话"
+        },
+        "detail": {
+          "$ref": "#/definitions/AddressDetail",
+          "description": " 地址详细信息"
+        }
+      },
+      "title": "AddressSnapshot",
+      "required": [
+        "receiver_name",
+        "receiver_phone",
+        "detail"
+      ]
+    },
+    "AfterSaleDetailResp": {
+      "type": "object",
+      "properties": {
+        "after_sale_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "order_sn": {
+          "type": "string"
+        },
+        "after_sale_type": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status_desc": {
+          "type": "string"
+        },
+        "apply_amount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "audit_remark": {
+          "type": "string"
+        },
+        "create_time": {
+          "type": "string"
+        },
+        "audit_time": {
+          "type": "string"
+        },
+        "return_tracking_sn": {
+          "type": "string"
+        },
+        "return_tracking_corp": {
+          "type": "string"
+        },
+        "receive_time": {
+          "type": "string"
+        },
+        "refund_amount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "refund_time": {
+          "type": "string"
+        },
+        "order_item": {
+          "$ref": "#/definitions/OrderItem"
+        }
+      },
+      "title": "AfterSaleDetailResp",
+      "required": [
+        "after_sale_id",
+        "order_sn",
+        "after_sale_type",
+        "status",
+        "status_desc",
+        "apply_amount",
+        "reason",
+        "images",
+        "audit_remark",
+        "create_time",
+        "audit_time",
+        "return_tracking_sn",
+        "return_tracking_corp",
+        "receive_time",
+        "refund_amount",
+        "refund_time",
+        "order_item"
+      ]
+    },
+    "AfterSaleListItem": {
+      "type": "object",
+      "properties": {
+        "after_sale_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 售后单ID"
+        },
+        "order_sn": {
+          "type": "string",
+          "description": " 订单号"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 1:仅退款 2:退货退款"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 1:待审核 2:待退货 3:退款中 4:已完成 5:已拒绝"
+        },
+        "status_desc": {
+          "type": "string",
+          "description": " 状态描述"
+        },
+        "refund_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 退款金额（分）"
+        },
+        "product_name": {
+          "type": "string",
+          "description": " 商品名称"
+        },
+        "sku_name": {
+          "type": "string",
+          "description": " 规格名称"
+        },
+        "pic": {
+          "type": "string",
+          "description": " 商品图片"
+        }
+      },
+      "title": "AfterSaleListItem",
+      "required": [
+        "after_sale_id",
+        "order_sn",
+        "type",
+        "status",
+        "status_desc",
+        "refund_amount",
+        "product_name",
+        "sku_name",
+        "pic"
+      ]
+    },
+    "AfterSaleListReq": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 售后单状态: 1待审核 2待退货 3退款中 4已完成 5已拒绝，不传则查全部"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1",
+          "description": " 页码，默认1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10",
+          "description": " 每页数量，默认10"
+        }
+      },
+      "title": "AfterSaleListReq"
+    },
+    "AfterSaleListResp": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 总数量"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AfterSaleListItem"
+          },
+          "description": " 售后单列表"
+        }
+      },
+      "title": "AfterSaleListResp",
+      "required": [
+        "total",
+        "list"
+      ]
+    },
+    "AfterSaleReq": {
+      "type": "object",
+      "properties": {
+        "order_sn": {
+          "type": "string",
+          "description": " 订单号"
+        },
+        "sku_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " SKU ID"
+        },
+        "quantity": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 退款数量（支持部分退款）"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 1:仅退款 2:退货退款"
+        },
+        "reason": {
+          "type": "string",
+          "description": " 售后原因"
+        },
+        "apply_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 申请退款金额（单位：分）"
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": " 凭证图片URL列表，最多9张"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "description": " 幂等键"
+        }
+      },
+      "title": "AfterSaleReq",
+      "required": [
+        "order_sn",
+        "sku_id",
+        "quantity",
+        "type",
+        "reason",
+        "apply_amount",
+        "idempotency_key"
+      ]
+    },
+    "AfterSaleResp": {
+      "type": "object",
+      "properties": {
+        "msg": {
+          "type": "string"
+        }
+      },
+      "title": "AfterSaleResp",
+      "required": [
+        "msg"
+      ]
+    },
+    "AttrFilterItem": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": " 属性名，如\"颜色\""
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": " 属性值列表，如[\"红色\",\"蓝色\"]"
+        }
+      },
+      "title": "AttrFilterItem",
+      "required": [
+        "name",
+        "values"
+      ]
+    },
+    "AttributeItem": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": " 属性名，如\"颜色\""
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": " 属性值列表，如[\"红色\",\"蓝色\",\"白色\"]"
+        }
+      },
+      "title": "AttributeItem",
+      "required": [
+        "name",
+        "values"
+      ]
+    },
+    "AvailableCouponsReq": {
+      "type": "object",
+      "properties": {
+        "order_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 当前订单总金额（单位：分）"
+        }
+      },
+      "title": "AvailableCouponsReq",
+      "required": [
+        "order_amount"
+      ]
+    },
+    "AvailableCouponsResp": {
+      "type": "object",
+      "properties": {
+        "available": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserCoupon"
+          },
+          "description": " 可使用的优惠券"
+        },
+        "unavailable": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserCoupon"
+          },
+          "description": " 不可使用的优惠券（含原因）"
+        }
+      },
+      "title": "AvailableCouponsResp",
+      "required": [
+        "available",
+        "unavailable"
+      ]
+    },
+    "BatchSkuResp": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SkuSimple"
+          },
+          "description": " SKU列表"
+        }
+      },
+      "title": "BatchSkuResp",
+      "required": [
+        "list"
+      ]
+    },
+    "CallbackResp": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": " 响应码"
+        },
+        "message": {
+          "type": "string",
+          "description": " 响应消息"
+        }
+      },
+      "title": "CallbackResp"
+    },
+    "CancelOrderReq": {
+      "type": "object",
+      "properties": {
+        "cancel_reason": {
+          "type": "string",
+          "description": " 取消原因"
+        },
+        "reason_type": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 取消原因类型"
+        }
+      },
+      "title": "CancelOrderReq"
+    },
+    "CaptchaReq": {
+      "type": "object",
+      "properties": {
+        "phone": {
+          "type": "string",
+          "description": " 手机号"
+        },
+        "scene": {
+          "type": "string",
+          "description": " 场景：login, register, reset_pwd, update_pwd, update_phone"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "description": " 幂等键（客户端UUID）"
+        }
+      },
+      "title": "CaptchaReq",
+      "required": [
+        "phone",
+        "scene",
+        "idempotency_key"
+      ]
+    },
+    "CartItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 购物车记录ID"
+        },
+        "sku_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " SKU ID"
+        },
+        "spu_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " SPU ID"
+        },
+        "product_name": {
+          "type": "string",
+          "description": " 商品名称"
+        },
+        "sku_name": {
+          "type": "string",
+          "description": " 规格名称"
+        },
+        "pic": {
+          "type": "string",
+          "description": " 商品图片"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 实时单价（分）"
+        },
+        "quantity": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 数量"
+        },
+        "selected": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": " 是否勾选"
+        },
+        "stock": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 实时库存"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 商品状态 1:正常 2:下架/失效"
+        }
+      },
+      "title": "CartItem",
+      "required": [
+        "sku_id",
+        "spu_id",
+        "product_name",
+        "sku_name",
+        "pic",
+        "price",
+        "quantity",
+        "selected",
+        "stock",
+        "status"
+      ]
+    },
+    "CartListResp": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/CartItem"
+          },
+          "description": " 购物车商品列表"
+        },
+        "total_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 勾选商品总金额（单位：分）"
+        }
+      },
+      "title": "CartListResp",
+      "required": [
+        "items",
+        "total_amount"
+      ]
+    },
+    "Category": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 分类ID"
+        },
+        "parent_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 父分类ID"
+        },
+        "name": {
+          "type": "string",
+          "description": " 分类名称"
+        },
+        "icon": {
+          "type": "string",
+          "description": " 分类图标URL"
+        },
+        "level": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 分类层级：1一级 2二级 3三级"
+        },
+        "children": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Category"
+          },
+          "description": " 子分类列表"
+        }
+      },
+      "title": "Category",
+      "required": [
+        "id",
+        "parent_id",
+        "name",
+        "icon",
+        "level"
+      ]
+    },
+    "CategoryInfo": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 分类ID"
+        },
+        "parent_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 父分类ID"
+        },
+        "name": {
+          "type": "string",
+          "description": " 分类名称"
+        },
+        "icon": {
+          "type": "string",
+          "description": " 分类图标URL"
+        },
+        "level": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 分类层级：1一级 2二级 3三级"
+        }
+      },
+      "title": "CategoryInfo",
+      "required": [
+        "id",
+        "parent_id",
+        "name",
+        "icon",
+        "level"
+      ]
+    },
+    "CategoryResp": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "$ref": "#/definitions/Category",
+          "description": " 分类信息"
+        }
+      },
+      "title": "CategoryResp",
+      "required": [
+        "category"
+      ]
+    },
+    "CategoryTreeResp": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Category"
+          },
+          "description": " 分类列表"
+        }
+      },
+      "title": "CategoryTreeResp",
+      "required": [
+        "list"
+      ]
+    },
+    "ClaimCouponReq": {
+      "type": "object",
+      "properties": {
+        "coupon_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 优惠券ID"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "description": " 幂等键"
+        }
+      },
+      "title": "ClaimCouponReq",
+      "required": [
+        "coupon_id",
+        "idempotency_key"
+      ]
+    },
+    "ClaimCouponResp": {
+      "type": "object",
+      "properties": {
+        "user_coupon_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 用户优惠券记录ID"
+        },
+        "expire_time": {
+          "type": "string",
+          "description": " 领取后的过期时间，RFC3339格式"
+        }
+      },
+      "title": "ClaimCouponResp",
+      "required": [
+        "user_coupon_id",
+        "expire_time"
+      ]
+    },
+    "Coupon": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 优惠券ID"
+        },
+        "name": {
+          "type": "string",
+          "description": " 优惠券名称"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 1-满减券，2-折扣券，3-无门槛券"
+        },
+        "threshold_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 使用门槛（单位：分）"
+        },
+        "reduce_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 满减金额（单位：分），仅满减券有效"
+        },
+        "discount_rate": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 折扣率：80 表示8折，仅折扣券有效"
+        },
+        "max_discount_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 折扣封顶金额（单位：分），仅折扣券有效"
+        },
+        "start_time": {
+          "type": "string",
+          "description": " 生效开始时间，RFC3339格式"
+        },
+        "end_time": {
+          "type": "string",
+          "description": " 生效结束时间，RFC3339格式"
+        },
+        "description": {
+          "type": "string",
+          "description": " 优惠券描述"
+        },
+        "is_claimed": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": " 当前用户是否已领取"
+        }
+      },
+      "title": "Coupon",
+      "required": [
+        "id",
+        "name",
+        "type",
+        "threshold_amount",
+        "reduce_amount",
+        "discount_rate",
+        "max_discount_amount",
+        "start_time",
+        "end_time",
+        "description",
+        "is_claimed"
+      ]
+    },
+    "CouponListReq": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1",
+          "description": " 页码，默认1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10",
+          "description": " 每页数量，默认10"
+        }
+      },
+      "title": "CouponListReq"
+    },
+    "CouponListResp": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 总数量"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Coupon"
+          },
+          "description": " 优惠券列表"
+        }
+      },
+      "title": "CouponListResp",
+      "required": [
+        "total",
+        "list"
+      ]
+    },
+    "CreateOrderReq": {
+      "type": "object",
+      "properties": {
+        "settlement_token": {
+          "type": "string",
+          "description": " 结算令牌"
+        },
+        "pay_type": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 支付方式：1-微信，2-支付宝"
+        },
+        "remark": {
+          "type": "string",
+          "description": " 订单备注"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "description": " 幂等键（前端生成）"
+        },
+        "cart_sku_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "description": " 购物车商品ID列表"
+        },
+        "address_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 最终使用的地址ID"
+        },
+        "coupon_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 优惠券ID（可选）"
+        }
+      },
+      "title": "CreateOrderReq",
+      "required": [
+        "settlement_token",
+        "idempotency_key",
+        "cart_sku_ids",
+        "address_id"
+      ]
+    },
+    "CreateOrderResp": {
+      "type": "object",
+      "properties": {
+        "order_sn": {
+          "type": "string",
+          "description": " 订单号"
+        },
+        "pay_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 实际支付金额（单位：分）"
+        }
+      },
+      "title": "CreateOrderResp",
+      "required": [
+        "order_sn",
+        "pay_amount"
+      ]
+    },
+    "CreatePaymentReq": {
+      "type": "object",
+      "properties": {
+        "order_sn": {
+          "type": "string",
+          "description": " 订单号"
+        },
+        "channel": {
+          "type": "string",
+          "description": " 支付渠道: alipay, wechat"
+        },
+        "pay_type": {
+          "type": "string",
+          "description": " 支付场景: APP, H5, JSAPI, QR"
+        },
+        "amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 应付金额（分），用于后端校验"
+        },
+        "openid": {
+          "type": "string",
+          "description": " 微信JSAPI支付时必传"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "description": " 幂等键"
+        }
+      },
+      "title": "CreatePaymentReq",
+      "required": [
+        "order_sn",
+        "channel",
+        "pay_type",
+        "amount",
+        "idempotency_key"
+      ]
+    },
+    "CreatePaymentResp": {
+      "type": "object",
+      "properties": {
+        "payment_sn": {
+          "type": "string",
+          "description": " 支付流水号"
+        },
+        "pay_data": {
+          "type": "string",
+          "description": " 支付参数（JSON字符串或表单HTML）"
+        }
+      },
+      "title": "CreatePaymentResp",
+      "required": [
+        "payment_sn",
+        "pay_data"
+      ]
+    },
+    "DeleteAccountReq": {
+      "type": "object",
+      "properties": {
+        "password": {
+          "type": "string",
+          "description": " 密码验证"
+        },
+        "refresh_token": {
+          "type": "string",
+          "description": " 刷新令牌"
+        }
+      },
+      "title": "DeleteAccountReq",
+      "required": [
+        "password",
+        "refresh_token"
+      ]
+    },
+    "DeliveryTrackItem": {
+      "type": "object",
+      "properties": {
+        "time": {
+          "type": "string",
+          "description": " 轨迹时间，RFC3339格式"
+        },
+        "station": {
+          "type": "string",
+          "description": " 地点"
+        },
+        "status": {
+          "type": "string",
+          "description": " 状态描述"
+        },
+        "description": {
+          "type": "string",
+          "description": " 详细说明"
+        }
+      },
+      "title": "DeliveryTrackItem",
+      "required": [
+        "time",
+        "station",
+        "status",
+        "description"
+      ]
+    },
+    "DeliveryTrackResp": {
+      "type": "object",
+      "properties": {
+        "order_sn": {
+          "type": "string",
+          "description": " 订单号"
+        },
+        "delivery_sn": {
+          "type": "string",
+          "description": " 物流单号"
+        },
+        "delivery_corp": {
+          "type": "string",
+          "description": " 物流公司"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 物流主状态码：100-已揽收，200-运输中，300-派送中，400-已签收，500-异常"
+        },
+        "status_desc": {
+          "type": "string",
+          "description": " 状态描述"
+        },
+        "tracks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/DeliveryTrackItem"
+          },
+          "description": " 轨迹节点列表"
+        }
+      },
+      "title": "DeliveryTrackResp",
+      "required": [
+        "order_sn",
+        "delivery_sn",
+        "delivery_corp",
+        "status",
+        "status_desc",
+        "tracks"
+      ]
+    },
+    "HotKeywordItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "keyword": {
+          "type": "string"
+        },
+        "search_count": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "sort": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
+      "title": "HotKeywordItem",
+      "required": [
+        "id",
+        "keyword",
+        "search_count",
+        "sort"
+      ]
+    },
+    "HotKeywordsResp": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/HotKeywordItem"
+          }
+        }
+      },
+      "title": "HotKeywordsResp",
+      "required": [
+        "list"
+      ]
+    },
+    "IdPathReq": {
+      "type": "object",
+      "title": "IdPathReq"
+    },
+    "LoginReq": {
+      "type": "object",
+      "properties": {
+        "phone": {
+          "type": "string",
+          "description": " 手机号"
+        },
+        "password": {
+          "type": "string",
+          "description": " 密码"
+        }
+      },
+      "title": "LoginReq",
+      "required": [
+        "phone",
+        "password"
+      ]
+    },
+    "LoginResp": {
+      "type": "object",
+      "properties": {
+        "access_token": {
+          "type": "string",
+          "description": " 访问令牌"
+        },
+        "access_expire": {
+          "type": "string",
+          "description": " 访问令牌有效期截止时间，RFC3339格式"
+        },
+        "refresh_token": {
+          "type": "string",
+          "description": " 刷新令牌"
+        },
+        "refresh_expire": {
+          "type": "string",
+          "description": " 刷新令牌有效期截止时间，RFC3339格式"
+        }
+      },
+      "title": "LoginResp",
+      "required": [
+        "access_token",
+        "access_expire",
+        "refresh_token",
+        "refresh_expire"
+      ]
+    },
+    "MobileLoginReq": {
+      "type": "object",
+      "properties": {
+        "phone": {
+          "type": "string",
+          "description": " 手机号"
+        },
+        "code": {
+          "type": "string",
+          "description": " 验证码"
+        }
+      },
+      "title": "MobileLoginReq",
+      "required": [
+        "phone",
+        "code"
+      ]
+    },
+    "MyCouponListReq": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "default": "0",
+          "description": " 0-未使用，1-已使用，2-已过期"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1",
+          "description": " 页码，默认1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10",
+          "description": " 每页数量，默认10"
+        }
+      },
+      "title": "MyCouponListReq",
+      "required": [
+        "status"
+      ]
+    },
+    "MyCouponListResp": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 总数量"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/UserCoupon"
+          },
+          "description": " 用户优惠券列表"
+        }
+      },
+      "title": "MyCouponListResp",
+      "required": [
+        "total",
+        "list"
+      ]
+    },
+    "OrderDetailResp": {
+      "type": "object",
+      "properties": {
+        "order_sn": {
+          "type": "string",
+          "description": " 订单号"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 10:待付款 20:待发货 30:待收货 40:已完成 50:已取消 60:售后中"
+        },
+        "status_desc": {
+          "type": "string",
+          "description": " 状态描述"
+        },
+        "pay_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 实付金额（单位：分）"
+        },
+        "create_time": {
+          "type": "string",
+          "description": " 创建时间，RFC3339格式"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OrderItem"
+          },
+          "description": " 商品快照列表"
+        },
+        "address": {
+          "$ref": "#/definitions/AddressSnapshot",
+          "description": " 收货地址快照"
+        },
+        "freight_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 运费（分）"
+        },
+        "coupon_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 优惠金额（分）"
+        },
+        "delivery_sn": {
+          "type": "string",
+          "description": " 物流单号"
+        },
+        "delivery_corp": {
+          "type": "string",
+          "description": " 物流公司"
+        },
+        "expire_time": {
+          "type": "string",
+          "description": " 待付款截止时间，RFC3339格式"
+        },
+        "remark": {
+          "type": "string",
+          "description": " 订单备注"
+        },
+        "pay_time": {
+          "type": "string",
+          "description": " 支付时间，RFC3339格式"
+        },
+        "delivery_time": {
+          "type": "string",
+          "description": " 发货时间，RFC3339格式"
+        },
+        "finish_time": {
+          "type": "string",
+          "description": " 完成时间，RFC3339格式"
+        },
+        "cancel_time": {
+          "type": "string",
+          "description": " 取消时间，RFC3339格式"
+        }
+      },
+      "title": "OrderDetailResp",
+      "required": [
+        "order_sn",
+        "status",
+        "status_desc",
+        "pay_amount",
+        "create_time",
+        "items",
+        "address",
+        "freight_amount",
+        "coupon_amount"
+      ]
+    },
+    "OrderItem": {
+      "type": "object",
+      "properties": {
+        "sku_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "spu_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "product_name": {
+          "type": "string"
+        },
+        "sku_name": {
+          "type": "string"
+        },
+        "pic": {
+          "type": "string"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "quantity": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "total_amount": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "OrderItem",
+      "required": [
+        "sku_id",
+        "spu_id",
+        "product_name",
+        "sku_name",
+        "pic",
+        "price",
+        "quantity",
+        "total_amount"
+      ]
+    },
+    "OrderItemReq": {
+      "type": "object",
+      "properties": {
+        "sku_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " SKU ID"
+        },
+        "quantity": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 购买数量"
+        }
+      },
+      "title": "OrderItemReq",
+      "required": [
+        "sku_id",
+        "quantity"
+      ]
+    },
+    "OrderItemSnapshot": {
+      "type": "object",
+      "properties": {
+        "full_name": {
+          "type": "string",
+          "description": " 商品名称"
+        },
+        "pic": {
+          "type": "string",
+          "description": " 商品图片"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 下单时单价（单位：分）"
+        },
+        "quantity": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 数"
+        }
+      },
+      "title": "OrderItemSnapshot",
+      "required": [
+        "full_name",
+        "pic",
+        "price",
+        "quantity"
+      ]
+    },
+    "OrderListItem": {
+      "type": "object",
+      "properties": {
+        "order_sn": {
+          "type": "string",
+          "description": " 订单号"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 10:待付款 20:待发货 30:待收货 40:已完成 50:已取消 60:售后中"
+        },
+        "status_desc": {
+          "type": "string",
+          "description": " 状态描述"
+        },
+        "pay_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 实付金额（单位：分）"
+        },
+        "create_time": {
+          "type": "string",
+          "description": " 创建时间，RFC3339格式"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OrderItemSnapshot"
+          },
+          "description": " 商品快照列表"
+        }
+      },
+      "title": "OrderListItem",
+      "required": [
+        "order_sn",
+        "status",
+        "status_desc",
+        "pay_amount",
+        "create_time",
+        "items"
+      ]
+    },
+    "OrderListReq": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "default": "0",
+          "description": " 0:全部 10,20,30,40,50,60"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1",
+          "description": " 页码，默认1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10",
+          "description": " 每页数量，默认10"
+        }
+      },
+      "title": "OrderListReq",
+      "required": [
+        "status"
+      ]
+    },
+    "OrderListResp": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 总数量"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OrderListItem"
+          },
+          "description": " 订单列表"
+        }
+      },
+      "title": "OrderListResp",
+      "required": [
+        "total",
+        "list"
+      ]
+    },
+    "OrderSnPathReq": {
+      "type": "object",
+      "title": "OrderSnPathReq"
+    },
+    "OssCallbackReq": {
+      "type": "object",
+      "properties": {
+        "bucket": {
+          "type": "string",
+          "description": " 阿里云 Bucket"
+        },
+        "object": {
+          "type": "string",
+          "description": " 阿里云 OSS Object"
+        },
+        "etag": {
+          "type": "string",
+          "description": " 阿里云 OSS Etag"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 阿里云 OSS 文件大小"
+        },
+        "mimeType": {
+          "type": "string",
+          "description": " 阿里云 OSS MimeType"
+        }
+      },
+      "title": "OssCallbackReq",
+      "required": [
+        "bucket",
+        "object",
+        "etag",
+        "size",
+        "mimeType"
+      ]
+    },
+    "OssTokenReq": {
+      "type": "object",
+      "properties": {
+        "file_name": {
+          "type": "string",
+          "description": " 原始文件名（用于提取扩展名）"
+        }
+      },
+      "title": "OssTokenReq",
+      "required": [
+        "file_name"
+      ]
+    },
+    "OssTokenResp": {
+      "type": "object",
+      "properties": {
+        "accessid": {
+          "type": "string",
+          "description": " 阿里云 AccessKeyId"
+        },
+        "host": {
+          "type": "string",
+          "description": " 阿里云 OSS Host"
+        },
+        "policy": {
+          "type": "string",
+          "description": " 阿里云 OSS 策略"
+        },
+        "signature": {
+          "type": "string",
+          "description": " 阿里云 OSS 签名"
+        },
+        "expire": {
+          "type": "string",
+          "description": " OSS 签名有效期 （RFC3339格式）"
+        },
+        "dir": {
+          "type": "string",
+          "description": " OSS 存储目录（avatar/）"
+        },
+        "object_key": {
+          "type": "string",
+          "description": " OSS 存储对象名"
+        },
+        "callback": {
+          "type": "string"
+        }
+      },
+      "title": "OssTokenResp",
+      "required": [
+        "accessid",
+        "host",
+        "policy",
+        "signature",
+        "expire",
+        "dir",
+        "object_key",
+        "callback"
+      ]
+    },
+    "Pagination": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1",
+          "description": " 页码，默认1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10",
+          "description": " 每页数量，默认10"
+        }
+      },
+      "title": "Pagination",
+      "required": [
+        "page",
+        "size"
+      ]
+    },
+    "PaymentSnPathReq": {
+      "type": "object",
+      "title": "PaymentSnPathReq"
+    },
+    "PaymentStatusResp": {
+      "type": "object",
+      "properties": {
+        "payment_sn": {
+          "type": "string",
+          "description": " 支付流水号"
+        },
+        "order_sn": {
+          "type": "string",
+          "description": " 订单号"
+        },
+        "channel": {
+          "type": "string",
+          "description": " 支付渠道"
+        },
+        "channel_order_sn": {
+          "type": "string",
+          "description": " 渠道订单号"
+        },
+        "transaction_id": {
+          "type": "string",
+          "description": " 第三方交易号"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 0:待支付 1:成功 2:失败 3:退款中 4:退款成功"
+        },
+        "status_desc": {
+          "type": "string",
+          "description": " 状态描述"
+        },
+        "amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 单位：分"
+        },
+        "pay_time": {
+          "type": "string",
+          "description": " 支付完成时间，RFC3339格式"
+        },
+        "error_msg": {
+          "type": "string",
+          "description": " 错误信息"
+        }
+      },
+      "title": "PaymentStatusResp",
+      "required": [
+        "payment_sn",
+        "order_sn",
+        "channel",
+        "status",
+        "status_desc",
+        "amount"
+      ]
+    },
+    "PreOrderReq": {
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OrderItemReq"
+          },
+          "description": " 下单商品列表"
+        },
+        "address_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 地址ID（可选）"
+        },
+        "coupon_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 优惠券ID（可选）"
+        }
+      },
+      "title": "PreOrderReq",
+      "required": [
+        "items"
+      ]
+    },
+    "PreOrderResp": {
+      "type": "object",
+      "properties": {
+        "settlement_token": {
+          "type": "string",
+          "description": " 结算令牌"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OrderItem"
+          },
+          "description": " 商品清单"
+        },
+        "address": {
+          "$ref": "#/definitions/AddressSnapshot",
+          "description": " 地址详情"
+        },
+        "total_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 商品总价（单位：分）"
+        },
+        "freight_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 运费（单位：分）"
+        },
+        "coupon_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 优惠券减免（单位：分）"
+        },
+        "pay_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 实际支付金额（单位：分）"
+        }
+      },
+      "title": "PreOrderResp",
+      "required": [
+        "settlement_token",
+        "items",
+        "address",
+        "total_amount",
+        "freight_amount",
+        "coupon_amount",
+        "pay_amount"
+      ]
+    },
+    "ProductDetailResp": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 商品ID"
+        },
+        "category_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 所属分类ID"
+        },
+        "brand": {
+          "type": "string",
+          "description": " 品牌名称"
+        },
+        "name": {
+          "type": "string",
+          "description": " 商品名称"
+        },
+        "description": {
+          "type": "string",
+          "description": " 商品简介"
+        },
+        "content": {
+          "type": "string",
+          "description": " 富文本详情"
+        },
+        "default_pic": {
+          "type": "string",
+          "description": " 默认主图URL"
+        },
+        "banner_pics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": " 轮播图列表"
+        },
+        "video_url": {
+          "type": "string",
+          "description": " 商品视频URL"
+        },
+        "weight": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 重量（克）"
+        },
+        "freight_template_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 运费模板ID"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 最低SKU价格（单位：分）"
+        },
+        "sales": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 实际销量"
+        },
+        "show_sales": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 展示销量"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 1:上架 2:下架"
+        },
+        "status_desc": {
+          "type": "string",
+          "description": " 状态描述"
+        },
+        "skus": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SkuItem"
+          },
+          "description": " SKU列表"
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AttributeItem"
+          },
+          "description": " 聚合属性（用于前端筛选）"
+        }
+      },
+      "title": "ProductDetailResp",
+      "required": [
+        "id",
+        "category_id",
+        "brand",
+        "name",
+        "description",
+        "content",
+        "default_pic",
+        "banner_pics",
+        "weight",
+        "freight_template_id",
+        "price",
+        "sales",
+        "show_sales",
+        "status",
+        "status_desc",
+        "skus",
+        "attributes"
+      ]
+    },
+    "ProductItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 商品ID"
+        },
+        "name": {
+          "type": "string",
+          "description": " 商品名称"
+        },
+        "brand": {
+          "type": "string",
+          "description": " 品牌名称"
+        },
+        "description": {
+          "type": "string",
+          "description": " 商品简介"
+        },
+        "default_pic": {
+          "type": "string",
+          "description": " 默认主图URL"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 最低SKU价格（单位：分）"
+        },
+        "sales": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 实际销量"
+        },
+        "show_sales": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 前台展示销量 = sales + virtual_sales"
+        }
+      },
+      "title": "ProductItem",
+      "required": [
+        "id",
+        "name",
+        "brand",
+        "description",
+        "default_pic",
+        "price",
+        "sales",
+        "show_sales"
+      ]
+    },
+    "ProductListReq": {
+      "type": "object",
+      "properties": {
+        "category_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 分类ID"
+        },
+        "brand": {
+          "type": "string",
+          "description": " 品牌名称（模糊匹配）"
+        },
+        "min_price": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 最低价格（单位：分）"
+        },
+        "max_price": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 最高价格（单位：分）"
+        },
+        "keyword": {
+          "type": "string",
+          "description": " 简单关键词搜索（大数据量建议使用独立搜索服务）"
+        },
+        "attrs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AttrFilterItem"
+          },
+          "description": " 属性过滤"
+        },
+        "is_new": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": " 是否新品（按创建时间\u003c7天）"
+        },
+        "sort_by": {
+          "type": "string",
+          "description": " 排序字段"
+        },
+        "sort_type": {
+          "type": "string",
+          "description": " 排序方向"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1",
+          "description": " 页码，默认1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10",
+          "description": " 每页数量，默认10"
+        }
+      },
+      "title": "ProductListReq"
+    },
+    "ProductListResp": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 总数量"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProductItem"
+          },
+          "description": " 商品列表"
+        }
+      },
+      "title": "ProductListResp",
+      "required": [
+        "total",
+        "list"
+      ]
+    },
+    "RecommendReq": {
+      "type": "object",
+      "properties": {
+        "scene": {
+          "type": "string",
+          "description": " 场景：home(首页), cart(购物车), detail(详情页)"
+        },
+        "limit": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10",
+          "description": " 返回数量"
+        },
+        "current_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 当前商品ID（详情页推荐时使用）"
+        }
+      },
+      "title": "RecommendReq",
+      "required": [
+        "limit"
+      ]
+    },
+    "RefreshTokenReq": {
+      "type": "object",
+      "properties": {
+        "refresh_token": {
+          "type": "string",
+          "description": " 刷新令牌"
+        }
+      },
+      "title": "RefreshTokenReq",
+      "required": [
+        "refresh_token"
+      ]
+    },
+    "RefundApplyReq": {
+      "type": "object",
+      "properties": {
+        "order_sn": {
+          "type": "string",
+          "description": " 订单号"
+        },
+        "payment_sn": {
+          "type": "string",
+          "description": " 支付流水号（可选，不传则自动查找）"
+        },
+        "amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 退款金额（分）"
+        },
+        "reason": {
+          "type": "string",
+          "description": " 退款原因"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 1:仅退款 2:退货退款"
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": " 退款凭证图片"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "description": " 幂等键"
+        }
+      },
+      "title": "RefundApplyReq",
+      "required": [
+        "order_sn",
+        "amount",
+        "reason",
+        "type",
+        "idempotency_key"
+      ]
+    },
+    "RefundApplyResp": {
+      "type": "object",
+      "properties": {
+        "refund_sn": {
+          "type": "string",
+          "description": " 退款单号"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 0:处理中 1:成功 2:失败"
+        },
+        "status_desc": {
+          "type": "string",
+          "description": " 状态描述"
+        }
+      },
+      "title": "RefundApplyResp",
+      "required": [
+        "refund_sn",
+        "status",
+        "status_desc"
+      ]
+    },
+    "RefundDetailResp": {
+      "type": "object",
+      "properties": {
+        "refund_sn": {
+          "type": "string",
+          "description": " 退款单号"
+        },
+        "payment_sn": {
+          "type": "string",
+          "description": " 支付流水号"
+        },
+        "order_sn": {
+          "type": "string",
+          "description": " 订单号"
+        },
+        "amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 退款金额（分）"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 0:处理中 1:成功 2:失败"
+        },
+        "status_desc": {
+          "type": "string",
+          "description": " 状态描述"
+        },
+        "refund_time": {
+          "type": "string",
+          "description": " 退款完成时间，RFC3339格式"
+        },
+        "transaction_id": {
+          "type": "string",
+          "description": " 第三方退款交易号"
+        },
+        "error_msg": {
+          "type": "string",
+          "description": " 错误信息"
+        }
+      },
+      "title": "RefundDetailResp",
+      "required": [
+        "refund_sn",
+        "payment_sn",
+        "order_sn",
+        "amount",
+        "status",
+        "status_desc"
+      ]
+    },
+    "RegisterReq": {
+      "type": "object",
+      "properties": {
+        "phone": {
+          "type": "string",
+          "description": " 手机号"
+        },
+        "password": {
+          "type": "string",
+          "description": " 密码"
+        },
+        "confirm_password": {
+          "type": "string",
+          "description": " 确认密码"
+        },
+        "code": {
+          "type": "string",
+          "description": " 验证码"
+        },
+        "nickname": {
+          "type": "string",
+          "description": " 昵称（可选）"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "description": " 幂等键"
+        }
+      },
+      "title": "RegisterReq",
+      "required": [
+        "phone",
+        "password",
+        "confirm_password",
+        "code",
+        "idempotency_key"
+      ]
+    },
+    "ResetPasswordReq": {
+      "type": "object",
+      "properties": {
+        "phone": {
+          "type": "string",
+          "description": " 手机号"
+        },
+        "code": {
+          "type": "string",
+          "description": " 验证码"
+        },
+        "new_password": {
+          "type": "string",
+          "description": " 新密码"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "description": " 幂等键"
+        }
+      },
+      "title": "ResetPasswordReq",
+      "required": [
+        "phone",
+        "code",
+        "new_password",
+        "idempotency_key"
+      ]
+    },
+    "SearchHistoryItem": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "SearchHistoryItem",
+      "required": [
+        "keyword",
+        "created_at"
+      ]
+    },
+    "SearchHistoryResp": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SearchHistoryItem"
+          }
+        }
+      },
+      "title": "SearchHistoryResp",
+      "required": [
+        "list"
+      ]
+    },
+    "SearchProductItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "brand": {
+          "type": "string"
+        },
+        "cover": {
+          "type": "string"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "sales": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "category_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "category_name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "title": "SearchProductItem",
+      "required": [
+        "id",
+        "name",
+        "brand",
+        "cover",
+        "price",
+        "sales",
+        "category_id",
+        "category_name",
+        "description"
+      ]
+    },
+    "SearchProductsReq": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string",
+          "description": " 搜索关键词"
+        },
+        "category_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 分类ID"
+        },
+        "brand": {
+          "type": "string",
+          "description": " 品牌"
+        },
+        "min_price": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 最低价格（分）"
+        },
+        "max_price": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 最高价格（分）"
+        },
+        "sort_by": {
+          "type": "string",
+          "description": " 排序字段"
+        },
+        "sort_type": {
+          "type": "string",
+          "description": " 排序方向"
+        },
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10"
+        }
+      },
+      "title": "SearchProductsReq",
+      "required": [
+        "page",
+        "size"
+      ]
+    },
+    "SearchProductsResp": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SearchProductItem"
+          }
+        }
+      },
+      "title": "SearchProductsResp",
+      "required": [
+        "total",
+        "list"
+      ]
+    },
+    "SearchSuggestReq": {
+      "type": "object",
+      "properties": {
+        "keyword": {
+          "type": "string"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "5"
+        }
+      },
+      "title": "SearchSuggestReq",
+      "required": [
+        "keyword",
+        "size"
+      ]
+    },
+    "SearchSuggestResp": {
+      "type": "object",
+      "properties": {
+        "suggestions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "title": "SearchSuggestResp",
+      "required": [
+        "suggestions"
+      ]
+    },
+    "SelectCartReq": {
+      "type": "object",
+      "properties": {
+        "sku_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " SKU ID"
+        },
+        "selected": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": " 是否勾选"
+        }
+      },
+      "title": "SelectCartReq",
+      "required": [
+        "sku_id",
+        "selected"
+      ]
+    },
+    "SkuIdsReq": {
+      "type": "object",
+      "properties": {
+        "sku_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "description": " SKU ID列表"
+        }
+      },
+      "title": "SkuIdsReq",
+      "required": [
+        "sku_ids"
+      ]
+    },
+    "SkuItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " SKU ID"
+        },
+        "code": {
+          "type": "string"
+        },
+        "pic": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": " SKU图片URL"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 价格（单位：分）"
+        },
+        "stock": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 库存数量"
+        },
+        "spec_data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/SpecItem"
+          },
+          "description": " 原始JSON，如{\"颜色\":\"红色\"}{\"容量\":\"64G\"}"
+        },
+        "weight": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 重量（克）"
+        }
+      },
+      "title": "SkuItem",
+      "required": [
+        "id",
+        "code",
+        "pic",
+        "price",
+        "stock",
+        "spec_data",
+        "weight"
+      ]
+    },
+    "SkuSimple": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " SKU ID"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 价格（单位：分）"
+        },
+        "stock": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 库存数量"
+        }
+      },
+      "title": "SkuSimple",
+      "required": [
+        "id",
+        "price",
+        "stock"
+      ]
+    },
+    "SpecItem": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "values": {
+          "type": "string"
+        }
+      },
+      "title": "SpecItem",
+      "required": [
+        "name",
+        "values"
+      ]
+    },
+    "UnlockCouponReq": {
+      "type": "object",
+      "properties": {
+        "user_coupon_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 用户优惠券记录ID"
+        },
+        "order_sn": {
+          "type": "string",
+          "description": " 订单号"
+        }
+      },
+      "title": "UnlockCouponReq",
+      "required": [
+        "user_coupon_id",
+        "order_sn"
+      ]
+    },
+    "UnlockCouponResp": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": " 是否成功"
+        },
+        "error_msg": {
+          "type": "string",
+          "description": " 错误信息"
+        }
+      },
+      "title": "UnlockCouponResp",
+      "required": [
+        "success"
+      ]
+    },
+    "UpdateAddressReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 地址ID"
+        },
+        "receiver_name": {
+          "type": "string",
+          "description": " 收货人姓名"
+        },
+        "receiver_phone": {
+          "type": "string",
+          "description": " 收货人电话"
+        },
+        "is_default": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 是否默认地址：0-否，1-是"
+        },
+        "tag": {
+          "type": "string",
+          "description": " 地址标签：HOME-家，OFFICE-公司，SCHOOL-学校"
+        },
+        "detail": {
+          "$ref": "#/definitions/AddressDetail",
+          "description": " 地址详细信息（内部字段已校验）"
+        }
+      },
+      "title": "UpdateAddressReq"
+    },
+    "UpdateCartReq": {
+      "type": "object",
+      "properties": {
+        "sku_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " SKU ID"
+        },
+        "quantity": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 数量，若为0则从购物车移除"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "description": " 幂等键"
+        }
+      },
+      "title": "UpdateCartReq",
+      "required": [
+        "sku_id",
+        "quantity",
+        "idempotency_key"
+      ]
+    },
+    "UpdatePasswordReq": {
+      "type": "object",
+      "properties": {
+        "old_password": {
+          "type": "string",
+          "description": " 旧密码"
+        },
+        "new_password": {
+          "type": "string",
+          "description": " 新密码"
+        },
+        "confirm_password": {
+          "type": "string",
+          "description": " 确认密码"
+        }
+      },
+      "title": "UpdatePasswordReq",
+      "required": [
+        "old_password",
+        "new_password",
+        "confirm_password"
+      ]
+    },
+    "UpdatePhoneReq": {
+      "type": "object",
+      "properties": {
+        "old_phone_code": {
+          "type": "string",
+          "description": " 原手机验证码（已登录时可选）"
+        },
+        "new_phone": {
+          "type": "string",
+          "description": " 新手机号"
+        },
+        "new_phone_code": {
+          "type": "string",
+          "description": " 新手机验证码"
+        },
+        "idempotency_key": {
+          "type": "string",
+          "description": " 幂等键"
+        }
+      },
+      "title": "UpdatePhoneReq",
+      "required": [
+        "new_phone",
+        "new_phone_code",
+        "idempotency_key"
+      ]
+    },
+    "UpdateUserInfoReq": {
+      "type": "object",
+      "properties": {
+        "nickname": {
+          "type": "string",
+          "description": " 昵称（可选）"
+        },
+        "avatar": {
+          "type": "string",
+          "description": " 头像URL（可选）"
+        },
+        "gender": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 性别：0-未知，1-男，2-女（可选）"
+        },
+        "birthday": {
+          "type": "string",
+          "description": " 生日，RFC3339日期格式（例如 2006-01-02，可选）"
+        }
+      },
+      "title": "UpdateUserInfoReq"
+    },
+    "UseCouponReq": {
+      "type": "object",
+      "properties": {
+        "user_coupon_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 用户优惠券记录ID"
+        }
+      },
+      "title": "UseCouponReq",
+      "required": [
+        "user_coupon_id"
+      ]
+    },
+    "UseCouponResp": {
+      "type": "object",
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "format": "boolean",
+          "description": " 是否成功"
+        },
+        "discount_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 实际减免金额（单位：分）"
+        },
+        "error_msg": {
+          "type": "string",
+          "description": " 错误信息"
+        }
+      },
+      "title": "UseCouponResp",
+      "required": [
+        "success",
+        "discount_amount"
+      ]
+    },
+    "UserCoupon": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 用户优惠券记录ID"
+        },
+        "coupon_id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 优惠券ID"
+        },
+        "name": {
+          "type": "string",
+          "description": " 优惠券名称"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 优惠券类型"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 0-未使用，1-已使用，2-已过期"
+        },
+        "expire_time": {
+          "type": "string",
+          "description": " 用户持有过期时间，RFC3339格式"
+        },
+        "order_sn": {
+          "type": "string",
+          "description": " 使用该券的订单号"
+        },
+        "unavailable_reason": {
+          "type": "string",
+          "description": " 不可用原因（结算页用）"
+        },
+        "threshold_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 使用门槛（分）"
+        },
+        "reduce_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 满减金额（分）"
+        },
+        "discount_rate": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 折扣率"
+        },
+        "max_discount_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 折扣封顶金额（分）"
+        }
+      },
+      "title": "UserCoupon",
+      "required": [
+        "id",
+        "coupon_id",
+        "name",
+        "type",
+        "status",
+        "expire_time",
+        "threshold_amount",
+        "reduce_amount",
+        "discount_rate",
+        "max_discount_amount"
+      ]
+    },
+    "UserInfoResp": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 用户ID"
+        },
+        "phone": {
+          "type": "string",
+          "description": " 手机号"
+        },
+        "nickname": {
+          "type": "string",
+          "description": " 昵称"
+        },
+        "avatar": {
+          "type": "string",
+          "description": " 头像URL"
+        },
+        "gender": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 性别：0-未知，1-男，2-女"
+        },
+        "birthday": {
+          "type": "string",
+          "description": " 生日，RFC3339日期格式（例如 2006-01-02）"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 账号状态：1-正常，2-限制下单，3-封禁"
+        },
+        "status_desc": {
+          "type": "string",
+          "description": " 状态描述"
+        }
+      },
+      "title": "UserInfoResp",
+      "required": [
+        "id",
+        "phone",
+        "nickname",
+        "avatar",
+        "gender",
+        "birthday",
+        "status",
+        "status_desc"
+      ]
+    }
+  },
+  "securityDefinitions": {
+    "apiKey": {
+      "type": "apiKey",
+      "description": "Enter JWT Bearer token **_only_**",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

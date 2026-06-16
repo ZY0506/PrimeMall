@@ -2,6 +2,7 @@ package adminlogic
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"github.com/ZY0506/PrimeMall/apps/service/user/rpc/internal/model"
@@ -95,7 +96,7 @@ func (l *GetUserDetailLogic) GetUserDetail(in *user.GetUserDetailReq) (*user.Get
 			Nickname:      userInfo.Nickname,
 			Avatar:        userInfo.Avatar,
 			Gender:        userInfo.Gender,
-			Birthday:      timestamppb.New(userInfo.Birthday.Time),
+			Birthday:      nullableTimestamp(userInfo.Birthday),
 			Status:        user.UserStatus(userInfo.Status),
 			CreatedAt:     timestamppb.New(userInfo.CreatedAt),
 			LastLoginTime: timestamppb.New(userInfo.LastLoginTime.Time),
@@ -104,4 +105,12 @@ func (l *GetUserDetailLogic) GetUserDetail(in *user.GetUserDetailReq) (*user.Get
 		RecentLoginLogs: loginLogs,
 		PunishLogs:      punishLogs,
 	}, nil
+}
+
+// nullableTimestamp 将 sql.NullTime 转为 protobuf Timestamp，NULL 时返回 nil
+func nullableTimestamp(nt sql.NullTime) *timestamppb.Timestamp {
+	if nt.Valid {
+		return timestamppb.New(nt.Time)
+	}
+	return nil
 }

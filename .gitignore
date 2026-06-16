@@ -4,12 +4,16 @@
 # IDE and editor files
 .idea/
 .vscode/
+*~
 
 # Log files
 *.log
+/logs/
 
 # Sensitive files
 AccessKey.csv
+*.pem
+*.key
 
 # Build artifacts and binaries
 *.exe
@@ -24,24 +28,23 @@ storage/
 .claude/
 .uploads/
 
-# Documentation (optional - remove if you want to track docs)
-doc/
-
 # Templates (optional - remove if you want to track templates)
 template/
 
 # Test data and scripts (keep test code, ignore data)
-tests
+tests/
 concurrency.exe
 
 # Go build output
 /bin/
 /pkg/
 
+# Go vendor directory (use go mod download instead)
+vendor/
+
 # OS files
 .DS_Store
 Thumbs.db
 
-/bin
-start-all.bat
-stop-all.bat
+# Documentation - bug reports (internal use only)
+/doc/bug

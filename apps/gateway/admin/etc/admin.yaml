@@ -6,6 +6,7 @@ Mode: dev
 JwtAuth:
   AccessSecret: ${JWT_SECRET}
   AccessExpire: 7200
+  RefreshSecret: ${JWT_SECRET}
 
 AdminRpc:
   Etcd:

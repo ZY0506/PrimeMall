@@ -145,6 +145,7 @@ func (m *defaultProductSkuModel) FindHotSkus(ctx context.Context, limit int) (*[
 	return &resp, nil
 }
 
+// LockStock 锁定库
 // LockStock 锁定库存
 func (m *defaultProductSkuModel) LockStock(ctx context.Context, items []*product.SkuStockItem, orderSn string) (*[]*product.SkuStockResult, error) {
 	results := make([]*product.SkuStockResult, 0, len(items))
@@ -565,7 +566,7 @@ func (m *defaultProductSkuModel) DeductStock(ctx context.Context, items []*produ
                     WHERE id = ? AND version = ? AND locked_stock >= ?
                       AND status = 1 AND deleted_at IS NULL
                 `, m.table)
-				res, err := session.ExecCtx(ctx, queryUpdate, item.Quantity, item.Quantity, item.SkuId, sku.Version, item.Quantity, item.Quantity)
+				res, err := session.ExecCtx(ctx, queryUpdate, item.Quantity, item.Quantity, item.SkuId, sku.Version, item.Quantity)
 				if err != nil {
 					logx.WithContext(ctx).Errorf("更新商品库存失败, error=%v", err)
 					return err

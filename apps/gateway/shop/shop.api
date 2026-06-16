@@ -8,7 +8,7 @@ info (
 )
 
 // goctl api go -api ./apps/gateway/shop/shop.api -dir ./apps/gateway/shop
-// goctl api plugin -plugin goctl-swagger="swagger -filename api.json" -api ./apps/gateway/shop/shop.api -dir ./doc/api
+// goctl api plugin -plugin goctl-swagger="swagger -filename shop-api.json" -api ./apps/gateway/shop/shop.api -dir ./doc/api
 // =============================================================
 // 0. 公共类型定义
 // =============================================================
@@ -299,20 +299,20 @@ type (
 	}
 	// 属性过滤项
 	AttrFilterItem {
-		Name   string   `json:"name"`   // 属性名，如"颜色"
+		Name   string   `json:"name"` // 属性名，如"颜色"
 		Values []string `json:"values"` // 属性值列表，如["红色","蓝色"]
 	}
 	// 商品列表请求
 	ProductListReq {
-		CategoryId uint64            `form:"category_id,optional" validate:"omitempty,min=1"` // 分类ID
-		Brand      string            `form:"brand,optional" validate:"omitempty,min=1,max=100"` // 品牌名称（模糊匹配）
-		MinPrice   int64             `form:"min_price,optional" validate:"omitempty,min=0"` // 最低价格（单位：分）
-		MaxPrice   int64             `form:"max_price,optional" validate:"omitempty,min=0,gtefield=MinPrice"` // 最高价格（单位：分）
-		Keyword    string            `form:"keyword,optional" validate:"omitempty,min=1,max=100"` // 简单关键词搜索（大数据量建议使用独立搜索服务）
-		Attrs      []AttrFilterItem `form:"attrs,optional"`                                     // 属性过滤
-		IsNew      bool              `form:"is_new,optional"` // 是否新品（按创建时间<7天）
-		SortBy     string            `form:"sort_by,optional" validate:"omitempty,oneof=price sales created_at"` // 排序字段
-		SortType   string            `form:"sort_type,optional" validate:"omitempty,oneof=asc desc"` // 排序方向
+		CategoryId uint64           `form:"category_id,optional" validate:"omitempty,min=1"` // 分类ID
+		Brand      string           `form:"brand,optional" validate:"omitempty,min=1,max=100"` // 品牌名称（模糊匹配）
+		MinPrice   int64            `form:"min_price,optional" validate:"omitempty,min=0"` // 最低价格（单位：分）
+		MaxPrice   int64            `form:"max_price,optional" validate:"omitempty,min=0,gtefield=MinPrice"` // 最高价格（单位：分）
+		Keyword    string           `form:"keyword,optional" validate:"omitempty,min=1,max=100"` // 简单关键词搜索（大数据量建议使用独立搜索服务）
+		Attrs      []AttrFilterItem `form:"attrs,optional"` // 属性过滤
+		IsNew      bool             `form:"is_new,optional"` // 是否新品（按创建时间<7天）
+		SortBy     string           `form:"sort_by,optional" validate:"omitempty,oneof=price sales created_at"` // 排序字段
+		SortType   string           `form:"sort_type,optional" validate:"omitempty,oneof=asc desc"` // 排序方向
 		Pagination
 	}
 	// 商品列表项
@@ -544,8 +544,9 @@ type (
 		CancelTime    string          `json:"cancel_time,optional"` // 取消时间，RFC3339格式
 	}
 	CancelOrderReq {
-		OrderSn      string `json:"order_sn" validate:"required"` // 订单号
+		OrderSn      string `path:"order_sn" json:"order_sn" validate:"required"` // 订单号
 		CancelReason string `json:"cancel_reason,optional" validate:"omitempty,max=200"` // 取消原因
+		ReasonType   int64  `json:"reason_type,optional"` // 取消原因类型
 	}
 	// 物流轨迹节点
 	DeliveryTrackItem {
@@ -838,8 +839,12 @@ type (
 		ReduceAmount      int64  `json:"reduce_amount"` // 满减金额（单位：分），仅满减券有效
 		DiscountRate      int64  `json:"discount_rate"` // 折扣率：80 表示8折，仅折扣券有效
 		MaxDiscountAmount int64  `json:"max_discount_amount"` // 折扣封顶金额（单位：分），仅折扣券有效
-		StartTime         string `json:"start_time"` // 生效开始时间，RFC3339格式
-		EndTime           string `json:"end_time"` // 生效结束时间，RFC3339格式
+		TotalQuantity     int64  `json:"total_quantity"` // 总库存
+		UsedQuantity      int64  `json:"used_quantity"` // 已使用数量
+		PerUserLimit      int64  `json:"per_user_limit"` // 每人限领数量
+		UserClaimCount    int64  `json:"user_claim_count"` // 当前用户已领取次数
+		StartTime         int64  `json:"start_time"` // 生效开始时间（Unix时间戳秒）
+		EndTime           int64  `json:"end_time"` // 生效结束时间（Unix时间戳秒）
 		Description       string `json:"description"` // 优惠券描述
 		IsClaimed         bool   `json:"is_claimed"` // 当前用户是否已领取
 	}
@@ -894,7 +899,7 @@ type (
 	// 后续将通过 IP 白名单、独立 JWT 或 mTLS 等方式限制访问来源。
 	UseCouponReq {
 		UserCouponId uint64 `json:"user_coupon_id" validate:"required,min=1"` // 用户优惠券记录ID
-		OrderSn      string `json:"order_sn" validate:"required"` // 订单号
+		OrderSn      string `path:"order_sn" json:"order_sn" validate:"required"` // 订单号
 	}
 	UseCouponResp {
 		Success        bool   `json:"success"` // 是否成功
@@ -952,5 +957,92 @@ service shop-api {
 	@doc "订单服务：解锁优惠券（订单取消时回滚）"
 	@handler unlockCoupon
 	post /unlock (UnlockCouponReq) returns (UnlockCouponResp)
+}
+
+// ==================== ES商品搜索 ====================
+type (
+	SearchProductsReq {
+		Keyword    string `form:"keyword,optional"` // 搜索关键词
+		CategoryId int64  `form:"category_id,optional"` // 分类ID
+		Brand      string `form:"brand,optional"` // 品牌
+		MinPrice   int64  `form:"min_price,optional"` // 最低价格（分）
+		MaxPrice   int64  `form:"max_price,optional"` // 最高价格（分）
+		SortBy     string `form:"sort_by,optional" validate:"omitempty,oneof=price sales"` // 排序字段
+		SortType   string `form:"sort_type,optional" validate:"omitempty,oneof=asc desc"` // 排序方向
+		Page       int64  `form:"page,default=1"`
+		Size       int64  `form:"size,default=10"`
+	}
+	SearchProductItem {
+		Id           uint64 `json:"id"`
+		Name         string `json:"name"`
+		Brand        string `json:"brand"`
+		Cover        string `json:"cover"`
+		Price        int64  `json:"price"`
+		Sales        int64  `json:"sales"`
+		CategoryId   uint64 `json:"category_id"`
+		CategoryName string `json:"category_name"`
+		Description  string `json:"description"`
+	}
+	SearchProductsResp {
+		Total int64               `json:"total"`
+		List  []SearchProductItem `json:"list"`
+	}
+	SearchSuggestReq {
+		Keyword string `form:"keyword" validate:"required,min=1"`
+		Size    int64  `form:"size,default=5" validate:"omitempty,min=1,max=10"`
+	}
+	SearchSuggestResp {
+		Suggestions []string `json:"suggestions"`
+	}
+	HotKeywordItem {
+		Id          uint64 `json:"id"`
+		Keyword     string `json:"keyword"`
+		SearchCount int64  `json:"search_count"`
+		Sort        int32  `json:"sort"`
+	}
+	HotKeywordsResp {
+		List []HotKeywordItem `json:"list"`
+	}
+	SearchHistoryItem {
+		Keyword   string `json:"keyword"`
+		CreatedAt int64  `json:"created_at"`
+	}
+	SearchHistoryResp {
+		List []SearchHistoryItem `json:"list"`
+	}
+)
+
+// ES商品搜索（无需登录）
+@server (
+	prefix: /api/v1/search
+)
+service shop-api {
+	@doc "ES商品搜索"
+	@handler searchProducts
+	get /products (SearchProductsReq) returns (SearchProductsResp)
+
+	@doc "ES搜索建议"
+	@handler searchSuggest
+	get /suggest (SearchSuggestReq) returns (SearchSuggestResp)
+
+	@doc "热搜词列表"
+	@handler getHotKeywords
+	get /hot-keywords returns (HotKeywordsResp)
+}
+
+// 搜索历史（需登录）
+@server (
+	jwt:        JwtAuth
+	middleware: TokenBlacklistMiddleware
+	prefix:     /api/v1/search
+)
+service shop-api {
+	@doc "查询搜索历史"
+	@handler getSearchHistory
+	get /history returns (SearchHistoryResp)
+
+	@doc "清除搜索历史"
+	@handler clearSearchHistory
+	delete /history
 }
 

@@ -6,6 +6,7 @@ package list
 import (
 	"context"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/types/product"
+	"github.com/ZY0506/PrimeMall/common/response"
 
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/types"
@@ -29,6 +30,14 @@ func NewBatchSkuLogic(ctx context.Context, svcCtx *svc.ServiceContext) *BatchSku
 }
 
 func (l *BatchSkuLogic) BatchSku(req *types.SkuIdsReq) (resp *types.BatchSkuResp, err error) {
+	// 校验参数
+	if len(req.SkuIds) == 0 {
+		return nil, response.NewBizError(response.ErrCodeInvalidParam, "sku_ids 不能为空")
+	}
+	if len(req.SkuIds) > 100 {
+		return nil, response.NewBizError(response.ErrCodeInvalidParam, "sku_ids 最多支持 100 个")
+	}
+
 	// 调用rpc
 	skus, err := l.svcCtx.ProductRpc.BatchGetSkus(l.ctx, &product.SkuIdsReq{
 		SkuIds: req.SkuIds,

@@ -8,6 +8,8 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/service/marketing/rpc/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/service/marketing/rpc/types/marketing"
 	"github.com/ZY0506/PrimeMall/common/ctxdata"
+	"github.com/ZY0506/PrimeMall/common/errorx"
+	"github.com/ZY0506/PrimeMall/common/response"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -30,32 +32,35 @@ func (l *ClaimCouponLogic) ClaimCoupon(in *marketing.ClaimCouponReq) (*marketing
 	// 从gRPC context获取userId
 	userId, err := ctxdata.GetUserIdFromCtx(l.ctx)
 	if err != nil {
-		l.Logger.Errorf("ClaimCoupon GetUserIdFromCtx error: %v", err)
+		l.Logger.Errorf("领取优惠券：获取用户ID失败，错误：%v", err)
 		return nil, err
 	}
 
 	// 1. 查找优惠券
 	coupon, err := l.svcCtx.CouponModel.FindOne(l.ctx, in.CouponId)
 	if err != nil {
-		l.Logger.Errorf("ClaimCoupon FindOne error: %v", err)
+		l.Logger.Errorf("领取优惠券：查询优惠券失败，错误：%v", err)
 		return nil, err
 	}
 	if coupon == nil {
-		return &marketing.ClaimCouponResp{}, nil
+		return nil, errorx.NewBizError(response.ErrCodeCouponNotFound, "优惠券不存在")
 	}
 
 	// 2. 检查状态和有效期
 	if coupon.Status != 1 {
-		return &marketing.ClaimCouponResp{}, nil
+		return nil, errorx.NewBizError(response.ErrCodeCouponNotAvailable, "优惠券已下架")
 	}
 	now := time.Now()
-	if now.Before(coupon.StartTime) || now.After(coupon.EndTime) {
-		return &marketing.ClaimCouponResp{}, nil
+	if now.Before(coupon.StartTime) {
+		return nil, errorx.NewBizError(response.ErrCodeCouponNotStarted, "优惠券尚未开始")
+	}
+	if now.After(coupon.EndTime) {
+		return nil, errorx.NewBizError(response.ErrCodeCouponExpired, "优惠券已过期")
 	}
 
 	// 3. 检查库存
 	if coupon.UsedQuantity >= coupon.TotalQuantity {
-		return &marketing.ClaimCouponResp{}, nil
+		return nil, errorx.NewBizError(response.ErrCodeCouponStockExhausted, "优惠券已抢光")
 	}
 
 	// 4. 检查用户领取次数
@@ -64,8 +69,8 @@ func (l *ClaimCouponLogic) ClaimCoupon(in *marketing.ClaimCouponReq) (*marketing
 		l.Logger.Errorf("领取优惠券：统计用户领取次数失败，错误：%v", err)
 		return nil, err
 	}
-	if int64(count) >= coupon.PerUserLimit {
-		return &marketing.ClaimCouponResp{}, nil
+	if count >= coupon.PerUserLimit {
+		return nil, errorx.NewBizError(response.ErrCodeCouponAlreadyClaimed, "已达领取上限")
 	}
 
 	// 5. 扣减库存 + 创建用户优惠券记录

@@ -17,7 +17,7 @@ func AvailableCouponsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.AvailableCouponsReq
 		if err := httpx.Parse(r, &req); err != nil {
-			response.ClientError(r.Context(), w, response.RequestError, err.Error())
+			response.ClientError(r.Context(), w, response.ErrCodeInvalidParam, err.Error())
 			return
 		}
 

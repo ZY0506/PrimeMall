@@ -37,6 +37,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: admin.CouponListHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodGet,
+				Path:    "/coupon/detail/:id",
+				Handler: admin.CouponDetailHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodPost,
 				Path:    "/coupon/save",
 				Handler: admin.SaveCouponHandler(serverCtx),

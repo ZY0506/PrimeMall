@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
+	"errors"
+
+	"github.com/ZY0506/PrimeMall/apps/service/user/rpc/internal/model"
 	"github.com/ZY0506/PrimeMall/common/ctxdata"
 	"github.com/ZY0506/PrimeMall/common/errorx"
 	"github.com/ZY0506/PrimeMall/common/response"
@@ -39,11 +42,16 @@ func (l *UpdateAddressLogic) UpdateAddress(in *user.AddressItem) (*user.EmptyRes
 	// 查询要修改的地址
 	address, err := l.svcCtx.AddressModel.FindOne(l.ctx, in.Id)
 	if err != nil {
+		if errors.Is(err, model.ErrNotFound) {
+			l.Logger.Infof("地址不存在,id=%d", in.Id)
+			return nil, errorx.NewBizError(response.ErrCodeAddressNotFound, "地址不存在")
+		}
+		l.Logger.Errorf("查询地址信息失败,id=%d,err=%v", in.Id, err)
 		return nil, err
 	}
 	if address.UserId != userID {
 		l.Logger.Errorf("用户无权限修改该地址,userId=%d,addressId=%d", userID, in.Id)
-		return nil, errorx.NewBizError(response.ErrCodePermissionDenied, "用户无权限修改该地址")
+		return nil, errorx.NewBizError(response.ErrCodeAddressNotBelongUser, "该地址不属于当前用户")
 	}
 	if in.ReceiverName != "" {
 		address.ReceiverName = in.ReceiverName

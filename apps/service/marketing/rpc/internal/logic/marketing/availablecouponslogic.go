@@ -27,13 +27,13 @@ func NewAvailableCouponsLogic(ctx context.Context, svcCtx *svc.ServiceContext) *
 func (l *AvailableCouponsLogic) AvailableCoupons(in *marketing.AvailableCouponsReq) (*marketing.AvailableCouponsResp, error) {
 	userId, err := ctxdata.GetUserIdFromCtx(l.ctx)
 	if err != nil {
-		l.Logger.Errorf("AvailableCoupons GetUserIdFromCtx error: %v", err)
+		l.Logger.Errorf("查询可用优惠券：获取用户ID失败，错误：%v", err)
 		return nil, err
 	}
 
 	userCoupons, err := l.svcCtx.UserCouponModel.FindAvailableByUser(l.ctx, userId)
 	if err != nil {
-		l.Logger.Errorf("AvailableCoupons FindAvailableByUser error: %v", err)
+		l.Logger.Errorf("查询可用优惠券：查询可用列表失败，错误：%v", err)
 		return nil, err
 	}
 

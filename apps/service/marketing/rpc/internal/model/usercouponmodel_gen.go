@@ -53,9 +53,9 @@ func newUserCouponModel(conn sqlx.SqlConn) *defaultUserCouponModel {
 }
 
 func (m *defaultUserCouponModel) Insert(ctx context.Context, data *UserCoupon) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?)", m.table, userCouponRowsExpectAutoSet)
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?)", m.table, userCouponRowsExpectAutoSet)
 	ret, err := m.conn.ExecCtx(ctx, query, data.CouponId, data.UserId, data.OrderSn,
-		data.Status, data.UsedTime, data.Source, data.CreatedAt, data.ExpireTime)
+		data.Status, data.UsedTime, data.Source, data.ExpireTime)
 	return ret, err
 }
 

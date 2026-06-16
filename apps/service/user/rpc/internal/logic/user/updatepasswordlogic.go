@@ -49,6 +49,9 @@ func (l *UpdatePasswordLogic) UpdatePassword(in *user.UpdatePasswordReq) (*user.
 	if !pwd.CompareHashAndPassword(u.Password, in.OldPassword) {
 		return nil, errorx.NewBizError(response.ErrCodePasswordWrong, "旧密码错误")
 	}
+	if in.NewPassword == in.OldPassword {
+		return nil, errorx.NewBizError(response.ErrCodeSameAsOldPassword, "新密码与旧密码一致")
+	}
 	if in.NewPassword != in.ConfirmPassword {
 		return nil, errorx.NewBizError(response.ErrCodePasswordNotMatch, "新密码与确认密码不一致")
 	}

@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
+	"github.com/ZY0506/PrimeMall/common/constants"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
@@ -17,6 +19,7 @@ type (
 		InsertTx(ctx context.Context, session sqlx.Session, data *OrderInfo) (sql.Result, error)
 		UpdateTx(ctx context.Context, session sqlx.Session, newData *OrderInfo) error
 		FindList(ctx context.Context, userId uint64, status, page, pageSize int64) ([]*OrderInfo, int64, error)
+		FindExpiredOrders(ctx context.Context, limit int64) ([]*OrderInfo, error)
 		withSession(session sqlx.Session) OrderInfoModel
 	}
 
@@ -30,6 +33,15 @@ func NewOrderInfoModel(conn sqlx.SqlConn) OrderInfoModel {
 	return &customOrderInfoModel{
 		defaultOrderInfoModel: newOrderInfoModel(conn),
 	}
+}
+
+// FindExpiredOrders 查询已过期且未取消的待支付订单
+func (m *customOrderInfoModel) FindExpiredOrders(ctx context.Context, limit int64) ([]*OrderInfo, error) {
+	query := fmt.Sprintf("select %s from %s where `status` = ? and `expire_time` is not null and `expire_time` <= now() and `cancel_time` is null order by `expire_time` asc limit ?",
+		orderInfoRows, m.table)
+	var resp []*OrderInfo
+	err := m.conn.QueryRowsCtx(ctx, &resp, query, constants.ORDER_STATUS_PENDING_PAY, limit)
+	return resp, err
 }
 
 func (m *customOrderInfoModel) withSession(session sqlx.Session) OrderInfoModel {
@@ -46,7 +58,7 @@ func (m *customOrderInfoModel) InsertTx(ctx context.Context, session sqlx.Sessio
 // UpdateTx 事务操作更新
 func (m *customOrderInfoModel) UpdateTx(ctx context.Context, session sqlx.Session, newData *OrderInfo) error {
 	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, orderInfoRowsWithPlaceHolder)
-	_, err := session.ExecCtx(ctx, query, newData.OrderSn, newData.OrderType, newData.IdempotencyKey, newData.UserId, newData.Status, newData.AddressSnap, newData.TotalAmount, newData.FreightAmount, newData.CouponId, newData.CouponDiscount, newData.PayAmount, newData.Remark, newData.PayTime, newData.PayType, newData.DeliveryTime, newData.DeliverySn, newData.DeliveryCorp, newData.ReceiveTime, newData.CancelTime, newData.SeckillActivityId, newData.SeckillPrice, newData.Id)
+	_, err := session.ExecCtx(ctx, query, newData.OrderSn, newData.OrderType, newData.IdempotencyKey, newData.UserId, newData.Status, newData.AddressSnap, newData.TotalAmount, newData.FreightAmount, newData.CouponId, newData.CouponDiscount, newData.PayAmount, newData.Remark, newData.PayTime, newData.PayType, newData.DeliveryTime, newData.DeliverySn, newData.DeliveryCorp, newData.ReceiveTime, newData.CancelTime, newData.CancelReasonType, newData.CancelReason, newData.SeckillActivityId, newData.SeckillPrice, newData.ExpireTime, newData.Id)
 	return err
 }
 

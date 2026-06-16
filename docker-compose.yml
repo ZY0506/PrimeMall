@@ -20,7 +20,7 @@ services:
       - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
 
     ports:
-      - "${DB_PORT_EXTERNAL:-13306}:3306"
+      - "${DB_PORT:-13306}:3306"
     volumes:
       - ./storage/mysql/data:/var/lib/mysql
       - ./deployments/docker/mysql/init:/docker-entrypoint-initdb.d
@@ -47,7 +47,7 @@ services:
       --maxmemory 256mb
       --maxmemory-policy allkeys-lru
     ports:
-      - "${REDIS_PORT_EXTERNAL:-16379}:6379"
+      - "${REDIS_PORT:-16379}:6379"
     volumes:
       - ./storage/redis/data:/data
     healthcheck:
@@ -68,13 +68,14 @@ services:
     restart: unless-stopped
     environment:
       - ETCD_NAME=etcd-prime_mall
-      - ETCD_ADVERTISE_CLIENT_URLS=http://0.0.0.0:2379
+      # 宿主机通过 localhost 连接 etcd，必须用映射端口
+      - ETCD_ADVERTISE_CLIENT_URLS=http://localhost:${ETCD_PORT:-12379}
       - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
       - ETCD_INITIAL_CLUSTER_STATE=new
       - ETCD_INITIAL_CLUSTER_TOKEN=prime_mall_etcd_cluster
       - TZ=Asia/Shanghai
     ports:
-      - "${ETCD_PORT_EXTERNAL:-12379}:2379"
+      - "${ETCD_PORT:-12379}:2379"
     volumes:
       - ./storage/etcd/data:/etcd
     healthcheck:
@@ -99,8 +100,8 @@ services:
       - RABBITMQ_DEFAULT_VHOST=${RABBITMQ_VHOST:-/}
       - TZ=Asia/Shanghai
     ports:
-      - "${RABBITMQ_PORT_EXTERNAL:-15672}:15672"
-      - "${RABBITMQ_AMQP_PORT:-5672}:5672"
+      - "${RABBITMQ_UI_PORT:-15672}:15672"
+      - "${RABBITMQ_PORT:-5672}:5672"
     volumes:
       - ./storage/rabbitmq/data:/var/lib/rabbitmq
     healthcheck:
@@ -124,14 +125,18 @@ services:
       - node.name=es-prime-mall
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - TZ=Asia/Shanghai
+      # 磁盘水位线调整（避免94%+磁盘使用触发flood-stage导致索引只读）
+      - "cluster.routing.allocation.disk.watermark.low=85%"
+      - "cluster.routing.allocation.disk.watermark.high=92%"
+      - "cluster.routing.allocation.disk.watermark.flood_stage=97%"
     ulimits:
       memlock:
         soft: -1
         hard: -1
     ports:
-      - "${ES_PORT_EXTERNAL:-19200}:9200"
+      - "${ES_PORT:-19200}:9200"
       - "${ES_INTERNAL_PORT:-19300}:9300"
     volumes:
       - ./storage/es/data:/usr/share/elasticsearch/data

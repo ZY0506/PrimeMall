@@ -21,6 +21,8 @@ type (
 	CouponResp           = marketing.CouponResp
 	CreateCouponReq      = marketing.CreateCouponReq
 	Empty                = marketing.Empty
+	GetUserCouponReq     = marketing.GetUserCouponReq
+	GetUserCouponResp    = marketing.GetUserCouponResp
 	IdReq                = marketing.IdReq
 	ListCouponsReq       = marketing.ListCouponsReq
 	ListCouponsResp      = marketing.ListCouponsResp
@@ -53,6 +55,8 @@ type (
 		UseCoupon(ctx context.Context, in *UseCouponReq, opts ...grpc.CallOption) (*UseCouponResp, error)
 		// 内部：解锁优惠券（订单取消回滚）
 		UnlockCoupon(ctx context.Context, in *UnlockCouponReq, opts ...grpc.CallOption) (*UnlockCouponResp, error)
+		// 内部：获取用户优惠券信息（含券定义）
+		GetUserCoupon(ctx context.Context, in *GetUserCouponReq, opts ...grpc.CallOption) (*GetUserCouponResp, error)
 	}
 
 	defaultMarketing struct {
@@ -124,4 +128,10 @@ func (m *defaultMarketing) UseCoupon(ctx context.Context, in *UseCouponReq, opts
 func (m *defaultMarketing) UnlockCoupon(ctx context.Context, in *UnlockCouponReq, opts ...grpc.CallOption) (*UnlockCouponResp, error) {
 	client := marketing.NewMarketingClient(m.cli.Conn())
 	return client.UnlockCoupon(ctx, in, opts...)
+}
+
+// 内部：获取用户优惠券信息（含券定义）
+func (m *defaultMarketing) GetUserCoupon(ctx context.Context, in *GetUserCouponReq, opts ...grpc.CallOption) (*GetUserCouponResp, error) {
+	client := marketing.NewMarketingClient(m.cli.Conn())
+	return client.GetUserCoupon(ctx, in, opts...)
 }

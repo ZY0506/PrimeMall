@@ -29,6 +29,7 @@ const (
 	Marketing_AvailableCoupons_FullMethodName = "/marketing.Marketing/AvailableCoupons"
 	Marketing_UseCoupon_FullMethodName        = "/marketing.Marketing/UseCoupon"
 	Marketing_UnlockCoupon_FullMethodName     = "/marketing.Marketing/UnlockCoupon"
+	Marketing_GetUserCoupon_FullMethodName    = "/marketing.Marketing/GetUserCoupon"
 )
 
 // MarketingClient is the client API for Marketing service.
@@ -57,6 +58,8 @@ type MarketingClient interface {
 	UseCoupon(ctx context.Context, in *UseCouponReq, opts ...grpc.CallOption) (*UseCouponResp, error)
 	// 内部：解锁优惠券（订单取消回滚）
 	UnlockCoupon(ctx context.Context, in *UnlockCouponReq, opts ...grpc.CallOption) (*UnlockCouponResp, error)
+	// 内部：获取用户优惠券信息（含券定义）
+	GetUserCoupon(ctx context.Context, in *GetUserCouponReq, opts ...grpc.CallOption) (*GetUserCouponResp, error)
 }
 
 type marketingClient struct {
@@ -167,6 +170,16 @@ func (c *marketingClient) UnlockCoupon(ctx context.Context, in *UnlockCouponReq,
 	return out, nil
 }
 
+func (c *marketingClient) GetUserCoupon(ctx context.Context, in *GetUserCouponReq, opts ...grpc.CallOption) (*GetUserCouponResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetUserCouponResp)
+	err := c.cc.Invoke(ctx, Marketing_GetUserCoupon_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MarketingServer is the server API for Marketing service.
 // All implementations must embed UnimplementedMarketingServer
 // for forward compatibility.
@@ -193,6 +206,8 @@ type MarketingServer interface {
 	UseCoupon(context.Context, *UseCouponReq) (*UseCouponResp, error)
 	// 内部：解锁优惠券（订单取消回滚）
 	UnlockCoupon(context.Context, *UnlockCouponReq) (*UnlockCouponResp, error)
+	// 内部：获取用户优惠券信息（含券定义）
+	GetUserCoupon(context.Context, *GetUserCouponReq) (*GetUserCouponResp, error)
 	mustEmbedUnimplementedMarketingServer()
 }
 
@@ -232,6 +247,9 @@ func (UnimplementedMarketingServer) UseCoupon(context.Context, *UseCouponReq) (*
 }
 func (UnimplementedMarketingServer) UnlockCoupon(context.Context, *UnlockCouponReq) (*UnlockCouponResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UnlockCoupon not implemented")
+}
+func (UnimplementedMarketingServer) GetUserCoupon(context.Context, *GetUserCouponReq) (*GetUserCouponResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserCoupon not implemented")
 }
 func (UnimplementedMarketingServer) mustEmbedUnimplementedMarketingServer() {}
 func (UnimplementedMarketingServer) testEmbeddedByValue()                   {}
@@ -434,6 +452,24 @@ func _Marketing_UnlockCoupon_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Marketing_GetUserCoupon_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserCouponReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MarketingServer).GetUserCoupon(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Marketing_GetUserCoupon_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MarketingServer).GetUserCoupon(ctx, req.(*GetUserCouponReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Marketing_ServiceDesc is the grpc.ServiceDesc for Marketing service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -480,6 +516,10 @@ var Marketing_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UnlockCoupon",
 			Handler:    _Marketing_UnlockCoupon_Handler,
+		},
+		{
+			MethodName: "GetUserCoupon",
+			Handler:    _Marketing_GetUserCoupon_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

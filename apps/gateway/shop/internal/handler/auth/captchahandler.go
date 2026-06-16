@@ -18,7 +18,7 @@ func CaptchaHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		// 解析参数
 		var req types.CaptchaReq
 		if err := httpx.Parse(r, &req); err != nil {
-			response.ClientError(r.Context(), w, response.RequestError, err.Error())
+			response.ClientError(r.Context(), w, response.ErrCodeInvalidParam, err.Error())
 			return
 		}
 

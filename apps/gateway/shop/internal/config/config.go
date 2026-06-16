@@ -10,13 +10,14 @@ import (
 
 type Config struct {
 	rest.RestConf
-	UserRpc      zrpc.RpcClientConf
-	ProductRpc   zrpc.RpcClientConf
-	OrderRpc     zrpc.RpcClientConf
-	PaymentRpc   zrpc.RpcClientConf
-	MarketingRpc zrpc.RpcClientConf
-	SearchRpc    zrpc.RpcClientConf
-	JwtAuth      struct {
+	UserRpc            zrpc.RpcClientConf
+	ProductRpc         zrpc.RpcClientConf
+	OrderRpc           zrpc.RpcClientConf
+	PaymentRpc         zrpc.RpcClientConf
+	PaymentInternalRpc zrpc.RpcClientConf
+	MarketingRpc       zrpc.RpcClientConf
+	SearchRpc          zrpc.RpcClientConf
+	JwtAuth            struct {
 		AccessSecret  string
 		AccessExpire  int64
 		RefreshSecret string

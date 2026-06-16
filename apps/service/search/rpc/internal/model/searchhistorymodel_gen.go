@@ -49,8 +49,8 @@ func newSearchHistoryModel(conn sqlx.SqlConn) *defaultSearchHistoryModel {
 }
 
 func (m *defaultSearchHistoryModel) Insert(ctx context.Context, data *SearchHistory) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?)", m.table, searchHistoryRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.UserId, data.Keyword, data.ResultCount, data.CreatedAt)
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?)", m.table, searchHistoryRowsExpectAutoSet)
+	ret, err := m.conn.ExecCtx(ctx, query, data.UserId, data.Keyword, data.ResultCount)
 	return ret, err
 }
 

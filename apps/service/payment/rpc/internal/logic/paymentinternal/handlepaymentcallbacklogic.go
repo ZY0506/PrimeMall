@@ -61,12 +61,11 @@ func (l *HandlePaymentCallbackLogic) HandlePaymentCallback(in *payment.PaymentCa
 	callbackData := ""
 	if in.RawData != "" {
 		callbackData = in.RawData
-
 	}
 	_, _ = l.svcCtx.PaymentCallbackLogModel.Insert(l.ctx, &model.PaymentCallbackLog{
 		PaymentSn:   in.PaymentSn,
 		OrderSn:     in.OrderSn,
-		Channel:     "mock",
+		Channel:     pay.Channel,
 		RequestBody: sql.NullString{String: callbackData, Valid: callbackData != ""},
 		Status:      1,
 	})
@@ -80,30 +79,29 @@ func (l *HandlePaymentCallbackLogic) HandlePaymentCallback(in *payment.PaymentCa
 		return &payment.PaymentCallbackResponse{Success: false, Message: "更新失败"}, nil
 	}
 
-	// 更新Redis缓存
+	// 更新Redis缓存（Hash）
 	paymentHashKey := fmt.Sprintf("payment:sn:%s", in.PaymentSn)
 	_ = l.svcCtx.Client.HSet(l.ctx, paymentHashKey, map[string]interface{}{
 		"status":   int(payment.PaymentStatus_PAYMENT_STATUS_SUCCESS),
 		"pay_time": now.Format(time.RFC3339),
 	}).Err()
 
-	// 异步通知订单服务
-	go func() {
-		defer func() {
-			if r := recover(); r != nil {
-				l.Logger.Errorf("支付回调通知订单协程panic: %v", r)
-			}
-		}()
-		notifyCtx := context.Background()
-		_, err := l.svcCtx.OrderInternalRpc.NotifyPaymentSuccess(notifyCtx, &orderinternal.PaymentSuccessNotifyRequest{
-			PaymentSn: in.PaymentSn,
-			OrderSn:   in.OrderSn,
-			PayTime:   timestamppb.New(now),
-		})
-		if err != nil {
-			l.Logger.Errorf("通知订单服务支付成功失败: %v", err)
-		}
-	}()
+	// 清理JSON快照缓存，确保后续GetPaymentDetail查询从Hash获取最新状态
+	detailKey := fmt.Sprintf("payment:detail:%s", in.PaymentSn)
+	_ = l.svcCtx.Client.Del(l.ctx, detailKey).Err()
+
+	// 通知订单服务（同步调用以捕获错误）
+	notifyCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	_, err = l.svcCtx.OrderInternalRpc.NotifyPaymentSuccess(notifyCtx, &orderinternal.PaymentSuccessNotifyRequest{
+		PaymentSn: in.PaymentSn,
+		OrderSn:   in.OrderSn,
+		PayTime:   timestamppb.New(now),
+	})
+	if err != nil {
+		l.Logger.Errorf("通知订单服务支付成功失败: %v", err)
+		return &payment.PaymentCallbackResponse{Success: false, Message: fmt.Sprintf("通知订单失败: %v", err)}, nil
+	}
 
 	l.Logger.Infof("支付回调处理成功: paymentSn=%s, orderSn=%s", in.PaymentSn, in.OrderSn)
 	return &payment.PaymentCallbackResponse{Success: true, Message: "success"}, nil

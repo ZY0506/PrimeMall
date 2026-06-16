@@ -5,6 +5,7 @@ import (
 
 	"github.com/ZY0506/PrimeMall/apps/service/search/rpc/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/service/search/rpc/types/search"
+	"github.com/ZY0506/PrimeMall/common/ctxdata"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -41,14 +42,23 @@ func (l *SearchProductsLogic) SearchProducts(in *search.SearchProductsReq) (*sea
 		}, nil
 	}
 
-	// Ensure index exists
-	_ = l.svcCtx.ES.EnsureIndex(l.ctx)
-
 	result, err := l.svcCtx.ES.SearchProducts(l.ctx, in.Keyword, in.CategoryId, in.Brand,
 		in.MinPrice, in.MaxPrice, in.SortBy, in.SortType, page, size)
 	if err != nil {
-		l.Logger.Errorf("商品搜索：ES查询失败，错误：%v", err)
-		return nil, err
+		l.Logger.Errorf("商品搜索：ES查询失败，已降级返回空结果，错误：%v", err)
+		return &search.SearchProductsResp{
+			Page: &search.PageResp{Total: 0, Page: int64(page), Size: int64(size)},
+			List: []*search.ProductSearchItem{},
+		}, nil
+	}
+
+	// 记录搜索历史（登录用户）
+	if userId, uidErr := ctxdata.GetUserIdFromCtx(l.ctx); uidErr == nil && userId > 0 && in.Keyword != "" {
+		go func() {
+			if err := l.svcCtx.SearchHistoryModel.RecordHistory(context.Background(), userId, in.Keyword, result.Total); err != nil {
+				l.Logger.Errorf("记录搜索历史失败: %v", err)
+			}
+		}()
 	}
 
 	list := make([]*search.ProductSearchItem, 0, len(result.Hits))

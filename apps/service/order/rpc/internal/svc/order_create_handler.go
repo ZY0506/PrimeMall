@@ -5,12 +5,15 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/ZY0506/PrimeMall/apps/service/marketing/rpc/client/marketing"
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/internal/model"
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/types/order"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/types/product"
 	"github.com/ZY0506/PrimeMall/common/constants"
+	"github.com/ZY0506/PrimeMall/common/ctxdata"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
@@ -47,9 +50,9 @@ type OrderItemMessage struct {
 	TotalAmount int64  `json:"total_amount"`
 }
 
-// orderCreateHandler 处理订单创建消息：锁库存 + 落库 + 发送超时队列
+// orderCreateHandler 处理订单创建消息：锁库存 → 使用优惠券 → 落库 → 后置处理
 func (sc *ServiceContext) orderCreateHandler(msg []byte) error {
-	ctx, cancel := context.WithTimeout(sc.ctx, 10*time.Second)
+	ctx, cancel := context.WithTimeout(sc.Ctx, 10*time.Second)
 	defer cancel()
 	var createMsg OrderCreateMessage
 	if err := json.Unmarshal(msg, &createMsg); err != nil {
@@ -134,7 +137,42 @@ func (sc *ServiceContext) orderCreateHandler(msg []byte) error {
 		return sc.handleStockFailOrder(ctx, orderInfo, now)
 	}
 
-	// ===================== 5. 本地事务：落库 =====================
+	// ===================== 5. 使用优惠券（下单前扣减，保证一致性）=====================
+	usedCoupon := false
+	if createMsg.CouponId > 0 {
+		useCouponCtx := ctx
+		if ckCtx, ckErr := ctxdata.PutUserIdToCtx(ctx, createMsg.UserId); ckErr == nil {
+			useCouponCtx = ckCtx
+		} else {
+			logx.WithContext(ctx).Errorf("注入用户ID到优惠券上下文失败, order_sn=%s, err=%v", createMsg.OrderSn, ckErr)
+		}
+		useRet, useErr := sc.useCouponWithRetry(useCouponCtx, &createMsg)
+		if useErr != nil || useRet == nil || !useRet.Success {
+			errMsg := "优惠券使用失败"
+			if useRet != nil {
+				errMsg = useRet.ErrorMsg
+			}
+			logx.WithContext(ctx).Errorf("使用优惠券失败，order_sn=%s, reason=%s", createMsg.OrderSn, errMsg)
+			// 补偿：解锁库存
+			_, _ = sc.ProductRpc.UnlockStock(ctx, &product.UpdateStockReq{
+				Items:   lockStockItems,
+				OrderSn: createMsg.OrderSn,
+			})
+			return sc.handleFailOrder(ctx, orderInfo, now, "优惠券使用失败，订单自动取消", constants.CANCEL_REASON_TYPE_OTHER)
+		}
+		usedCoupon = true
+		// 用 UseCoupon 返回的实际折扣金额覆盖 payAmount
+		if useRet.DiscountAmount > 0 {
+			actualPay := createMsg.TotalAmount + createMsg.FreightAmount - useRet.DiscountAmount
+			if actualPay < 0 {
+				actualPay = 0
+			}
+			orderInfo.PayAmount = actualPay
+			orderInfo.CouponDiscount = useRet.DiscountAmount
+		}
+	}
+
+	// ===================== 6. 本地事务：落库 =====================
 	err = sc.DB.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
 		_, err := sc.OrderInfoModel.InsertTx(ctx, session, orderInfo)
 		if err != nil {
@@ -149,18 +187,29 @@ func (sc *ServiceContext) orderCreateHandler(msg []byte) error {
 		return nil
 	})
 	if err != nil {
-		// 事务失败：解锁库存
+		// 事务失败：解锁库存 + 解锁优惠券（补偿）
 		_, _ = sc.ProductRpc.UnlockStock(ctx, &product.UpdateStockReq{
 			Items:   lockStockItems,
 			OrderSn: createMsg.OrderSn,
 		})
+		if usedCoupon {
+			sc.unlockCouponBestEffort(ctx, &createMsg)
+		}
 		logx.WithContext(ctx).Errorf("异步订单事务失败，order_sn=%s, err=%v", createMsg.OrderSn, err)
 		return err
 	}
 
-	// ===================== 6. 后置处理 =====================
-	if len(createMsg.CartSkuIds) > 0 {
-		_ = sc.CartModel.BatchDelete(ctx, createMsg.UserId, createMsg.CartSkuIds)
+	// ===================== 7. 后置处理 =====================
+	// 自动清除已购买商品的购物车记录
+	cartSkuIds := createMsg.CartSkuIds
+	if len(cartSkuIds) == 0 {
+		// 未传入 CartSkuIds 时，从订单商品 SKU 列表自动推导
+		for _, item := range createMsg.ItemSnapshots {
+			cartSkuIds = append(cartSkuIds, item.SkuId)
+		}
+	}
+	if len(cartSkuIds) > 0 {
+		_ = sc.CartModel.BatchDelete(ctx, createMsg.UserId, cartSkuIds)
 	}
 
 	// 发送延迟队列 → 超时取消
@@ -171,18 +220,93 @@ func (sc *ServiceContext) orderCreateHandler(msg []byte) error {
 		Items:            unlockStockItems,
 		CouponId:         createMsg.CouponId,
 	})
-	_ = sc.MQClient.Publish(ctx, "", constants.ORDER_TIMEOUT_ROUTING_KEY, timeoutMsg)
+	_ = sc.MQClient.Publish(ctx, constants.ORDER_DELAY_QUEUE+"_exchange", constants.ORDER_DELAY_QUEUE, timeoutMsg)
 
 	logx.WithContext(ctx).Infof("异步订单创建成功，order_sn=%s", createMsg.OrderSn)
 	return nil
 }
 
+// useCouponWithRetry 调用营销服务使用优惠券，带重试机制
+// 仅对网络等瞬时错误重试，业务错误（已使用、已过期等）直接返回
+func (sc *ServiceContext) useCouponWithRetry(ctx context.Context, createMsg *OrderCreateMessage) (*marketing.UseCouponResp, error) {
+	var lastErr error
+	maxAttempts := 3
+
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		if attempt > 0 {
+			// 指数退避：200ms, 400ms
+			backoff := time.Duration(100*(1<<attempt)) * time.Millisecond
+			select {
+			case <-time.After(backoff):
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			}
+		}
+
+		useCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+		resp, err := sc.MarketingRpc.UseCoupon(useCtx, &marketing.UseCouponReq{
+			UserCouponId: createMsg.CouponId,
+			OrderSn:      createMsg.OrderSn,
+			OrderAmount:  createMsg.TotalAmount,
+		})
+		cancel()
+
+		if err != nil {
+			// 网络/超时等瞬时错误，可重试
+			lastErr = err
+			logx.WithContext(ctx).Errorf("使用优惠券RPC失败（第%d次），order_sn=%s, err=%v",
+				attempt+1, createMsg.OrderSn, err)
+			continue
+		}
+
+		if !resp.Success {
+			// 业务错误（已使用、已过期等），不可重试
+			return resp, nil
+		}
+
+		// 成功
+		return resp, nil
+	}
+
+	return nil, fmt.Errorf("使用优惠券重试%d次后仍然失败: %v", maxAttempts, lastErr)
+}
+
+// unlockCouponBestEffort 尽力解锁优惠券（补偿操作），不返回错误避免打断主流程
+func (sc *ServiceContext) unlockCouponBestEffort(ctx context.Context, createMsg *OrderCreateMessage) {
+	if createMsg.CouponId == 0 {
+		return
+	}
+	for attempt := 0; attempt < 3; attempt++ {
+		if attempt > 0 {
+			time.Sleep(time.Duration(100*(1<<attempt)) * time.Millisecond)
+		}
+		uCtx, cancel := context.WithTimeout(ctx, 3*time.Second)
+		resp, err := sc.MarketingRpc.UnlockCoupon(uCtx, &marketing.UnlockCouponReq{
+			UserCouponId: createMsg.CouponId,
+			OrderSn:      createMsg.OrderSn,
+		})
+		cancel()
+		if err == nil && resp != nil && resp.Success {
+			return
+		}
+		logx.WithContext(ctx).Errorf("解锁优惠券失败（第%d次），order_sn=%s, err=%v",
+			attempt+1, createMsg.OrderSn, err)
+	}
+	logx.WithContext(ctx).Errorf("解锁优惠券最终失败，需人工处理，order_sn=%s, coupon_id=%d",
+		createMsg.OrderSn, createMsg.CouponId)
+}
+
 // handleStockFailOrder 库存不足：记录订单为取消状态
 func (sc *ServiceContext) handleStockFailOrder(ctx context.Context, orderInfo *model.OrderInfo, now time.Time) error {
+	return sc.handleFailOrder(ctx, orderInfo, now, "库存不足，订单自动取消", constants.CANCEL_REASON_TYPE_INSUFFICIENT_STOCK)
+}
+
+// handleFailOrder 记录订单为取消状态
+func (sc *ServiceContext) handleFailOrder(ctx context.Context, orderInfo *model.OrderInfo, now time.Time, reason string, reasonType int64) error {
 	orderInfo.Status = constants.ORDER_STATUS_CANCELED
 	orderInfo.CancelTime = sql.NullTime{Time: now, Valid: true}
-	orderInfo.CancelReason = "库存不足，订单自动取消"
-	orderInfo.CancelReasonType = constants.CANCEL_REASON_TYPE_INSUFFICIENT_STOCK
+	orderInfo.CancelReason = reason
+	orderInfo.CancelReasonType = reasonType
 
 	return sc.DB.TransactCtx(ctx, func(ctx context.Context, session sqlx.Session) error {
 		_, err := sc.OrderInfoModel.InsertTx(ctx, session, orderInfo)

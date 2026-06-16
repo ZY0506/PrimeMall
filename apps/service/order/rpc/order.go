@@ -21,7 +21,7 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-var configFile = flag.String("f", "etc/order.yaml", "the config file")
+var configFile = flag.String("f", "apps/service/order/rpc/etc/order.yaml", "the config file")
 
 func main() {
 	flag.Parse()
@@ -50,6 +50,9 @@ func main() {
 		}
 	})
 	defer s.Stop()
+
+	// 启动定时关单任务（兜底方案，防止MQ延迟消息丢失导致过期订单未关闭）
+	go ctx.CloseExpiredOrders(ctx.Ctx)
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()

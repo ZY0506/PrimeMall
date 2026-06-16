@@ -155,7 +155,7 @@ func (m *defaultProductSpuModel) FindListByFilter(ctx context.Context, filters *
 	orderClause := "ORDER BY p.id DESC" // 默认按 id 倒序
 	switch filters.SortBy {
 	case "price":
-		orderClause = fmt.Sprintf("ORDER BY min_price %s, p.id %s", filters.SortType, filters.SortType)
+		orderClause = fmt.Sprintf("ORDER BY price %s, p.id %s", filters.SortType, filters.SortType)
 	case "sales":
 		orderClause = fmt.Sprintf("ORDER BY p.sales_count %s, p.id %s", filters.SortType, filters.SortType)
 	case "created_at":

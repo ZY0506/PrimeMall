@@ -6,6 +6,7 @@ package list
 import (
 	"context"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/types/product"
+	"github.com/ZY0506/PrimeMall/common/response"
 
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/types"
@@ -29,6 +30,21 @@ func NewListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ListLogic {
 }
 
 func (l *ListLogic) List(req *types.ProductListReq) (resp *types.ProductListResp, err error) {
+	// 校验排序参数
+	if req.SortBy != "" {
+		switch req.SortBy {
+		case "price", "sales", "created_at":
+			// 有效的排序字段，校验排序方向
+			if req.SortType != "" && req.SortType != "asc" && req.SortType != "desc" {
+				return nil, response.NewBizError(response.ErrCodeInvalidParam, "无效的排序方向，仅支持 asc/desc")
+			}
+		default:
+			return nil, response.NewBizError(response.ErrCodeInvalidParam, "无效的排序字段，仅支持 price/sales/created_at")
+		}
+	} else if req.SortType != "" {
+		return nil, response.NewBizError(response.ErrCodeInvalidParam, "指定排序方向时必须同时指定排序字段")
+	}
+
 	var attrs []*product.AttrFilter
 	for _, attr := range req.Attrs {
 		attrs = append(attrs, &product.AttrFilter{

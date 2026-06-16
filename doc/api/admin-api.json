@@ -1,0 +1,2121 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "PrimeMall Admin API",
+    "description": "PrimeMall 管理后台",
+    "version": "v1.0"
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/api/v1/admin/category/list": {
+      "get": {
+        "operationId": "categoryList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/CategoryListResp"
+            }
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/category/save": {
+      "post": {
+        "operationId": "saveCategory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SaveCategoryReq"
+            }
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/category/{id}": {
+      "delete": {
+        "operationId": "deleteCategory",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IdReq"
+            }
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/coupon/list": {
+      "get": {
+        "operationId": "couponList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminCouponListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "10"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/coupon/save": {
+      "post": {
+        "operationId": "saveCoupon",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SaveCouponReq"
+            }
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/coupon/status": {
+      "post": {
+        "operationId": "updateCouponStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateStatusReq"
+            }
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/info": {
+      "get": {
+        "operationId": "adminInfo",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminInfoResp"
+            }
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/login": {
+      "post": {
+        "summary": "管理员登录",
+        "operationId": "login",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminLoginResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/AdminLoginReq"
+            }
+          }
+        ],
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/admin/operate/logs": {
+      "get": {
+        "operationId": "operateLogs",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminOperateLogResp"
+            }
+          }
+        },
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/order/detail/{order_sn}": {
+      "get": {
+        "operationId": "orderDetail",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminOrderDetailResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "order_sn",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/order/list": {
+      "get": {
+        "operationId": "orderList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminOrderListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "10"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "order_sn",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "start_time",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "end_time",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/order/ship": {
+      "post": {
+        "operationId": "shipOrder",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ShipOrderReq"
+            }
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/password": {
+      "put": {
+        "operationId": "changePassword",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/ChangePasswordReq"
+            }
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/product/detail/{id}": {
+      "get": {
+        "operationId": "productDetail",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminProductDetailResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/product/list": {
+      "get": {
+        "operationId": "productList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminProductListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "10"
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "category_id",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/product/save": {
+      "post": {
+        "operationId": "saveProduct",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/SaveProductReq"
+            }
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/product/status": {
+      "post": {
+        "operationId": "updateProductStatus",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateStatusReq"
+            }
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/product/{id}": {
+      "delete": {
+        "operationId": "deleteProduct",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IdReq"
+            }
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/refund/handle": {
+      "post": {
+        "operationId": "handleRefund",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/HandleRefundReq"
+            }
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/refund/list": {
+      "get": {
+        "operationId": "refundList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminRefundListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "10"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/user/blacklist": {
+      "post": {
+        "operationId": "blacklistUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BlackUserReq"
+            }
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/user/detail/{id}": {
+      "get": {
+        "operationId": "userDetail",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminUserDetailResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/user/list": {
+      "get": {
+        "operationId": "userList",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/AdminUserListResp"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "1"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "default": "10"
+          },
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int64"
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    },
+    "/api/v1/admin/user/recover": {
+      "post": {
+        "operationId": "recoverUser",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {}
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/IdReq"
+            }
+          }
+        ],
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "apiKey": []
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "AdminCategoryItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "parent_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "level": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "sort": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "AdminCategoryItem",
+      "required": [
+        "id",
+        "parent_id",
+        "name",
+        "icon",
+        "level",
+        "sort"
+      ]
+    },
+    "AdminCouponItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "total_quantity": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "used_quantity": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "start_time": {
+          "type": "string"
+        },
+        "end_time": {
+          "type": "string"
+        }
+      },
+      "title": "AdminCouponItem",
+      "required": [
+        "id",
+        "name",
+        "type",
+        "total_quantity",
+        "used_quantity",
+        "status",
+        "start_time",
+        "end_time"
+      ]
+    },
+    "AdminCouponListReq": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "title": "AdminCouponListReq"
+    },
+    "AdminCouponListResp": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminCouponItem"
+          }
+        }
+      },
+      "title": "AdminCouponListResp",
+      "required": [
+        "total",
+        "list"
+      ]
+    },
+    "AdminInfoResp": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "username": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        }
+      },
+      "title": "AdminInfoResp",
+      "required": [
+        "id",
+        "username",
+        "nickname",
+        "avatar",
+        "role"
+      ]
+    },
+    "AdminLoginReq": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "title": "AdminLoginReq",
+      "required": [
+        "username",
+        "password"
+      ]
+    },
+    "AdminLoginResp": {
+      "type": "object",
+      "properties": {
+        "access_token": {
+          "type": "string"
+        },
+        "access_expire": {
+          "type": "string"
+        }
+      },
+      "title": "AdminLoginResp",
+      "required": [
+        "access_token",
+        "access_expire"
+      ]
+    },
+    "AdminOperateLogItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "admin_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "module": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "ip": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        }
+      },
+      "title": "AdminOperateLogItem",
+      "required": [
+        "id",
+        "admin_id",
+        "module",
+        "action",
+        "content",
+        "ip",
+        "created_at"
+      ]
+    },
+    "AdminOperateLogResp": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminOperateLogItem"
+          }
+        }
+      },
+      "title": "AdminOperateLogResp",
+      "required": [
+        "total",
+        "list"
+      ]
+    },
+    "AdminOrderAddress": {
+      "type": "object",
+      "properties": {
+        "receiver_name": {
+          "type": "string"
+        },
+        "receiver_phone": {
+          "type": "string"
+        },
+        "province": {
+          "type": "string"
+        },
+        "city": {
+          "type": "string"
+        },
+        "district": {
+          "type": "string"
+        },
+        "detail_address": {
+          "type": "string"
+        }
+      },
+      "title": "AdminOrderAddress",
+      "required": [
+        "receiver_name",
+        "receiver_phone",
+        "province",
+        "city",
+        "district",
+        "detail_address"
+      ]
+    },
+    "AdminOrderDetailResp": {
+      "type": "object",
+      "properties": {
+        "order_sn": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "user_phone": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status_desc": {
+          "type": "string"
+        },
+        "pay_type": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "pay_type_desc": {
+          "type": "string"
+        },
+        "pay_amount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "total_amount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "freight_amount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "coupon_amount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "remark": {
+          "type": "string"
+        },
+        "address": {
+          "$ref": "#/definitions/AdminOrderAddress"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminOrderItem"
+          }
+        },
+        "delivery_sn": {
+          "type": "string"
+        },
+        "delivery_company": {
+          "type": "string"
+        },
+        "payment_sn": {
+          "type": "string"
+        },
+        "create_time": {
+          "type": "string"
+        },
+        "pay_time": {
+          "type": "string"
+        },
+        "delivery_time": {
+          "type": "string"
+        },
+        "finish_time": {
+          "type": "string"
+        },
+        "cancel_time": {
+          "type": "string"
+        }
+      },
+      "title": "AdminOrderDetailResp",
+      "required": [
+        "order_sn",
+        "user_id",
+        "user_phone",
+        "status",
+        "status_desc",
+        "pay_type",
+        "pay_type_desc",
+        "pay_amount",
+        "total_amount",
+        "freight_amount",
+        "coupon_amount",
+        "remark",
+        "address",
+        "items",
+        "create_time"
+      ]
+    },
+    "AdminOrderItem": {
+      "type": "object",
+      "properties": {
+        "sku_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "spu_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "product_name": {
+          "type": "string"
+        },
+        "sku_name": {
+          "type": "string"
+        },
+        "pic": {
+          "type": "string"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 成交单价（分）"
+        },
+        "quantity": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 购买数量"
+        },
+        "total_amount": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 小计金额（分）"
+        }
+      },
+      "title": "AdminOrderItem",
+      "required": [
+        "sku_id",
+        "spu_id",
+        "product_name",
+        "sku_name",
+        "pic",
+        "price",
+        "quantity",
+        "total_amount"
+      ]
+    },
+    "AdminOrderListReq": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "order_sn": {
+          "type": "string"
+        },
+        "start_time": {
+          "type": "string"
+        },
+        "end_time": {
+          "type": "string"
+        }
+      },
+      "title": "AdminOrderListReq"
+    },
+    "AdminOrderListResp": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminOrderSnapshot"
+          }
+        }
+      },
+      "title": "AdminOrderListResp",
+      "required": [
+        "total",
+        "list"
+      ]
+    },
+    "AdminOrderSnapshot": {
+      "type": "object",
+      "properties": {
+        "order_sn": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "user_phone": {
+          "type": "string"
+        },
+        "pay_amount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status_desc": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        }
+      },
+      "title": "AdminOrderSnapshot",
+      "required": [
+        "order_sn",
+        "user_id",
+        "user_phone",
+        "pay_amount",
+        "status",
+        "status_desc",
+        "created_at"
+      ]
+    },
+    "AdminProductDetailResp": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "category_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "brand": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "default_pic": {
+          "type": "string"
+        },
+        "banner_pics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "video_url": {
+          "type": "string"
+        },
+        "weight": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "freight_template_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "skus": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminSkuItem"
+          }
+        },
+        "created_at": {
+          "type": "string"
+        }
+      },
+      "title": "AdminProductDetailResp",
+      "required": [
+        "id",
+        "category_id",
+        "brand",
+        "name",
+        "description",
+        "content",
+        "default_pic",
+        "banner_pics",
+        "video_url",
+        "weight",
+        "freight_template_id",
+        "status",
+        "skus",
+        "created_at"
+      ]
+    },
+    "AdminProductItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "brand": {
+          "type": "string"
+        },
+        "default_pic": {
+          "type": "string"
+        },
+        "price": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "sales": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "created_at": {
+          "type": "string"
+        }
+      },
+      "title": "AdminProductItem",
+      "required": [
+        "id",
+        "name",
+        "brand",
+        "default_pic",
+        "price",
+        "sales",
+        "status",
+        "created_at"
+      ]
+    },
+    "AdminProductListReq": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10"
+        },
+        "keyword": {
+          "type": "string"
+        },
+        "category_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "AdminProductListReq"
+    },
+    "AdminProductListResp": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminProductItem"
+          }
+        }
+      },
+      "title": "AdminProductListResp",
+      "required": [
+        "total",
+        "list"
+      ]
+    },
+    "AdminRefundItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "refund_sn": {
+          "type": "string"
+        },
+        "order_sn": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "refund_amount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status_desc": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        }
+      },
+      "title": "AdminRefundItem",
+      "required": [
+        "id",
+        "refund_sn",
+        "order_sn",
+        "user_id",
+        "refund_amount",
+        "status",
+        "status_desc",
+        "created_at"
+      ]
+    },
+    "AdminRefundListReq": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "AdminRefundListReq"
+    },
+    "AdminRefundListResp": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminRefundItem"
+          }
+        }
+      },
+      "title": "AdminRefundListResp",
+      "required": [
+        "total",
+        "list"
+      ]
+    },
+    "AdminSkuItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "code": {
+          "type": "string"
+        },
+        "pic": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "price": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "stock": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "weight": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "spec_data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ProductSpecItem"
+          }
+        }
+      },
+      "title": "AdminSkuItem",
+      "required": [
+        "code",
+        "pic",
+        "price",
+        "stock",
+        "weight",
+        "spec_data"
+      ]
+    },
+    "AdminUserDetailResp": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "gender": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "birthday": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status_desc": {
+          "type": "string"
+        },
+        "order_count": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "total_amount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "last_login_time": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        }
+      },
+      "title": "AdminUserDetailResp",
+      "required": [
+        "id",
+        "phone",
+        "nickname",
+        "avatar",
+        "gender",
+        "birthday",
+        "status",
+        "status_desc",
+        "order_count",
+        "total_amount",
+        "last_login_time",
+        "created_at"
+      ]
+    },
+    "AdminUserItem": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status_desc": {
+          "type": "string"
+        },
+        "created_at": {
+          "type": "string"
+        }
+      },
+      "title": "AdminUserItem",
+      "required": [
+        "id",
+        "phone",
+        "nickname",
+        "avatar",
+        "status",
+        "status_desc",
+        "created_at"
+      ]
+    },
+    "AdminUserListReq": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10"
+        },
+        "keyword": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "AdminUserListReq"
+    },
+    "AdminUserListResp": {
+      "type": "object",
+      "properties": {
+        "total": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminUserItem"
+          }
+        }
+      },
+      "title": "AdminUserListResp",
+      "required": [
+        "total",
+        "list"
+      ]
+    },
+    "BlackUserReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "title": "BlackUserReq",
+      "required": [
+        "id"
+      ]
+    },
+    "CategoryListResp": {
+      "type": "object",
+      "properties": {
+        "list": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminCategoryItem"
+          }
+        }
+      },
+      "title": "CategoryListResp",
+      "required": [
+        "list"
+      ]
+    },
+    "ChangePasswordReq": {
+      "type": "object",
+      "properties": {
+        "old_password": {
+          "type": "string"
+        },
+        "new_password": {
+          "type": "string"
+        }
+      },
+      "title": "ChangePasswordReq",
+      "required": [
+        "old_password",
+        "new_password"
+      ]
+    },
+    "HandleRefundReq": {
+      "type": "object",
+      "properties": {
+        "refund_sn": {
+          "type": "string"
+        },
+        "action": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 1通过 2拒绝"
+        },
+        "remark": {
+          "type": "string"
+        }
+      },
+      "title": "HandleRefundReq",
+      "required": [
+        "refund_sn",
+        "action"
+      ]
+    },
+    "IdReq": {
+      "type": "object",
+      "title": "IdReq"
+    },
+    "OrderSnReq": {
+      "type": "object",
+      "title": "OrderSnReq"
+    },
+    "Pagination": {
+      "type": "object",
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int64",
+          "default": "1"
+        },
+        "size": {
+          "type": "integer",
+          "format": "int64",
+          "default": "10"
+        }
+      },
+      "title": "Pagination",
+      "required": [
+        "page",
+        "size"
+      ]
+    },
+    "ProductSpecItem": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "title": "ProductSpecItem",
+      "required": [
+        "name",
+        "value"
+      ]
+    },
+    "SaveCategoryReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "parent_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "sort": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "SaveCategoryReq",
+      "required": [
+        "parent_id",
+        "name",
+        "sort"
+      ]
+    },
+    "SaveCouponReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "threshold_amount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "reduce_amount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "discount_rate": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "max_discount_amount": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "total_quantity": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "per_user_limit": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "start_time": {
+          "type": "string"
+        },
+        "end_time": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "title": "SaveCouponReq",
+      "required": [
+        "name",
+        "type",
+        "threshold_amount",
+        "reduce_amount",
+        "discount_rate",
+        "max_discount_amount",
+        "total_quantity",
+        "per_user_limit",
+        "start_time",
+        "end_time",
+        "status",
+        "description"
+      ]
+    },
+    "SaveProductReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "category_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "brand": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "default_pic": {
+          "type": "string"
+        },
+        "banner_pics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "video_url": {
+          "type": "string"
+        },
+        "weight": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "freight_template_id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "skus": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/AdminSkuItem"
+          }
+        }
+      },
+      "title": "SaveProductReq",
+      "required": [
+        "category_id",
+        "brand",
+        "name",
+        "description",
+        "content",
+        "default_pic",
+        "banner_pics",
+        "weight",
+        "freight_template_id",
+        "status",
+        "skus"
+      ]
+    },
+    "ShipOrderReq": {
+      "type": "object",
+      "properties": {
+        "order_sn": {
+          "type": "string"
+        },
+        "delivery_company": {
+          "type": "string"
+        },
+        "delivery_sn": {
+          "type": "string"
+        },
+        "remark": {
+          "type": "string"
+        }
+      },
+      "title": "ShipOrderReq",
+      "required": [
+        "order_sn",
+        "delivery_company",
+        "delivery_sn"
+      ]
+    },
+    "UpdateStatusReq": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "UpdateStatusReq",
+      "required": [
+        "id",
+        "status"
+      ]
+    }
+  },
+  "securityDefinitions": {
+    "apiKey": {
+      "type": "apiKey",
+      "description": "Enter JWT Bearer token **_only_**",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

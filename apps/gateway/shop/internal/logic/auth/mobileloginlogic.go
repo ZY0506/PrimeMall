@@ -5,12 +5,9 @@ package auth
 
 import (
 	"context"
-	"github.com/ZY0506/PrimeMall/apps/service/user/rpc/types/user"
-	"github.com/ZY0506/PrimeMall/common/response"
-	"github.com/ZY0506/PrimeMall/common/utils"
-
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/types"
+	"github.com/ZY0506/PrimeMall/apps/service/user/rpc/types/user"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -31,10 +28,6 @@ func NewMobileLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Mobil
 }
 
 func (l *MobileLoginLogic) MobileLogin(req *types.MobileLoginReq) (resp *types.LoginResp, err error) {
-	// 参数验证（手机号）
-	if !utils.ValidatePhone(req.Phone) {
-		return nil, response.NewBizError(response.ErrCodeInvalidParam, "手机号格式错误")
-	}
 	// 调用rpc
 	res, err := l.svcCtx.UserRpc.MobileLogin(l.ctx, &user.MobileLoginReq{
 		Phone: req.Phone,
