@@ -49,11 +49,8 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (resp *orde
 		return nil, err
 	}
 	if !ok {
-		return &order.CreateOrderResponse{
-			OrderSn:   "",
-			PayAmount: 0,
-			Status:    constants.ORDER_STATUS_PROCESSING,
-		}, nil
+		l.Logger.Errorf("幂等冲突，重复提交，idempotencyKey=%s", idempotencyKey)
+		return nil, errorx.NewBizError(response.ErrCodeIdempotentConflict, "订单正在处理中，请勿重复提交")
 	}
 	defer func() {
 		if err != nil {
@@ -66,12 +63,13 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (resp *orde
 	var cacheJson string
 	cacheJson, err = l.svcCtx.Client.Get(l.ctx, cacheKey).Result()
 	if err != nil {
+		l.Logger.Errorf("获取结算缓存失败: %v", err)
 		return nil, err
 	}
 
 	var settlementData SettlementData
 	if err = json.Unmarshal([]byte(cacheJson), &settlementData); err != nil {
-		l.Logger.Errorf("解析缓存失败: %v", err)
+		l.Logger.Errorf("解析结算缓存失败: %v", err)
 		return nil, err
 	}
 

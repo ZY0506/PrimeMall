@@ -28,6 +28,13 @@ MarketingRpc:
   NonBlock: true
   Timeout: 5000
 
+PaymentRpc:
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}:${ETCD_PORT}
+    Key: payment.rpc
+  Timeout: 5000
+
 DB:
   DSN: ${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/shop_order?charset=utf8mb4&parseTime=True&loc=Local
   MaxIdleConns: 50

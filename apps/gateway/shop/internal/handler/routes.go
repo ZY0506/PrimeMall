@@ -17,6 +17,8 @@ import (
 	paymentcore "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/payment/core"
 	productcategory "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/product/category"
 	productlist "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/product/list"
+	search "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/search"
+	useraddre
 	useraddress "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/user/address"
 	userprofile "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/user/profile"
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/svc"
@@ -31,19 +33,19 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				// 热搜词列表
 				Method:  http.MethodGet,
 				Path:    "/hot-keywords",
-				Handler: getHotKeywordsHandler(serverCtx),
+				Handler: search.GetHotKeywordsHandler(serverCtx),
 			},
 			{
 				// ES商品搜索
 				Method:  http.MethodGet,
 				Path:    "/products",
-				Handler: searchProductsHandler(serverCtx),
+				Handler: search.SearchProductsHandler(serverCtx),
 			},
 			{
 				// ES搜索建议
 				Method:  http.MethodGet,
 				Path:    "/suggest",
-				Handler: searchSuggestHandler(serverCtx),
+				Handler: search.SearchSuggestHandler(serverCtx),
 			},
 		},
 		rest.WithPrefix("/api/v1/search"),
@@ -57,13 +59,13 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 					// 查询搜索历史
 					Method:  http.MethodGet,
 					Path:    "/history",
-					Handler: getSearchHistoryHandler(serverCtx),
+					Handler: search.GetSearchHistoryHandler(serverCtx),
 				},
 				{
 					// 清除搜索历史
 					Method:  http.MethodDelete,
 					Path:    "/history",
-					Handler: clearSearchHistoryHandler(serverCtx),
+					Handler: search.ClearSearchHistoryHandler(serverCtx),
 				},
 			}...,
 		),

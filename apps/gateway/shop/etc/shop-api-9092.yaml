@@ -27,6 +27,12 @@ PaymentRpc:
       - ${ETCD_HOST}:${ETCD_PORT}
     Key: payment.rpc
 
+PaymentInternalRpc:
+  Etcd:
+    Hosts:
+      - ${ETCD_HOST}:${ETCD_PORT}
+    Key: payment.rpc
+
 MarketingRpc:
   Etcd:
     Hosts:

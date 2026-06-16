@@ -7,6 +7,7 @@ import (
 
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/types/order"
+	paymentclient "github.com/ZY0506/PrimeMall/apps/service/payment/rpc/client/payment"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/client/productinternal"
 	"github.com/ZY0506/PrimeMall/common/constants"
 	"github.com/ZY0506/PrimeMall/common/errorx"
@@ -31,7 +32,7 @@ func NewNotifyPaymentSuccessLogic(ctx context.Context, svcCtx *svc.ServiceContex
 }
 
 // NotifyPaymentSuccess 处理支付成功通知
-// 核心职责：更新订单状态为已支付 + 扣减已锁定库存（幂等安全）
+// 核心职责：查询真实支付方式 → 扣减已锁定库存 → 更新订单状态为已支付（含补偿回滚）
 func (l *NotifyPaymentSuccessLogic) NotifyPaymentSuccess(in *order.PaymentSuccessNotifyRequest) (*order.Empty, error) {
 	// 1. 参数校验
 	if in.OrderSn == "" || in.PaymentSn == "" {
@@ -58,14 +59,28 @@ func (l *NotifyPaymentSuccessLogic) NotifyPaymentSuccess(in *order.PaymentSucces
 		return nil, errorx.NewBizError(response.ErrCodeOrderStatusInvalid, "订单状态不允许支付")
 	}
 
-	// 5. 查询订单商品列表（用于扣减库存）
+	// 5. 查询支付详情获取真实的支付方式（从 Payment 服务获取，而非硬编码）
+	var payType int64
+	paymentDetail, err := l.svcCtx.PaymentRpc.GetPaymentDetail(l.ctx, &paymentclient.GetPaymentDetailRequest{
+		PaymentSn: in.PaymentSn,
+	})
+	if err != nil {
+		l.Logger.Errorf("查询支付详情失败, 使用默认支付方式, order_sn=%s, payment_sn=%s, err=%v",
+			in.OrderSn, in.PaymentSn, err)
+		payType = int64(constants.PAY_TYPE_WECHAT) // 降级：默认微信支付
+	} else {
+		payType = int64(paymentDetail.PayType)
+		l.Logger.Infof("获取支付方式成功, order_sn=%s, pay_type=%d", in.OrderSn, payType)
+	}
+
+	// 6. 查询订单商品列表（用于扣减库存）
 	items, err := l.svcCtx.OrderItemModel.FindListByOrderId(l.ctx, orderInfo.Id)
 	if err != nil {
 		l.Logger.Errorf("查询订单商品失败, order_sn=%s, err=%v", in.OrderSn, err)
 		return nil, err
 	}
 
-	// 6. 组装扣减库存参数
+	// 7. 组装扣减库存参数
 	deductItems := make([]*productinternal.SkuStockItem, 0, len(items))
 	for _, item := range items {
 		deductItems = append(deductItems, &productinternal.SkuStockItem{
@@ -74,7 +89,7 @@ func (l *NotifyPaymentSuccessLogic) NotifyPaymentSuccess(in *order.PaymentSucces
 		})
 	}
 
-	// 7. 先扣减库存（RPC调用放在事务外）
+	// 8. 先扣减库存（RPC调用放在事务外，成功后订单更新失败可回滚）
 	_, err = l.svcCtx.ProductRpc.DeductStock(l.ctx, &productinternal.UpdateStockReq{
 		Items:   deductItems,
 		OrderSn: in.OrderSn,
@@ -84,8 +99,7 @@ func (l *NotifyPaymentSuccessLogic) NotifyPaymentSuccess(in *order.PaymentSucces
 		return nil, err
 	}
 
-	// 8. 再更新订单状态（本地事务，仅操作数据库）
-	var payType int64 = 1 // 默认微信支付（实际按回调参数设置）
+	// 9. 再更新订单状态（本地事务，仅操作数据库）
 	err = l.svcCtx.DB.TransactCtx(l.ctx, func(ctx context.Context, session sqlx.Session) error {
 		orderInfo.Status = constants.ORDER_STATUS_PAID
 		orderInfo.PayTime = sql.NullTime{Time: time.Now(), Valid: true}
@@ -98,9 +112,18 @@ func (l *NotifyPaymentSuccessLogic) NotifyPaymentSuccess(in *order.PaymentSucces
 	})
 	if err != nil {
 		l.Logger.Errorf("支付成功处理失败, order_sn=%s, err=%v", in.OrderSn, err)
+		// 补偿：库存已扣减但订单状态更新失败，回滚库存
+		rollbackCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if _, unlockErr := l.svcCtx.ProductRpc.UnlockStock(rollbackCtx, &productinternal.UpdateStockReq{
+			Items:   deductItems,
+			OrderSn: in.OrderSn,
+		}); unlockErr != nil {
+			l.Logger.Errorf("回滚库存失败（需人工处理）: order_sn=%s, err=%v", in.OrderSn, unlockErr)
+		}
 		return nil, err
 	}
 
-	l.Logger.Infof("支付成功处理完成, order_sn=%s, payment_sn=%s", in.OrderSn, in.PaymentSn)
+	l.Logger.Infof("支付成功处理完成, order_sn=%s, payment_sn=%s, pay_type=%d", in.OrderSn, in.PaymentSn, payType)
 	return &order.Empty{}, nil
 }

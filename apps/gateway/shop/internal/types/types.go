@@ -296,23 +296,25 @@ type MyCouponListResp struct {
 }
 
 type OrderDetailResp struct {
-	OrderSn       string          `json:"order_sn"`               // 订单号
-	Status        int64           `json:"status"`                 // 10:待付款 20:待发货 30:待收货 40:已完成 50:已取消 60:售后中
-	StatusDesc    string          `json:"status_desc"`            // 状态描述
-	PayAmount     int64           `json:"pay_amount"`             // 实付金额（单位：分）
-	CreateTime    string          `json:"create_time"`            // 创建时间，RFC3339格式
-	Items         []OrderItem     `json:"items"`                  // 商品快照列表
-	Address       AddressSnapshot `json:"address"`                // 收货地址快照
-	FreightAmount int64           `json:"freight_amount"`         // 运费（分）
-	CouponAmount  int64           `json:"coupon_amount"`          // 优惠金额（分）
-	DeliverySn    string          `json:"delivery_sn,optional"`   // 物流单号
-	DeliveryCorp  string          `json:"delivery_corp,optional"` // 物流公司
-	ExpireTime    int64           `json:"expire_time,optional"`   // 待付款截止时间（Unix时间戳秒）
-	Remark        string          `json:"remark,optional"`        // 订单备注
-	PayTime       string          `json:"pay_time,optional"`      // 支付时间，RFC3339格式
-	DeliveryTime  string          `json:"delivery_time,optional"` // 发货时间，RFC3339格式
-	FinishTime    string          `json:"finish_time,optional"`   // 完成时间，RFC3339格式
-	CancelTime    string          `json:"cancel_time,optional"`   // 取消时间，RFC3339格式
+	OrderSn       string          `json:"order_sn"`                // 订单号
+	Status        int64           `json:"status"`                  // 10:待付款 20:待发货 30:待收货 40:已完成 50:已取消 60:售后中
+	StatusDesc    string          `json:"status_desc"`             // 状态描述
+	PayType       int64           `json:"pay_type,omitempty"`      // 支付方式：0-未知 1-微信 2-支付宝
+	PayTypeDesc   string          `json:"pay_type_desc,omitempty"` // 支付方式描述
+	PayAmount     int64           `json:"pay_amount"`              // 实付金额（单位：分）
+	CreateTime    string          `json:"create_time"`             // 创建时间，RFC3339格式
+	Items         []OrderItem     `json:"items"`                   // 商品快照列表
+	Address       AddressSnapshot `json:"address"`                 // 收货地址快照
+	FreightAmount int64           `json:"freight_amount"`          // 运费（分）
+	CouponAmount  int64           `json:"coupon_amount"`           // 优惠金额（分）
+	DeliverySn    string          `json:"delivery_sn,optional"`    // 物流单号
+	DeliveryCorp  string          `json:"delivery_corp,optional"`  // 物流公司
+	ExpireTime    int64           `json:"expire_time,optional"`    // 待付款截止时间（Unix时间戳秒）
+	Remark        string          `json:"remark,optional"`         // 订单备注
+	PayTime       string          `json:"pay_time,optional"`       // 支付时间，RFC3339格式
+	DeliveryTime  string          `json:"delivery_time,optional"`  // 发货时间，RFC3339格式
+	FinishTime    string          `json:"finish_time,optional"`    // 完成时间，RFC3339格式
+	CancelTime    string          `json:"cancel_time,optional"`    // 取消时间，RFC3339格式
 }
 
 type OrderItem struct {

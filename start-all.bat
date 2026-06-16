@@ -90,7 +90,7 @@ start "order.rpc"     bin\order.exe -f apps\service\order\rpc\etc\order.yaml
 start "search.rpc"    bin\search.exe -f apps\service\search\rpc\etc\search.yaml
 start "admin.rpc"     bin\admin.exe -f apps\service\admin\rpc\etc\admin.yaml
 timeout /t 3 /nobreak >nul
-echo   ✅ 6 个 RPC 服务已启动
+echo   ✅ 7 个 RPC 服务已启动
 echo.
 
 REM ============================================

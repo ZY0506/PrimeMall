@@ -7,6 +7,7 @@ type Config struct {
 	ProductRpc   zrpc.RpcClientConf
 	UserRpc      zrpc.RpcClientConf
 	MarketingRpc zrpc.RpcClientConf
+	PaymentRpc   zrpc.RpcClientConf
 	DB           struct {
 		DSN          string `json:"DSN"`
 		MaxIdleConns int    `json:"MaxIdleConns"`

@@ -1,14 +1,14 @@
-// Code scaffolded by goctl. Safe to edit.
-// goctl 1.9.1
-
 package core
 
 import (
 	"context"
+	"fmt"
+	"time"
+
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/types/order"
+	payment "github.com/ZY0506/PrimeMall/apps/service/payment/rpc/types/payment"
 	"github.com/ZY0506/PrimeMall/common/constants"
 	"github.com/ZY0506/PrimeMall/common/ctxdata"
-	"time"
 
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/types"
@@ -62,13 +62,29 @@ func (l *OrderDetailLogic) OrderDetail(req *types.OrderSnPathReq) (resp *types.O
 		})
 	}
 
+	// 查询支付类型：通过 Redis 索引获取支付流水号，再查询支付详情
+	payType := int64(0)
+	payTypeDesc := ""
+	paymentSn, _ := l.svcCtx.Client.Get(l.ctx, fmt.Sprintf("payment:order:%s", req.OrderSn)).Result()
+	if paymentSn != "" {
+		detail, err := l.svcCtx.PaymentRpc.GetPaymentDetail(l.ctx, &payment.GetPaymentDetailRequest{
+			PaymentSn: paymentSn,
+		})
+		if err == nil && detail != nil {
+			payType = int64(detail.PayType)
+			payTypeDesc = constants.PayTypeMap[int(payType)]
+		}
+	}
+
 	resp = &types.OrderDetailResp{
-		OrderSn:    orderDetail.Base.OrderSn,
-		Status:     int64(orderDetail.Base.Status),
-		StatusDesc: constants.OrderStatusMap[int(orderDetail.Base.Status)],
-		PayAmount:  orderDetail.Base.PayAmount,
-		CreateTime: orderDetail.Base.CreateTime.AsTime().Format(time.RFC3339),
-		Items:      orderItems,
+		OrderSn:     orderDetail.Base.OrderSn,
+		Status:      int64(orderDetail.Base.Status),
+		StatusDesc:  constants.OrderStatusMap[int(orderDetail.Base.Status)],
+		PayType:     payType,
+		PayTypeDesc: payTypeDesc,
+		PayAmount:   orderDetail.Base.PayAmount,
+		CreateTime:  orderDetail.Base.CreateTime.AsTime().Format(time.RFC3339),
+		Items:       orderItems,
 		Address: types.AddressSnapshot{
 			ReceiverName:  orderDetail.Address.ReceiverName,
 			ReceiverPhone: orderDetail.Address.ReceiverPhone,

@@ -2,7 +2,6 @@ package paymentlogic
 
 import (
 	"context"
-	"database/sql"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -12,6 +11,7 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/service/payment/rpc/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/service/payment/rpc/types/payment"
 	"github.com/ZY0506/PrimeMall/common/constants"
+	"github.com/ZY0506/PrimeMall/common/ctxdata"
 	"github.com/ZY0506/PrimeMall/common/errorx"
 	"github.com/ZY0506/PrimeMall/common/response"
 
@@ -99,24 +99,33 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.CreatePaymentRequest) (*p
 		l.Logger.Errorf("生成支付流水号失败: %v", err)
 		return nil, errorx.NewBizError(response.InternalError, "系统繁忙，请稍后重试")
 	}
+	userId, err := ctxdata.GetUserIdFromCtx(l.ctx)
+	if err != nil {
+		l.Logger.Errorf("获取用户ID失败: %v", err)
+		return nil, errorx.NewBizError(response.ErrCodeUnauthorized, "登录失效")
+	}
+	channelName := "unknown"
+	switch in.PayType {
+	case payment.PayType_PAY_TYPE_WECHAT:
+		channelName = "wechat"
+	case payment.PayType_PAY_TYPE_ALIPAY:
+		channelName = "alipay"
+	}
 	now := time.Now()
 	expireTime := orderDetail.ExpireTime.AsTime()
 
-	// 构建支付记录（模拟实现，直接设为成功）
+	// 构建支付记录（待支付）
 	paymentRecord := map[string]interface{}{
-		"payment_sn":       paymentSn,
-		"order_sn":         in.OrderSn,
-		"pay_type":         int64(in.PayType),
-		"status":           int(payment.PaymentStatus_PAYMENT_STATUS_SUCCESS),
-		"amount":           orderDetail.Base.PayAmount,
-		"channel_order_sn": fmt.Sprintf("MOCK_CHANNEL_%s", paymentSn),
-		"transaction_id":   fmt.Sprintf("MOCK_TXN_%s", paymentSn),
-		"client_ip":        in.ClientIp,
-		"idempotency_key":  in.IdempotencyKey,
-		"created_at":       now.Format(time.RFC3339),
-		"pay_time":         now.Format(time.RFC3339),
-		"expire_time":      expireTime.Format(time.RFC3339),
-		"error_msg":        "",
+		"payment_sn":      paymentSn,
+		"order_sn":        in.OrderSn,
+		"pay_type":        int64(in.PayType),
+		"status":          int(payment.PaymentStatus_PAYMENT_STATUS_PENDING),
+		"amount":          orderDetail.Base.PayAmount,
+		"client_ip":       in.ClientIp,
+		"idempotency_key": in.IdempotencyKey,
+		"created_at":      now.Format(time.RFC3339),
+		"expire_time":     expireTime.Format(time.RFC3339),
+		"error_msg":       "",
 	}
 	dataJson, _ := json.Marshal(paymentRecord)
 
@@ -135,16 +144,13 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.CreatePaymentRequest) (*p
 	_ = l.svcCtx.Client.Set(l.ctx, fmt.Sprintf("%s%s", constants.PAYMENT_DETAIL_PREFIX, paymentSn), dataJson, constants.PAYMENT_CACHE_EXPIRE).Err()
 
 	// 持久化到MySQL
-	payTime := sql.NullTime{Time: now, Valid: true}
 	_, err = l.svcCtx.PaymentModel.Insert(l.ctx, &model.Payment{
-		PaymentSn:      paymentSn,
-		OrderSn:        in.OrderSn,
-		Amount:         orderDetail.Base.PayAmount,
-		Channel:        "mock",
-		ChannelOrderSn: fmt.Sprintf("MOCK_CHANNEL_%s", paymentSn),
-		TransactionId:  fmt.Sprintf("MOCK_TXN_%s", paymentSn),
-		Status:         int64(payment.PaymentStatus_PAYMENT_STATUS_SUCCESS),
-		PayTime:        payTime,
+		PaymentSn: paymentSn,
+		OrderSn:   in.OrderSn,
+		Amount:    orderDetail.Base.PayAmount,
+		Channel:   channelName,
+		UserId:    userId,
+		Status:    int64(payment.PaymentStatus_PAYMENT_STATUS_PENDING),
 	})
 	if err != nil {
 		l.Logger.Errorf("持久化支付记录到MySQL失败: %v", err)
@@ -153,12 +159,12 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.CreatePaymentRequest) (*p
 		return nil, errorx.NewBizError(response.InternalError, "系统繁忙，请稍后重试")
 	}
 
-	mockPayParams := fmt.Sprintf(`{"payment_sn":"%s","mock_url":"https://mock.pay.example.com/pay?sn=%s"}`, paymentSn, paymentSn)
+	payParams := fmt.Sprintf(`{"payment_sn":"%s","channel":"%s","amount":%d}`, paymentSn, channelName, orderDetail.Base.PayAmount)
 	l.Logger.Infof("创建支付单成功: paymentSn=%s, orderSn=%s, amount=%d", paymentSn, in.OrderSn, orderDetail.Base.PayAmount)
 
 	return &payment.CreatePaymentResponse{
 		PaymentSn:  paymentSn,
-		PayParams:  mockPayParams,
+		PayParams:  payParams,
 		ExpireTime: orderDetail.ExpireTime,
 	}, nil
 }
@@ -170,7 +176,7 @@ func (l *CreatePaymentLogic) queryExistingPayment(paymentSn string) (*payment.Cr
 	if err != nil || exists == 0 {
 		return nil, errorx.NewBizError(response.ErrCodePaymentNotFound, "支付单不存在")
 	}
-	mockPayParams := fmt.Sprintf(`{"payment_sn":"%s","mock_url":"https://mock.pay.example.com/pay?sn=%s"}`, paymentSn, paymentSn)
+	payParams := fmt.Sprintf(`{"payment_sn":"%s"}`, paymentSn)
 
 	expireTimeStr, _ := l.svcCtx.Client.HGet(l.ctx, paymentHashKey, "expire_time").Result()
 	var expireTime time.Time
@@ -184,7 +190,7 @@ func (l *CreatePaymentLogic) queryExistingPayment(paymentSn string) (*payment.Cr
 	l.Logger.Infof("查询已存在支付单: paymentSn=%s", paymentSn)
 	return &payment.CreatePaymentResponse{
 		PaymentSn:  paymentSn,
-		PayParams:  mockPayParams,
+		PayParams:  payParams,
 		ExpireTime: timestamppb.New(expireTime),
 	}, nil
 }

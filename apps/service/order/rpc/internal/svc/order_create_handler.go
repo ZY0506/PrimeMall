@@ -200,8 +200,16 @@ func (sc *ServiceContext) orderCreateHandler(msg []byte) error {
 	}
 
 	// ===================== 7. 后置处理 =====================
-	if len(createMsg.CartSkuIds) > 0 {
-		_ = sc.CartModel.BatchDelete(ctx, createMsg.UserId, createMsg.CartSkuIds)
+	// 自动清除已购买商品的购物车记录
+	cartSkuIds := createMsg.CartSkuIds
+	if len(cartSkuIds) == 0 {
+		// 未传入 CartSkuIds 时，从订单商品 SKU 列表自动推导
+		for _, item := range createMsg.ItemSnapshots {
+			cartSkuIds = append(cartSkuIds, item.SkuId)
+		}
+	}
+	if len(cartSkuIds) > 0 {
+		_ = sc.CartModel.BatchDelete(ctx, createMsg.UserId, cartSkuIds)
 	}
 
 	// 发送延迟队列 → 超时取消

@@ -10,6 +10,7 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/internal/config"
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/internal/model"
 	order2 "github.com/ZY0506/PrimeMall/apps/service/order/rpc/types/order"
+	paymentclient "github.com/ZY0506/PrimeMall/apps/service/payment/rpc/client/payment"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/client/productinternal"
 	"github.com/ZY0506/PrimeMall/apps/service/user/rpc/client/userinternal"
 	"github.com/ZY0506/PrimeMall/common/constants"
@@ -37,6 +38,7 @@ type ServiceContext struct {
 	UserRpc            userinternal.UserInternal
 	MarketingRpc       marketing.Marketing
 	IDGenerator        *snowflakes.Generator
+	PaymentRpc         paymentclient.Payment
 	MQClient           *rabbitmq.Client
 	Ctx                context.Context
 	cancelFunc         context.CancelFunc
@@ -82,6 +84,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		UserRpc:            userinternal.NewUserInternal(zrpc.MustNewClient(c.UserRpc)),
 		MarketingRpc:       marketing.NewMarketing(zrpc.MustNewClient(c.MarketingRpc)),
 		IDGenerator:        IDGenerator,
+		PaymentRpc:         paymentclient.NewPayment(zrpc.MustNewClient(c.PaymentRpc)),
 		MQClient:           mqClient,
 		Ctx:                ctx,
 		cancelFunc:         cancelFunc,
