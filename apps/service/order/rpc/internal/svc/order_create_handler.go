@@ -63,9 +63,20 @@ func (sc *ServiceContext) orderCreateHandler(msg []byte) error {
 	logx.WithContext(ctx).Infof("开始异步创建订单，order_sn=%s", createMsg.OrderSn)
 
 	// ===================== 1. 幂等校验 =====================
+	// 1a. 按 OrderSn 检查（同一次请求重试）
 	exists, err := sc.OrderInfoModel.FindOneByOrderSn(ctx, createMsg.OrderSn)
 	if err == nil && exists != nil {
 		logx.WithContext(ctx).Infof("订单已存在（幂等），order_sn=%s", createMsg.OrderSn)
+		return nil
+	}
+	if err != nil && !errors.Is(err, model.ErrNotFound) {
+		return err
+	}
+
+	// 1b. 按 (user_id, idempotency_key) 检查（相同幂等键的旧订单已存在）
+	exists, err = sc.OrderInfoModel.FindOneByUserIdIdempotencyKey(ctx, createMsg.UserId, createMsg.IdempotencyKey)
+	if err == nil && exists != nil {
+		logx.WithContext(ctx).Infof("订单已存在（幂等，user_id+idempotency_key），order_sn=%s", createMsg.OrderSn)
 		return nil
 	}
 	if err != nil && !errors.Is(err, model.ErrNotFound) {

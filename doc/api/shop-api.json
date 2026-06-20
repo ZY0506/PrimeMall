@@ -2841,13 +2841,35 @@
           "format": "int64",
           "description": " 折扣封顶金额（单位：分），仅折扣券有效"
         },
+        "total_quantity": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 总库存"
+        },
+        "used_quantity": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 已使用数量"
+        },
+        "per_user_limit": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 每人限领数量"
+        },
+        "user_claim_count": {
+          "type": "integer",
+          "format": "int64",
+          "description": " 当前用户已领取次数"
+        },
         "start_time": {
-          "type": "string",
-          "description": " 生效开始时间，RFC3339格式"
+          "type": "integer",
+          "format": "int64",
+          "description": " 生效开始时间（Unix时间戳秒）"
         },
         "end_time": {
-          "type": "string",
-          "description": " 生效结束时间，RFC3339格式"
+          "type": "integer",
+          "format": "int64",
+          "description": " 生效结束时间（Unix时间戳秒）"
         },
         "description": {
           "type": "string",
@@ -2868,6 +2890,10 @@
         "reduce_amount",
         "discount_rate",
         "max_discount_amount",
+        "total_quantity",
+        "used_quantity",
+        "per_user_limit",
+        "user_claim_count",
         "start_time",
         "end_time",
         "description",
@@ -3755,17 +3781,19 @@
         "address_id": {
           "type": "integer",
           "format": "int64",
-          "description": " 地址ID（可选）"
+          "description": " 地址ID"
         },
         "coupon_id": {
           "type": "integer",
           "format": "int64",
-          "description": " 优惠券ID（可选）"
+          "description": " 优惠券ID（传0表示不使用优惠券）"
         }
       },
       "title": "PreOrderReq",
       "required": [
-        "items"
+        "items",
+        "address_id",
+        "coupon_id"
       ]
     },
     "PreOrderResp": {

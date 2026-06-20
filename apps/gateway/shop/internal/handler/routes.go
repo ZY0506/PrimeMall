@@ -18,7 +18,6 @@ import (
 	productcategory "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/product/category"
 	productlist "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/product/list"
 	search "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/search"
-	useraddre
 	useraddress "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/user/address"
 	userprofile "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/user/profile"
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/svc"

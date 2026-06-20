@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 chcp 65001 >nul
 title PrimeMall 一键停止
 cd /d "%~dp0"

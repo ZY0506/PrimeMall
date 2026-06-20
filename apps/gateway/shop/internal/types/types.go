@@ -409,9 +409,9 @@ type PaymentStatusResp struct {
 }
 
 type PreOrderReq struct {
-	Items     []OrderItemReq `json:"items" validate:"required,min=1,max=50"`         // 下单商品列表
-	AddressId uint64         `json:"address_id,optional" validate:"omitempty,min=1"` // 地址ID（可选）
-	CouponId  uint64         `json:"coupon_id,optional" validate:"omitempty,min=1"`  // 优惠券ID（可选）
+	Items     []OrderItemReq `json:"items" validate:"required,min=1,max=50"` // 下单商品列表
+	AddressId uint64         `json:"address_id" validate:"required,min=1"`   // 地址ID
+	CouponId  uint64         `json:"coupon_id"`                              // 优惠券ID（传0表示不使用优惠券）
 }
 
 type PreOrderResp struct {

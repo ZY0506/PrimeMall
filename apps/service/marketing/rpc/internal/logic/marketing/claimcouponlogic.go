@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"errors"
+
 	"github.com/ZY0506/PrimeMall/apps/service/marketing/rpc/internal/model"
 	"github.com/ZY0506/PrimeMall/apps/service/marketing/rpc/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/service/marketing/rpc/types/marketing"
@@ -39,6 +41,9 @@ func (l *ClaimCouponLogic) ClaimCoupon(in *marketing.ClaimCouponReq) (*marketing
 	// 1. 查找优惠券
 	coupon, err := l.svcCtx.CouponModel.FindOne(l.ctx, in.CouponId)
 	if err != nil {
+		if errors.Is(err, model.ErrNotFound) {
+			return nil, errorx.NewBizError(response.ErrCodeCouponNotFound, "优惠券不存在")
+		}
 		l.Logger.Errorf("领取优惠券：查询优惠券失败，错误：%v", err)
 		return nil, err
 	}

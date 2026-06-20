@@ -1143,7 +1143,7 @@
     {"sku_id": 2001, "quantity": 1}
   ],
   "address_id": 101,
-  "coupon_id": 301
+  "coupon_id": 0
 }
 ```
 
@@ -1152,8 +1152,8 @@
 | items                | []object | 是   | 下单商品列表（1-50 个）   |
 | items[].sku_id       | uint64   | 是   | SKU ID               |
 | items[].quantity     | int64    | 是   | 购买数量               |
-| address_id           | uint64   | 否   | 地址 ID（可选）          |
-| coupon_id            | uint64   | 否   | 优惠券 ID（可选）         |
+| address_id           | uint64   | 是   | 收货地址 ID             |
+| coupon_id            | uint64   | 是   | 优惠券 ID（传 0 表示不使用） |
 
 **响应体**：
 
