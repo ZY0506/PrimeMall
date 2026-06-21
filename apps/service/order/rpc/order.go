@@ -15,6 +15,7 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/types/order"
 
 	"github.com/zeromicro/go-zero/core/conf"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
@@ -25,6 +26,7 @@ var configFile = flag.String("f", "apps/service/order/rpc/etc/order.yaml", "the 
 
 func main() {
 	flag.Parse()
+	logx.SetLevel(logx.ErrorLevel)
 
 	projectRoot, _ := filepath.Abs("./")
 	envPath := filepath.Join(projectRoot, ".env")

@@ -18,6 +18,7 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/service/admin/rpc/types/admin"
 
 	"github.com/zeromicro/go-zero/core/conf"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
@@ -28,6 +29,7 @@ var configFile = flag.String("f", "apps/service/admin/rpc/etc/admin.yaml", "the 
 
 func main() {
 	flag.Parse()
+	logx.SetLevel(logx.ErrorLevel)
 
 	// 加载 .env 文件
 	projectRoot, _ := filepath.Abs("./")

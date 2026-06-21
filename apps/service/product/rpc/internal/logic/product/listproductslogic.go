@@ -53,20 +53,32 @@ func (l *ListProductsLogic) ListProducts(in *product.ProductListReq) (*product.P
 		}
 	}
 
-	// 要检验id
+	// 分类有效性校验（Cache-Aside：30 分钟 TTL，减少热路径 DB 查询）
 	if in.CategoryId > 0 {
-		category, err := l.svcCtx.CategoryModel.FindOne(l.ctx, in.CategoryId)
-		if err != nil {
-			if errors.Is(err, model.ErrNotFound) {
-				l.Logger.Errorf("分类不存在,id=%d", in.CategoryId)
-				return nil, errorx.NewBizError(response.ErrCodeCategoryNotFound, "分类不存在")
-			}
-			l.Logger.Errorf("查询分类id出错，error=%v", err)
-			return nil, err
-		}
-		if category.DeleteAt.Valid || category.Status != 1 {
-			l.Logger.Errorf("分类不可用,id=%d", in.CategoryId)
+		cacheKey := fmt.Sprintf("%s%d", constants.ProductCategoryKey, in.CategoryId)
+		cached, cacheErr := l.svcCtx.Client.Get(l.ctx, cacheKey).Result()
+		if cacheErr == nil && cached == "valid" {
+			// 缓存命中，分类有效
+		} else if cacheErr == nil && cached == "invalid" {
 			return nil, errorx.NewBizError(response.ErrCodeCategoryDisabled, "分类不可用")
+		} else {
+			// 缓存未命中，查 DB 验证
+			category, err := l.svcCtx.CategoryModel.FindOne(l.ctx, in.CategoryId)
+			if err != nil {
+				if errors.Is(err, model.ErrNotFound) {
+					return nil, errorx.NewBizError(response.ErrCodeCategoryNotFound, "分类不存在")
+				}
+				return nil, err
+			}
+			isValid := !category.DeleteAt.Valid && category.Status == 1
+			cacheValue := "valid"
+			if !isValid {
+				cacheValue = "invalid"
+			}
+			l.svcCtx.Client.Set(l.ctx, cacheKey, cacheValue, constants.ProductCategoryTTL)
+			if !isValid {
+				return nil, errorx.NewBizError(response.ErrCodeCategoryDisabled, "分类不可用")
+			}
 		}
 	}
 

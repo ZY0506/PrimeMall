@@ -14,6 +14,7 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/service/payment/rpc/types/payment"
 
 	"github.com/zeromicro/go-zero/core/conf"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
@@ -24,6 +25,7 @@ var configFile = flag.String("f", "apps/service/payment/rpc/etc/payment.yaml", "
 
 func main() {
 	flag.Parse()
+	logx.SetLevel(logx.ErrorLevel)
 
 	projectRoot, _ := filepath.Abs("./")
 	envPath := filepath.Join(projectRoot, ".env")

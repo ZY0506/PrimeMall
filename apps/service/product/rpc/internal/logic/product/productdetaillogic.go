@@ -76,27 +76,8 @@ func (l *ProductDetailLogic) ProductDetail(in *product.IdReq) (*product.ProductD
 		l.Logger.Errorf("商品sku不存在，id=%v", in.Id)
 		return nil, errorx.NewBizError(response.ErrCodeSkuNotFound, "商品sku不存在")
 	}
-	// 查询运费
-	var freightTemplate *model.FreightTemplate
-	if spu.FreightTemplateId > 0 {
-		freightTemplate, err = l.svcCtx.FreightTemplateModel.FindOne(l.ctx, spu.FreightTemplateId)
-		if err != nil && !errors.Is(err, model.ErrNotFound) {
-			l.Logger.Errorf("查询运费模板失败，error=%v", err)
-			return nil, err
-		}
-	}
-	// 如果未指定模板或查询不到，则使用默认模板
-	if freightTemplate == nil {
-		freightTemplate, err = l.svcCtx.FreightTemplateModel.FindDefault(l.ctx)
-		if err != nil {
-			if errors.Is(err, model.ErrNotFound) {
-				l.Logger.Infof("未配置任何运费模板")
-				return nil, errorx.NewBizError(response.ErrCodeFreightTemplateNotFound, "运费模板不存在")
-			}
-			l.Logger.Errorf("查询默认运费模板失败，error=%v", err)
-			return nil, err
-		}
-	}
+	// 运费模板 ID 直接使用 SPU 上的值，无需额外查表（前端仅用于下单时计算运费）
+	// 若 SPU 未设置模板（FreightTemplateId=0），下单时按无模板处理
 
 	var skuList []*product.SkuItem
 	attributesMap := make(map[string][]string)
@@ -171,7 +152,7 @@ func (l *ProductDetailLogic) ProductDetail(in *product.IdReq) (*product.ProductD
 		Sales:             spu.SalesCount,
 		ShowSales:         spu.VirtualSales,
 		Status:            product.ProductStatus(spu.Status),
-		FreightTemplateId: freightTemplate.Id,
+		FreightTemplateId: spu.FreightTemplateId,
 		Skus:              skuList,
 		Attributes:        attributes,
 	}

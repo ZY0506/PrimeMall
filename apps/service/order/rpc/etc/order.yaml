@@ -44,7 +44,7 @@ RDB:
   Addr: ${REDIS_HOST}:${REDIS_PORT}
   RedisPassword: "${REDIS_PASSWORD}"
   RedisDB: 0
-  RedisPoolSize: 100
+  RedisPoolSize: 200
   RedisMinIdleConns: 20
 
 Snowflake:

@@ -1,6 +1,8 @@
 package database
 
 import (
+	"time"
+
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
@@ -17,6 +19,8 @@ func InitDB(dsn string, maxIdleConns int, maxOpenConns int) sqlx.SqlConn {
 	}
 	rawDB.SetMaxIdleConns(maxIdleConns)
 	rawDB.SetMaxOpenConns(maxOpenConns)
+	rawDB.SetConnMaxLifetime(30 * time.Minute) // 连接最大存活时间，避免MySQL侧断开
+	rawDB.SetConnMaxIdleTime(5 * time.Minute)  // 空闲连接最大存活时间
 
 	return conn
 }

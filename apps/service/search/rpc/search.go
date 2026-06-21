@@ -12,6 +12,7 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/service/search/rpc/types/search"
 
 	"github.com/zeromicro/go-zero/core/conf"
+	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
@@ -22,6 +23,7 @@ var configFile = flag.String("f", "apps/service/search/rpc/etc/search.yaml", "th
 
 func main() {
 	flag.Parse()
+	logx.SetLevel(logx.ErrorLevel)
 
 	projectRoot, _ := filepath.Abs("./")
 	envPath := filepath.Join(projectRoot, ".env")

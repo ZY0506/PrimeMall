@@ -54,9 +54,21 @@ func NewESClient(addresses []string, username, password string) (*ESClient, erro
 	if err != nil {
 		return nil, fmt.Errorf("elasticsearch new client error: %w", err)
 	}
-	_, err = client.Info()
-	if err != nil {
-		return nil, fmt.Errorf("elasticsearch info error: %w", err)
+
+	// 等待 ES 就绪：最多重试 3 次，间隔 2 秒
+	var infoErr error
+	for i := 0; i < 3; i++ {
+		_, infoErr = client.Info()
+		if infoErr == nil {
+			break
+		}
+		if i < 2 {
+			logx.Infof("Elasticsearch 未就绪，2秒后重试 (%d/3): %v", i+1, infoErr)
+			time.Sleep(2 * time.Second)
+		}
+	}
+	if infoErr != nil {
+		return nil, fmt.Errorf("elasticsearch info error after 3 retries: %w", infoErr)
 	}
 	return &ESClient{client: client}, nil
 }

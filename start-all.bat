@@ -87,8 +87,8 @@ start "payment.rpc"   bin\payment.exe -f apps\service\payment\rpc\etc\payment.ya
 start "marketing.rpc" bin\marketing.exe -f apps\service\marketing\rpc\etc\marketing.yaml
 timeout /t 2 /nobreak >nul
 start "order.rpc"     bin\order.exe -f apps\service\order\rpc\etc\order.yaml
-start "search.rpc"    bin\search.exe -f apps\service\search\rpc\etc\search.yaml
 start "admin.rpc"     bin\admin.exe -f apps\service\admin\rpc\etc\admin.yaml
+start "search.rpc"    bin\search.exe -f apps\service\search\rpc\etc\search.yaml
 timeout /t 3 /nobreak >nul
 echo   ✅ 7 个 RPC 服务已启动
 echo.

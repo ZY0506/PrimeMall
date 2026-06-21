@@ -56,7 +56,7 @@ RDB:
   Addr: ${REDIS_HOST}:${REDIS_PORT}
   RedisPassword: "${REDIS_PASSWORD}"
   RedisDB: 0
-  RedisPoolSize: 100
+  RedisPoolSize: 300
   RedisMinIdleConns: 20
 
 OssConfig:
@@ -83,3 +83,7 @@ CasbinConf:
 RateLimit:
   PerIPSpeed: 100000
   PerIPBurst: 200000
+
+# 压测调优：关闭熔断器，避免压测时错误率波动导致误熔断
+Middlewares:
+  Breaker: false
