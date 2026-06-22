@@ -1,0 +1,35 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# 本地存储（不进入镜像）
+storage/
+.uploads/
+
+# 构建产物
+bin/
+*.exe
+*.test
+*.out
+
+# 日志
+*.log
+
+# 环境文件（敏感信息）
+.env
+.env.local
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 临时文件
+tmp/
+temp/

@@ -1,8 +1,58 @@
 # =================================================================
-# PrimeMall 基础设施服务编排
-# 包含: MySQL 数据库 / Redis 缓存 / Etcd 服务发现 / RabbitMQ 消息队列
-# 使用: docker compose -f docker-compose.yml up -d
+# PrimeMall 全服务编排（基础设施 + 应用服务）
+#   docker compose up -d                      # 一键启动全部
+#   docker compose up -d mysql redis etcd     # 仅启基础设施
+#   docker compose logs -f user-rpc shop-01   # 查看服务日志
 # =================================================================
+# 环境变量通过 .env 文件注入（见 .env.example）
+# =================================================================
+
+# ================================================================
+# 共享配置锚点（减少重复）
+# ================================================================
+x-common: &common
+  ETCD_HOST: etcd
+  ETCD_PORT: 2379
+  JWT_SECRET: ${JWT_SECRET:-kaolengmian}
+  JWT_ISSUER: ${JWT_ISSUER:-kaolengmian}
+
+x-db: &db
+  DB_HOST: mysql
+  DB_PORT: 3306
+  DB_USER: ${DB_USER:-root}
+  DB_PASSWORD: ${DB_PASSWORD:-123456}
+
+x-redis: &redis
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
+  REDIS_PASSWORD: ${REDIS_PASSWORD:-123456}
+
+x-rabbitmq: &rabbitmq
+  RABBITMQ_HOST: rabbitmq
+  RABBITMQ_PORT: 5672
+  RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-admin}
+  RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-123456}
+  RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
+
+x-es: &es
+  ES_HOST: elasticsearch
+  ES_PORT: 9200
+
+x-oss: &oss
+  OSS_ACCESS_KEY: ${OSS_ACCESS_KEY:-LTAI5tA3bpZVsLECG5T55gpt}
+  OSS_ACCESS_SECRET: ${OSS_ACCESS_SECRET:-NvjiE5Qt5xF40j84hFYBFrqQorQyQM}
+  OSS_ENDPOINT: ${OSS_ENDPOINT:-oss-cn-hangzhou.aliyuncs.com}
+  OSS_BUCKET: ${OSS_BUCKET:-primemall}
+  OSS_CALLBACK_URL: ${OSS_CALLBACK_URL:-}
+
+x-app-restart: &app-restart
+  restart: unless-stopped
+  networks:
+    - prime_mall_network
+
+# ================================================================
+# 服务定义
+# ================================================================
 services:
 
   # =================================================================
@@ -10,10 +60,8 @@ services:
   # =================================================================
   mysql:
     image: mysql:8.0
-
     container_name: mysql-prime_mall
     restart: unless-stopped
-    # 压测调优：放大连接池 + 跳过DNS解析减少开销
     command:
       - --max_connections=5000
       - --skip-name-resolve
@@ -22,7 +70,6 @@ services:
       - TZ=Asia/Shanghai
       - MYSQL_CHARACTER_SET_SERVER=utf8mb4
       - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
-
     ports:
       - "${DB_PORT:-13306}:3306"
     volumes:
@@ -72,8 +119,7 @@ services:
     restart: unless-stopped
     environment:
       - ETCD_NAME=etcd-prime_mall
-      # 宿主机通过 localhost 连接 etcd，必须用映射端口
-      - ETCD_ADVERTISE_CLIENT_URLS=http://localhost:${ETCD_PORT:-12379}
+      - ETCD_ADVERTISE_CLIENT_URLS=http://etcd:2379
       - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
       - ETCD_INITIAL_CLUSTER_STATE=new
       - ETCD_INITIAL_CLUSTER_TOKEN=prime_mall_etcd_cluster
@@ -126,12 +172,11 @@ services:
     restart: unless-stopped
     environment:
       - cluster.name=prime-mall-es
-      - node.name=es-prime-mall
+      - node.name=es-prime_mall
       - discovery.type=single-node
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
       - TZ=Asia/Shanghai
-      # 磁盘水位线调整（避免94%+磁盘使用触发flood-stage导致索引只读）
       - "cluster.routing.allocation.disk.watermark.low=85%"
       - "cluster.routing.allocation.disk.watermark.high=92%"
       - "cluster.routing.allocation.disk.watermark.flood_stage=97%"
@@ -154,7 +199,178 @@ services:
       - prime_mall_network
 
   # =================================================================
-  # Nginx 网关负载均衡（端口 8080 -> 后端 3 个网关实例）
+  # 应用服务 — RPC 后端
+  # 依赖顺序: user/product 先行 → order/payment/marketing/admin → search
+  # =================================================================
+
+  # -----------------------------------------------------------------
+  # user.rpc — 用户服务（登录、注册、地址管理）
+  # -----------------------------------------------------------------
+  user-rpc:
+    build:
+      context: .
+      target: user-rpc
+    command: ["-f", "./etc/user.yaml"]
+    environment:
+      <<: [*common, *db, *redis, *oss]
+    depends_on:
+      mysql: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      etcd: { condition: service_healthy }
+    <<: *app-restart
+
+  # -----------------------------------------------------------------
+  # product.rpc — 商品服务（分类、SKU、库存）
+  # -----------------------------------------------------------------
+  product-rpc:
+    build:
+      context: .
+      target: product-rpc
+    command: ["-f", "./etc/product.yaml"]
+    environment:
+      <<: [*common, *db, *redis]
+    depends_on:
+      mysql: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      etcd: { condition: service_healthy }
+    <<: *app-restart
+
+  # -----------------------------------------------------------------
+  # order.rpc — 订单服务（创建、查询、状态流转）
+  # -----------------------------------------------------------------
+  order-rpc:
+    build:
+      context: .
+      target: order-rpc
+    command: ["-f", "./etc/order.yaml"]
+    environment:
+      <<: [*common, *db, *redis, *rabbitmq]
+    depends_on:
+      mysql: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      etcd: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    <<: *app-restart
+
+  # -----------------------------------------------------------------
+  # payment.rpc — 支付服务（支付回调、退款）
+  # -----------------------------------------------------------------
+  payment-rpc:
+    build:
+      context: .
+      target: payment-rpc
+    command: ["-f", "./etc/payment.yaml"]
+    environment:
+      <<: [*common, *db, *redis, *rabbitmq]
+    depends_on:
+      mysql: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      etcd: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+    <<: *app-restart
+
+  # -----------------------------------------------------------------
+  # marketing.rpc — 营销服务（优惠券、活动）
+  # -----------------------------------------------------------------
+  marketing-rpc:
+    build:
+      context: .
+      target: marketing-rpc
+    command: ["-f", "./etc/marketing.yaml"]
+    environment:
+      <<: [*common, *db, *redis]
+    depends_on:
+      mysql: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      etcd: { condition: service_healthy }
+    <<: *app-restart
+
+  # -----------------------------------------------------------------
+  # admin.rpc — 管理后台 RPC（商品管理、订单管理）
+  # -----------------------------------------------------------------
+  admin-rpc:
+    build:
+      context: .
+      target: admin-rpc
+    command: ["-f", "./etc/admin.yaml"]
+    environment:
+      <<: [*common, *db, *redis]
+    depends_on:
+      mysql: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      etcd: { condition: service_healthy }
+    <<: *app-restart
+
+  # -----------------------------------------------------------------
+  # search.rpc — 搜索服务（ES 全文检索）
+  # -----------------------------------------------------------------
+  search-rpc:
+    build:
+      context: .
+      target: search-rpc
+    command: ["-f", "./etc/search.yaml"]
+    environment:
+      <<: [*common, *db, *es]
+    depends_on:
+      mysql: { condition: service_healthy }
+      etcd: { condition: service_healthy }
+      elasticsearch: { condition: service_healthy }
+    <<: *app-restart
+
+  # =================================================================
+  # 应用服务 — HTTP 网关
+  # =================================================================
+
+  # -----------------------------------------------------------------
+  # shop-api（3 实例，通过 Nginx 负载均衡）
+  # 依赖所有 RPC 服务（通过 etcd 发现，等容器启动后就绪）
+  # -----------------------------------------------------------------
+  shop-01: &shop-common
+    build:
+      context: .
+      target: shop-api
+    command: ["-f", "./etc/shop-api-9091.yaml"]
+    environment:
+      <<: [*common, *redis, *oss]
+    depends_on:
+      redis: { condition: service_healthy }
+      etcd: { condition: service_healthy }
+      user-rpc: { condition: service_started }
+      product-rpc: { condition: service_started }
+      order-rpc: { condition: service_started }
+      payment-rpc: { condition: service_started }
+      marketing-rpc: { condition: service_started }
+      admin-rpc: { condition: service_started }
+      search-rpc: { condition: service_started }
+    <<: *app-restart
+
+  shop-02:
+    <<: *shop-common
+
+  shop-03:
+    <<: *shop-common
+
+  # -----------------------------------------------------------------
+  # admin-api — 管理后台 HTTP 接口
+  # 依赖 admin.rpc（通过 etcd 发现）
+  # -----------------------------------------------------------------
+  admin-api:
+    build:
+      context: .
+      target: admin-api
+    command: ["-f", "./etc/admin.yaml"]
+    environment:
+      <<: [*common]
+    depends_on:
+      etcd: { condition: service_healthy }
+      admin-rpc: { condition: service_started }
+    ports:
+      - "8088:8088"
+    <<: *app-restart
+
+  # =================================================================
+  # Nginx 网关负载均衡（端口 8080 -> 3 个 shop-api 实例）
+  # 最后启动，确保网关已就绪
   # =================================================================
   nginx-shop:
     image: nginx:1.27-alpine
@@ -163,8 +379,12 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./deployments/nginx/shop.nginx.conf:/etc/nginx/conf.d/shop.conf:ro
+      - ./deployments/nginx/shop.docker.nginx.conf:/etc/nginx/conf.d/shop.conf:ro
       - ./storage/nginx/logs:/var/log/nginx
+    depends_on:
+      shop-01: { condition: service_started }
+      shop-02: { condition: service_started }
+      shop-03: { condition: service_started }
     networks:
       - prime_mall_network
 
