@@ -27,3 +27,23 @@ func (s *AdminCouponServer) GetCouponDetail(ctx context.Context, in *admin.IdReq
 	l := admincouponlogic.NewGetCouponDetailLogic(ctx, s.svcCtx)
 	return l.GetCouponDetail(in)
 }
+
+func (s *AdminCouponServer) ListCoupons(ctx context.Context, in *admin.AdminListCouponsReq) (*admin.AdminListCouponsResp, error) {
+	l := admincouponlogic.NewListCouponsLogic(ctx, s.svcCtx)
+	return l.ListCoupons(in)
+}
+
+func (s *AdminCouponServer) CreateCoupon(ctx context.Context, in *admin.AdminCreateCouponReq) (*admin.Empty, error) {
+	l := admincouponlogic.NewCreateCouponLogic(ctx, s.svcCtx)
+	return l.CreateCoupon(in)
+}
+
+func (s *AdminCouponServer) UpdateCoupon(ctx context.Context, in *admin.AdminUpdateCouponReq) (*admin.Empty, error) {
+	l := admincouponlogic.NewUpdateCouponLogic(ctx, s.svcCtx)
+	return l.UpdateCoupon(in)
+}
+
+func (s *AdminCouponServer) UpdateCouponStatus(ctx context.Context, in *admin.AdminUpdateCouponStatusReq) (*admin.Empty, error) {
+	l := admincouponlogic.NewUpdateCouponStatusLogic(ctx, s.svcCtx)
+	return l.UpdateCouponStatus(in)
+}

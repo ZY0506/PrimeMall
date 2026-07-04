@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/ZY0506/PrimeMall/apps/service/user/rpc/internal/model"
 	"github.com/ZY0506/PrimeMall/apps/service/user/rpc/internal/svc"
@@ -56,13 +57,13 @@ func (l *GetUserInfoLogic) GetUserInfo(in *user.EmptyReq) (*user.UserInfoResp, e
 		}
 		if res.Status == constants.USER_STATUS_BANNED {
 			statusDesc = fmt.Sprintf("因违反社区规定，封禁时间：%s-%s",
-				userPunish.StartTime.Time.Format("2006-01-02 15:04:05"),
-				userPunish.EndTime.Time.Format("2006-01-02 15:04:05"),
+				userPunish.StartTime.Time.Format(time.RFC3339),
+				userPunish.EndTime.Time.Format(time.RFC3339),
 			)
 		} else {
 			statusDesc = fmt.Sprintf("因违反社区规定，限制下单：%s-%s",
-				userPunish.StartTime.Time.Format("2006-01-02 15:04:05"),
-				userPunish.EndTime.Time.Format("2006-01-02 15:04:05"),
+				userPunish.StartTime.Time.Format(time.RFC3339),
+				userPunish.EndTime.Time.Format(time.RFC3339),
 			)
 		}
 	}

@@ -3,6 +3,7 @@ package core
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/types"
@@ -52,7 +53,7 @@ func (l *StatusByOrderSnLogic) StatusByOrderSn(req *types.OrderSnPathReq) (resp 
 		if err == nil {
 			var payTime string
 			if detail.PayTime != nil {
-				payTime = detail.PayTime.AsTime().Format("2006-01-02 15:04:05")
+				payTime = detail.PayTime.AsTime().Format(time.RFC3339)
 			}
 			return &types.PaymentStatusResp{
 				PaymentSn:      detail.PaymentSn,

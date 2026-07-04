@@ -23,7 +23,7 @@ func NewRecoverUserLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Recov
 	}
 }
 
-func (l *RecoverUserLogic) RecoverUser(req *types.IdReq) error {
+func (l *RecoverUserLogic) RecoverUser(req *types.RecoverUserReq) error {
 	if req.Id == 0 {
 		return errorx.NewBizError(int32(response.ErrCodeInvalidParam), "用户ID不能为空")
 	}

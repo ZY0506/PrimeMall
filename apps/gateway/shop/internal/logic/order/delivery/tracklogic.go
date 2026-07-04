@@ -2,6 +2,7 @@ package delivery
 
 import (
 	"context"
+	"time"
 
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/types"
@@ -69,17 +70,27 @@ func (l *TrackLogic) Track(req *types.OrderSnPathReq) (resp *types.DeliveryTrack
 	// 实际项目中，此处应调用第三方物流API查询真实轨迹
 	var tracks []types.DeliveryTrackItem
 
+	// 提取时间（添加 nil 保护）
+	var deliveryT time.Time
+	if orderDetail.DeliveryTime != nil {
+		deliveryT = orderDetail.DeliveryTime.AsTime()
+	}
+	var finishT time.Time
+	if orderDetail.FinishTime != nil {
+		finishT = orderDetail.FinishTime.AsTime()
+	}
+
 	// 根据订单状态返回不同层级的轨迹
 	if orderDetail.Base.Status == order.OrderStatus_ORDER_STATUS_SHIPPED {
 		tracks = []types.DeliveryTrackItem{
 			{
-				Time:        orderDetail.DeliveryTime.AsTime().Format("2006-01-02 15:04:05"),
+				Time:        deliveryT.Format(time.RFC3339),
 				Station:     "发货仓库",
 				Status:      "已揽收",
 				Description: "快递已揽收，等待运输",
 			},
 			{
-				Time:        orderDetail.DeliveryTime.AsTime().Add(2 * 60 * 60).Format("2006-01-02 15:04:05"),
+				Time:        deliveryT.Add(2 * 60 * 60).Format(time.RFC3339),
 				Station:     "中转中心",
 				Status:      "运输中",
 				Description: "快件已到达中转中心，准备发往目的地",
@@ -88,25 +99,25 @@ func (l *TrackLogic) Track(req *types.OrderSnPathReq) (resp *types.DeliveryTrack
 	} else if orderDetail.Base.Status == order.OrderStatus_ORDER_STATUS_COMPLETED {
 		tracks = []types.DeliveryTrackItem{
 			{
-				Time:        orderDetail.DeliveryTime.AsTime().Format("2006-01-02 15:04:05"),
+				Time:        deliveryT.Format(time.RFC3339),
 				Station:     "发货仓库",
 				Status:      "已揽收",
 				Description: "快递已揽收，等待运输",
 			},
 			{
-				Time:        orderDetail.DeliveryTime.AsTime().Add(2 * 60 * 60).Format("2006-01-02 15:04:05"),
+				Time:        deliveryT.Add(2 * 60 * 60).Format(time.RFC3339),
 				Station:     "中转中心",
 				Status:      "运输中",
 				Description: "快件已到达中转中心，准备发往目的地",
 			},
 			{
-				Time:        orderDetail.DeliveryTime.AsTime().Add(24 * 60 * 60).Format("2006-01-02 15:04:05"),
+				Time:        deliveryT.Add(24 * 60 * 60).Format(time.RFC3339),
 				Station:     "配送站",
 				Status:      "派送中",
 				Description: "快件已到达配送站，配送员正在派送",
 			},
 			{
-				Time:        orderDetail.FinishTime.AsTime().Format("2006-01-02 15:04:05"),
+				Time:        finishT.Format(time.RFC3339),
 				Station:     "",
 				Status:      "已签收",
 				Description: "快件已签收，感谢使用",

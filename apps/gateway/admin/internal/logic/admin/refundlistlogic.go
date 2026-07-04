@@ -2,9 +2,13 @@ package admin
 
 import (
 	"context"
+	"time"
+
 	"github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/types"
 	"github.com/ZY0506/PrimeMall/apps/service/admin/rpc/types/admin"
+	"github.com/ZY0506/PrimeMall/common/errorx"
+	"github.com/ZY0506/PrimeMall/common/response"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -21,6 +25,12 @@ func NewRefundListLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Refund
 }
 
 func (l *RefundListLogic) RefundList(req *types.AdminRefundListReq) (resp *types.AdminRefundListResp, err error) {
+	if req.Page <= 0 {
+		return nil, errorx.NewBizError(response.ErrCodeInvalidPage, "页码必须大于0")
+	}
+	if req.Size <= 0 || req.Size > 100 {
+		return nil, errorx.NewBizError(response.ErrCodeInvalidPage, "每页数量必须在1-100之间")
+	}
 	rpcResp, err := l.svcCtx.AdminAfterSaleRpc.ListAfterSales(l.ctx, &admin.AdminListAfterSalesReq{
 		Page: req.Page, PageSize: req.Size, Status: admin.AdminAfterSaleStatus(req.Status),
 	})
@@ -31,7 +41,7 @@ func (l *RefundListLogic) RefundList(req *types.AdminRefundListReq) (resp *types
 	for _, r := range rpcResp.List {
 		createdAt := ""
 		if r.CreatedAt != nil {
-			createdAt = r.CreatedAt.AsTime().Format("2006-01-02 15:04:05")
+			createdAt = r.CreatedAt.AsTime().Format(time.RFC3339)
 		}
 		list = append(list, types.AdminRefundItem{
 			Id: r.AfterSaleId, OrderSn: r.OrderSn, RefundAmount: r.RefundAmount,

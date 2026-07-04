@@ -45,18 +45,30 @@ func (l *MobileLoginLogic) MobileLogin(in *user.MobileLoginReq) (*user.LoginResp
 		clientInfo = &ctxdata.ClientInfo{IP: "0.0.0.0", UserAgent: ""}
 	}
 
-	// 1. 检查用户是否存在
+	// 1. 先校验验证码（不泄露用户是否存在）
+	ok, err := l.svcCtx.CaptchaSvc.Verify(l.ctx, in.Phone, constants.SCENE_LOGIN, in.Code)
+	if err != nil {
+		l.Logger.Errorf("验证码校验失败，error=%v", err)
+		return nil, err
+	}
+	if !ok {
+		l.Logger.Infof("验证码错误,phone=%v", in.Phone)
+		l.recordLoginLog(0, clientInfo.IP, clientInfo.UserAgent, constants.LOGIN_STATUS_FAIL, "验证码错误")
+		return nil, errorx.NewBizError(response.ErrCodeCaptchaWrong, "验证码错误")
+	}
+
+	// 2. 再查用户（查不到统一返回验证码错误，防止枚举）
 	userInfo, err := l.svcCtx.UserModel.FindOneByPhone(l.ctx, in.Phone)
 	if err != nil {
 		if errors.Is(err, model.ErrNotFound) {
 			l.Logger.Infof("用户不存在,phone=%s", in.Phone)
-			return nil, errorx.NewBizError(response.ErrCodeUserNotFound, "用户不存在")
+			return nil, errorx.NewBizError(response.ErrCodeCaptchaWrong, "手机号或验证码错误")
 		}
 		l.Logger.Errorf("数据库查询失败，error=%v", err)
 		return nil, err
 	}
 
-	// 2. 检查用户状态
+	// 3. 检查用户状态
 	if userInfo.Status == constants.USER_STATUS_BANNED {
 		l.Logger.Errorf("用户被禁用,phone=%v", in.Phone)
 
@@ -76,19 +88,6 @@ func (l *MobileLoginLogic) MobileLogin(in *user.MobileLoginReq) (*user.LoginResp
 		l.Logger.Errorf("用户已注销,phone=%v", in.Phone)
 		l.recordLoginLog(userInfo.Id, clientInfo.IP, clientInfo.UserAgent, constants.LOGIN_STATUS_FAIL, "用户已注销")
 		return nil, errorx.NewBizError(response.ErrCodeUserDeleted, "用户已注销")
-	}
-
-	// 3. 校验验证码
-	ok, err := l.svcCtx.CaptchaSvc.Verify(l.ctx, in.Phone, constants.SCENE_LOGIN, in.Code)
-	if err != nil {
-		l.Logger.Errorf("验证码校验失败，error=%v", err)
-		return nil, err
-	}
-
-	if !ok {
-		l.Logger.Infof("验证码错误,phone=%v", in.Phone)
-		l.recordLoginLog(userInfo.Id, clientInfo.IP, clientInfo.UserAgent, constants.LOGIN_STATUS_FAIL, "验证码错误")
-		return nil, errorx.NewBizError(response.ErrCodeCaptchaWrong, "验证码错误")
 	}
 
 	// 4. 颁发token

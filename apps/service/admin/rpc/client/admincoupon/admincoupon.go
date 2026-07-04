@@ -14,11 +14,21 @@ import (
 )
 
 type (
-	CouponDetailResp = admin.CouponDetailResp
-	IdReq            = admin.IdReq
+	AdminCreateCouponReq       = admin.AdminCreateCouponReq
+	AdminListCouponsReq        = admin.AdminListCouponsReq
+	AdminListCouponsResp       = admin.AdminListCouponsResp
+	AdminUpdateCouponReq       = admin.AdminUpdateCouponReq
+	AdminUpdateCouponStatusReq = admin.AdminUpdateCouponStatusReq
+	CouponDetailResp           = admin.CouponDetailResp
+	Empty                      = admin.Empty
+	IdReq                      = admin.IdReq
 
 	AdminCoupon interface {
 		GetCouponDetail(ctx context.Context, in *IdReq, opts ...grpc.CallOption) (*CouponDetailResp, error)
+		ListCoupons(ctx context.Context, in *AdminListCouponsReq, opts ...grpc.CallOption) (*AdminListCouponsResp, error)
+		CreateCoupon(ctx context.Context, in *AdminCreateCouponReq, opts ...grpc.CallOption) (*Empty, error)
+		UpdateCoupon(ctx context.Context, in *AdminUpdateCouponReq, opts ...grpc.CallOption) (*Empty, error)
+		UpdateCouponStatus(ctx context.Context, in *AdminUpdateCouponStatusReq, opts ...grpc.CallOption) (*Empty, error)
 	}
 
 	defaultAdminCoupon struct {
@@ -35,4 +45,24 @@ func NewAdminCoupon(cli zrpc.Client) AdminCoupon {
 func (m *defaultAdminCoupon) GetCouponDetail(ctx context.Context, in *IdReq, opts ...grpc.CallOption) (*CouponDetailResp, error) {
 	client := admin.NewAdminCouponClient(m.cli.Conn())
 	return client.GetCouponDetail(ctx, in, opts...)
+}
+
+func (m *defaultAdminCoupon) ListCoupons(ctx context.Context, in *AdminListCouponsReq, opts ...grpc.CallOption) (*AdminListCouponsResp, error) {
+	client := admin.NewAdminCouponClient(m.cli.Conn())
+	return client.ListCoupons(ctx, in, opts...)
+}
+
+func (m *defaultAdminCoupon) CreateCoupon(ctx context.Context, in *AdminCreateCouponReq, opts ...grpc.CallOption) (*Empty, error) {
+	client := admin.NewAdminCouponClient(m.cli.Conn())
+	return client.CreateCoupon(ctx, in, opts...)
+}
+
+func (m *defaultAdminCoupon) UpdateCoupon(ctx context.Context, in *AdminUpdateCouponReq, opts ...grpc.CallOption) (*Empty, error) {
+	client := admin.NewAdminCouponClient(m.cli.Conn())
+	return client.UpdateCoupon(ctx, in, opts...)
+}
+
+func (m *defaultAdminCoupon) UpdateCouponStatus(ctx context.Context, in *AdminUpdateCouponStatusReq, opts ...grpc.CallOption) (*Empty, error) {
+	client := admin.NewAdminCouponClient(m.cli.Conn())
+	return client.UpdateCouponStatus(ctx, in, opts...)
 }

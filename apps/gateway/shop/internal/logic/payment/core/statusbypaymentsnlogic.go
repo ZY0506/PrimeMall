@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/ZY0506/PrimeMall/apps/service/payment/rpc/types/payment"
 	"github.com/ZY0506/PrimeMall/common/ctxdata"
+	"time"
 
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/types"
@@ -47,7 +48,7 @@ func (l *StatusByPaymentSnLogic) StatusByPaymentSn(req *types.PaymentSnPathReq) 
 
 	var payTime string
 	if detail.PayTime != nil {
-		payTime = detail.PayTime.AsTime().Format("2006-01-02 15:04:05")
+		payTime = detail.PayTime.AsTime().Format(time.RFC3339)
 	}
 
 	return &types.PaymentStatusResp{

@@ -1791,7 +1791,11 @@ var AdminAfterSale_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	AdminCoupon_GetCouponDetail_FullMethodName = "/admin.AdminCoupon/GetCouponDetail"
+	AdminCoupon_GetCouponDetail_FullMethodName    = "/admin.AdminCoupon/GetCouponDetail"
+	AdminCoupon_ListCoupons_FullMethodName        = "/admin.AdminCoupon/ListCoupons"
+	AdminCoupon_CreateCoupon_FullMethodName       = "/admin.AdminCoupon/CreateCoupon"
+	AdminCoupon_UpdateCoupon_FullMethodName       = "/admin.AdminCoupon/UpdateCoupon"
+	AdminCoupon_UpdateCouponStatus_FullMethodName = "/admin.AdminCoupon/UpdateCouponStatus"
 )
 
 // AdminCouponClient is the client API for AdminCoupon service.
@@ -1802,6 +1806,10 @@ const (
 // 优惠券管理（聚合 MarketingRpc）
 type AdminCouponClient interface {
 	GetCouponDetail(ctx context.Context, in *IdReq, opts ...grpc.CallOption) (*CouponDetailResp, error)
+	ListCoupons(ctx context.Context, in *AdminListCouponsReq, opts ...grpc.CallOption) (*AdminListCouponsResp, error)
+	CreateCoupon(ctx context.Context, in *AdminCreateCouponReq, opts ...grpc.CallOption) (*Empty, error)
+	UpdateCoupon(ctx context.Context, in *AdminUpdateCouponReq, opts ...grpc.CallOption) (*Empty, error)
+	UpdateCouponStatus(ctx context.Context, in *AdminUpdateCouponStatusReq, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type adminCouponClient struct {
@@ -1822,6 +1830,46 @@ func (c *adminCouponClient) GetCouponDetail(ctx context.Context, in *IdReq, opts
 	return out, nil
 }
 
+func (c *adminCouponClient) ListCoupons(ctx context.Context, in *AdminListCouponsReq, opts ...grpc.CallOption) (*AdminListCouponsResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AdminListCouponsResp)
+	err := c.cc.Invoke(ctx, AdminCoupon_ListCoupons_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminCouponClient) CreateCoupon(ctx context.Context, in *AdminCreateCouponReq, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, AdminCoupon_CreateCoupon_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminCouponClient) UpdateCoupon(ctx context.Context, in *AdminUpdateCouponReq, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, AdminCoupon_UpdateCoupon_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminCouponClient) UpdateCouponStatus(ctx context.Context, in *AdminUpdateCouponStatusReq, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, AdminCoupon_UpdateCouponStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminCouponServer is the server API for AdminCoupon service.
 // All implementations must embed UnimplementedAdminCouponServer
 // for forward compatibility.
@@ -1830,6 +1878,10 @@ func (c *adminCouponClient) GetCouponDetail(ctx context.Context, in *IdReq, opts
 // 优惠券管理（聚合 MarketingRpc）
 type AdminCouponServer interface {
 	GetCouponDetail(context.Context, *IdReq) (*CouponDetailResp, error)
+	ListCoupons(context.Context, *AdminListCouponsReq) (*AdminListCouponsResp, error)
+	CreateCoupon(context.Context, *AdminCreateCouponReq) (*Empty, error)
+	UpdateCoupon(context.Context, *AdminUpdateCouponReq) (*Empty, error)
+	UpdateCouponStatus(context.Context, *AdminUpdateCouponStatusReq) (*Empty, error)
 	mustEmbedUnimplementedAdminCouponServer()
 }
 
@@ -1842,6 +1894,18 @@ type UnimplementedAdminCouponServer struct{}
 
 func (UnimplementedAdminCouponServer) GetCouponDetail(context.Context, *IdReq) (*CouponDetailResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCouponDetail not implemented")
+}
+func (UnimplementedAdminCouponServer) ListCoupons(context.Context, *AdminListCouponsReq) (*AdminListCouponsResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListCoupons not implemented")
+}
+func (UnimplementedAdminCouponServer) CreateCoupon(context.Context, *AdminCreateCouponReq) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateCoupon not implemented")
+}
+func (UnimplementedAdminCouponServer) UpdateCoupon(context.Context, *AdminUpdateCouponReq) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCoupon not implemented")
+}
+func (UnimplementedAdminCouponServer) UpdateCouponStatus(context.Context, *AdminUpdateCouponStatusReq) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCouponStatus not implemented")
 }
 func (UnimplementedAdminCouponServer) mustEmbedUnimplementedAdminCouponServer() {}
 func (UnimplementedAdminCouponServer) testEmbeddedByValue()                     {}
@@ -1882,6 +1946,78 @@ func _AdminCoupon_GetCouponDetail_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AdminCoupon_ListCoupons_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminListCouponsReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCouponServer).ListCoupons(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminCoupon_ListCoupons_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCouponServer).ListCoupons(ctx, req.(*AdminListCouponsReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminCoupon_CreateCoupon_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminCreateCouponReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCouponServer).CreateCoupon(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminCoupon_CreateCoupon_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCouponServer).CreateCoupon(ctx, req.(*AdminCreateCouponReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminCoupon_UpdateCoupon_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminUpdateCouponReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCouponServer).UpdateCoupon(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminCoupon_UpdateCoupon_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCouponServer).UpdateCoupon(ctx, req.(*AdminUpdateCouponReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminCoupon_UpdateCouponStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminUpdateCouponStatusReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminCouponServer).UpdateCouponStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminCoupon_UpdateCouponStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminCouponServer).UpdateCouponStatus(ctx, req.(*AdminUpdateCouponStatusReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AdminCoupon_ServiceDesc is the grpc.ServiceDesc for AdminCoupon service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1892,6 +2028,22 @@ var AdminCoupon_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCouponDetail",
 			Handler:    _AdminCoupon_GetCouponDetail_Handler,
+		},
+		{
+			MethodName: "ListCoupons",
+			Handler:    _AdminCoupon_ListCoupons_Handler,
+		},
+		{
+			MethodName: "CreateCoupon",
+			Handler:    _AdminCoupon_CreateCoupon_Handler,
+		},
+		{
+			MethodName: "UpdateCoupon",
+			Handler:    _AdminCoupon_UpdateCoupon_Handler,
+		},
+		{
+			MethodName: "UpdateCouponStatus",
+			Handler:    _AdminCoupon_UpdateCouponStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

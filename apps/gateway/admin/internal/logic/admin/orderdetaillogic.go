@@ -2,18 +2,22 @@ package admin
 
 import (
 	"context"
+
 	"github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/types"
 	"github.com/ZY0506/PrimeMall/apps/service/admin/rpc/types/admin"
+	"github.com/ZY0506/PrimeMall/common/errorx"
+	"github.com/ZY0506/PrimeMall/common/response"
 	"github.com/zeromicro/go-zero/core/logx"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"time"
 )
 
 func tsFormat(ts *timestamppb.Timestamp) string {
 	if ts == nil {
 		return ""
 	}
-	return ts.AsTime().Format("2006-01-02 15:04:05")
+	return ts.AsTime().Format(time.RFC3339)
 }
 
 type OrderDetailLogic struct {
@@ -29,6 +33,9 @@ func NewOrderDetailLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Order
 }
 
 func (l *OrderDetailLogic) OrderDetail(req *types.OrderSnReq) (resp *types.AdminOrderDetailResp, err error) {
+	if req.OrderSn == "" {
+		return nil, errorx.NewBizError(response.ErrCodeInvalidParam, "订单号不能为空")
+	}
 	rpcResp, err := l.svcCtx.AdminOrderRpc.GetOrder(l.ctx, &admin.AdminGetOrderReq{OrderSn: req.OrderSn})
 	if err != nil {
 		return nil, err
@@ -57,7 +64,7 @@ func (l *OrderDetailLogic) OrderDetail(req *types.OrderSnReq) (resp *types.Admin
 		TotalAmount: rpcResp.TotalAmount, FreightAmount: rpcResp.FreightAmount,
 		CouponAmount: rpcResp.CouponAmount, Remark: rpcResp.Remark,
 		Address: addr, Items: items,
-		DeliverySn: rpcResp.DeliverySn, DeliveryCompany: rpcResp.DeliveryCompany,
+		DeliverySn: rpcResp.DeliverySn, DeliveryCorp: rpcResp.DeliveryCompany,
 		CreateTime: tsFormat(rpcResp.CreateTime), PayTime: tsFormat(rpcResp.PayTime),
 		DeliveryTime: tsFormat(rpcResp.DeliveryTime), FinishTime: tsFormat(rpcResp.FinishTime),
 		CancelTime: tsFormat(rpcResp.CancelTime),

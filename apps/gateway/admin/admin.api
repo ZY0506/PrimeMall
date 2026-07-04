@@ -37,7 +37,7 @@ type (
 	}
 	AdminLoginResp {
 		AccessToken  string `json:"access_token"`
-		AccessExpire string `json:"access_expire"`
+		AccessExpire int64  `json:"access_expire"`
 	}
 	ChangePasswordReq {
 		OldPassword string `json:"old_password"`
@@ -92,6 +92,9 @@ type (
 		Id     uint64 `json:"id"`
 		Reason string `json:"reason,optional"`
 	}
+	RecoverUserReq {
+		Id uint64 `json:"id"`
+	}
 )
 
 // =============================================================
@@ -123,8 +126,8 @@ type (
 // =============================================================
 type (
 	ProductSpecItem {
-		Name  string `json:"name"`
-		Value string `json:"value"`
+		Name   string `json:"name"`
+		Values string `json:"values"`
 	}
 	AdminSkuItem {
 		Id       uint64            `json:"id,optional"`
@@ -176,6 +179,8 @@ type (
 		Brand             string         `json:"brand"`
 		Name              string         `json:"name"`
 		Description       string         `json:"description"`
+		Price             int64          `json:"price"`
+		Sales             int64          `json:"sales"`
 		Content           string         `json:"content"`
 		DefaultPic        string         `json:"default_pic"`
 		BannerPics        []string       `json:"banner_pics"`
@@ -234,34 +239,34 @@ type (
 	}
 	// 后台订单详情
 	AdminOrderDetailResp {
-		OrderSn         string            `json:"order_sn"`
-		UserId          uint64            `json:"user_id"`
-		UserPhone       string            `json:"user_phone"`
-		Status          int64             `json:"status"`
-		StatusDesc      string            `json:"status_desc"`
-		PayType         int64             `json:"pay_type"`
-		PayTypeDesc     string            `json:"pay_type_desc"`
-		PayAmount       int64             `json:"pay_amount"`
-		TotalAmount     int64             `json:"total_amount"`
-		FreightAmount   int64             `json:"freight_amount"`
-		CouponAmount    int64             `json:"coupon_amount"`
-		Remark          string            `json:"remark"`
-		Address         AdminOrderAddress `json:"address"`
-		Items           []AdminOrderItem  `json:"items"`
-		DeliverySn      string            `json:"delivery_sn,optional"`
-		DeliveryCompany string            `json:"delivery_company,optional"`
-		PaymentSn       string            `json:"payment_sn,optional"`
-		CreateTime      string            `json:"create_time"`
-		PayTime         string            `json:"pay_time,optional"`
-		DeliveryTime    string            `json:"delivery_time,optional"`
-		FinishTime      string            `json:"finish_time,optional"`
-		CancelTime      string            `json:"cancel_time,optional"`
+		OrderSn       string            `json:"order_sn"`
+		UserId        uint64            `json:"user_id"`
+		UserPhone     string            `json:"user_phone"`
+		Status        int64             `json:"status"`
+		StatusDesc    string            `json:"status_desc"`
+		PayType       int64             `json:"pay_type"`
+		PayTypeDesc   string            `json:"pay_type_desc"`
+		PayAmount     int64             `json:"pay_amount"`
+		TotalAmount   int64             `json:"total_amount"`
+		FreightAmount int64             `json:"freight_amount"`
+		CouponAmount  int64             `json:"coupon_amount"`
+		Remark        string            `json:"remark"`
+		Address       AdminOrderAddress `json:"address"`
+		Items         []AdminOrderItem  `json:"items"`
+		DeliverySn    string            `json:"delivery_sn,optional"`
+		DeliveryCorp  string            `json:"delivery_corp,optional"`
+		PaymentSn     string            `json:"payment_sn,optional"`
+		CreateTime    string            `json:"create_time"`
+		PayTime       string            `json:"pay_time,optional"`
+		DeliveryTime  string            `json:"delivery_time,optional"`
+		FinishTime    string            `json:"finish_time,optional"`
+		CancelTime    string            `json:"cancel_time,optional"`
 	}
 	ShipOrderReq {
-		OrderSn         string `json:"order_sn"`
-		DeliveryCompany string `json:"delivery_company"`
-		DeliverySn      string `json:"delivery_sn"`
-		Remark          string `json:"remark,optional"`
+		OrderSn      string `json:"order_sn"`
+		DeliveryCorp string `json:"delivery_corp"`
+		DeliverySn   string `json:"delivery_sn"`
+		Remark       string `json:"remark,optional"`
 	}
 )
 
@@ -308,8 +313,8 @@ type (
 		MaxDiscountAmount int64  `json:"max_discount_amount"`
 		TotalQuantity     int64  `json:"total_quantity"`
 		PerUserLimit      int64  `json:"per_user_limit"`
-		StartTime         string `json:"start_time"`
-		EndTime           string `json:"end_time"`
+		StartTime         int64  `json:"start_time"`
+		EndTime           int64  `json:"end_time"`
 		Status            int64  `json:"status"`
 		Description       string `json:"description"`
 	}
@@ -331,6 +336,26 @@ type (
 	AdminCouponListResp {
 		Total int64             `json:"total"`
 		List  []AdminCouponItem `json:"list"`
+	}
+)
+
+type (
+	AdminCouponDetailResp {
+		Id                uint64 `json:"id"`
+		Name              string `json:"name"`
+		Type              int64  `json:"type"`
+		ThresholdAmount   int64  `json:"threshold_amount"`
+		ReduceAmount      int64  `json:"reduce_amount"`
+		DiscountRate      int64  `json:"discount_rate"`
+		MaxDiscountAmount int64  `json:"max_discount_amount"`
+		TotalQuantity     int64  `json:"total_quantity"`
+		UsedQuantity      int64  `json:"used_quantity"`
+		PerUserLimit      int64  `json:"per_user_limit"`
+		StartTime         int64  `json:"start_time"`
+		EndTime           int64  `json:"end_time"`
+		Status            int64  `json:"status"`
+		Description       string `json:"description"`
+		CreatedAt         int64  `json:"created_at"`
 	}
 )
 
@@ -393,7 +418,7 @@ service admin {
 	post /user/blacklist (BlackUserReq)
 
 	@handler recoverUser
-	post /user/recover (IdReq)
+	put /user/recover (RecoverUserReq)
 
 	// 分类
 	@handler categoryList
@@ -442,6 +467,9 @@ service admin {
 	@handler couponList
 	get /coupon/list (AdminCouponListReq) returns (AdminCouponListResp)
 
+	@handler couponDetail
+	get /coupon/detail/:id (IdReq) returns (AdminCouponDetailResp)
+
 	@handler saveCoupon
 	post /coupon/save (SaveCouponReq)
 
@@ -450,6 +478,6 @@ service admin {
 
 	// 操作日志
 	@handler operateLogs
-	get /operate/logs returns (AdminOperateLogResp)
+	get /operate/logs (Pagination) returns (AdminOperateLogResp)
 }
 

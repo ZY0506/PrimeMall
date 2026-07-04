@@ -2,9 +2,12 @@ package admin
 
 import (
 	"context"
+
 	"github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/types"
 	"github.com/ZY0506/PrimeMall/apps/service/admin/rpc/types/admin"
+	"github.com/ZY0506/PrimeMall/common/errorx"
+	"github.com/ZY0506/PrimeMall/common/response"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -25,12 +28,11 @@ func (l *AdminInfoLogic) AdminInfo() (resp *types.AdminInfoResp, err error) {
 	if err != nil {
 		return nil, err
 	}
-	roleName := ""
 	if rpcResp.Admin != nil {
-		roleName = rpcResp.Admin.RoleName
+		return &types.AdminInfoResp{
+			Id: rpcResp.Admin.Id, Username: rpcResp.Admin.Username,
+			Nickname: rpcResp.Admin.RealName, Avatar: rpcResp.Admin.Avatar, Role: rpcResp.Admin.RoleName,
+		}, nil
 	}
-	return &types.AdminInfoResp{
-		Id: rpcResp.Admin.Id, Username: rpcResp.Admin.Username,
-		Nickname: rpcResp.Admin.RealName, Avatar: rpcResp.Admin.Avatar, Role: roleName,
-	}, nil
+	return nil, errorx.NewBizError(response.ErrCodeAdminNotFound, "管理员不存在")
 }

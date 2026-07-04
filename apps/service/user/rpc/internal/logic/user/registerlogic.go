@@ -47,22 +47,7 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.LoginResp, error) 
 		return nil, errorx.NewBizError(response.ErrCodePasswordNotMatch, "两次输入密码不一致")
 	}
 
-	// 校验手机号是否已经存在（排除已注销账户）
-	existingUser, err := l.svcCtx.UserModel.FindOneByPhone(l.ctx, in.Phone)
-	if err == nil {
-		// 如果用户存在且未注销，则手机号已注册
-		if !existingUser.DeletedAt.Valid {
-			l.Logger.Infof("手机号已存在,phone=%s", in.Phone)
-			return nil, errorx.NewBizError(response.ErrCodePhoneRegistered, "手机号已注册")
-		}
-		// 已注销用户允许重新注册
-		l.Logger.Infof("手机号已注销,phone=%s,允许重新注册", in.Phone)
-	} else if !errors.Is(err, model.ErrNotFound) {
-		l.Logger.Errorf("查询用户失败,error=%v", err)
-		return nil, err
-	}
-
-	// 验证码校验
+	// 先校验验证码（不泄露手机号是否已注册）
 	ok, err = l.svcCtx.CaptchaSvc.Verify(l.ctx, in.Phone, constants.SCENE_REGISTER, in.Code)
 	if err != nil {
 		l.Logger.Errorf("验证码校验失败,error=%v", err)
@@ -72,7 +57,20 @@ func (l *RegisterLogic) Register(in *user.RegisterReq) (*user.LoginResp, error) 
 		return nil, errorx.NewBizError(response.ErrCodeCaptchaWrong, "验证码错误")
 	}
 
-	// 3、幂等校验
+	// 再查手机号是否已注册（攻击者需先获取有效验证码，防止枚举）
+	existingUser, err := l.svcCtx.UserModel.FindOneByPhone(l.ctx, in.Phone)
+	if err == nil {
+		if !existingUser.DeletedAt.Valid {
+			l.Logger.Infof("手机号已存在,phone=%s", in.Phone)
+			return nil, errorx.NewBizError(response.ErrCodePhoneRegistered, "手机号已注册")
+		}
+		l.Logger.Infof("手机号已注销,phone=%s,允许重新注册", in.Phone)
+	} else if !errors.Is(err, model.ErrNotFound) {
+		l.Logger.Errorf("查询用户失败,error=%v", err)
+		return nil, err
+	}
+
+	// 幂等校验
 	idempotencyKey := fmt.Sprintf("%s%s", constants.IDEMPOTENCY_KEY+constants.USER_SERVICE, in.IdempotencyKey)
 	ok, err = l.svcCtx.Client.SetNX(l.ctx, idempotencyKey, "1", constants.IDEMPOTENCY_EXIRE).Result()
 	if err != nil {

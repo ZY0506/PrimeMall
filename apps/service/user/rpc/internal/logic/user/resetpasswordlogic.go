@@ -53,12 +53,23 @@ func (l *ResetPasswordLogic) ResetPassword(in *user.ResetPasswordReq) (*user.Emp
 		}
 	}()
 
-	// 检查用户是否存在
+	// 先校验验证码（不泄露用户是否存在）
+	ok, err = l.svcCtx.CaptchaSvc.Verify(l.ctx, in.Phone, constants.SCENE_RESET_PWD, in.Code)
+	if err != nil {
+		l.Logger.Errorf("验证码校验失败，error=%v", err)
+		return nil, err
+	}
+	if !ok {
+		l.Logger.Info("验证码错误", in.Phone)
+		return nil, errorx.NewBizError(response.ErrCodeCaptchaWrong, "验证码错误")
+	}
+
+	// 再查用户（查不到统一返回验证码错误，防止枚举）
 	userInfo, err := l.svcCtx.UserModel.FindOneByPhone(l.ctx, in.Phone)
 	if err != nil {
 		if errors.Is(err, model.ErrNotFound) {
 			l.Logger.Infof("用户不存在,phone=%s", in.Phone)
-			return nil, errorx.NewBizError(response.ErrCodeUserNotFound, "用户不存在")
+			return nil, errorx.NewBizError(response.ErrCodeCaptchaWrong, "手机号或验证码错误")
 		}
 		l.Logger.Errorf("数据库查询失败，error=%v", err)
 		return nil, err
@@ -72,17 +83,6 @@ func (l *ResetPasswordLogic) ResetPassword(in *user.ResetPasswordReq) (*user.Emp
 	if userInfo.DeletedAt.Valid {
 		l.Logger.Errorf("用户已注销，userId=%v", userInfo.Id)
 		return nil, errorx.NewBizError(response.ErrCodeUserDeleted, "用户已注销")
-	}
-
-	// 校验验证码
-	ok, err = l.svcCtx.CaptchaSvc.Verify(l.ctx, in.Phone, constants.SCENE_RESET_PWD, in.Code)
-	if err != nil {
-		l.Logger.Errorf("验证码校验失败，error=%v", err)
-		return nil, err
-	}
-	if !ok {
-		l.Logger.Info("验证码错误", in.Phone)
-		return nil, errorx.NewBizError(response.ErrCodeCaptchaWrong, "验证码错误")
 	}
 
 	// 检查密码是否一致

@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/config"
 	"github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler"
@@ -93,6 +94,17 @@ func (v *defaultValidator) applyRule(field reflect.StructField, val reflect.Valu
 	case strings.HasPrefix(rule, "oneof="):
 		options := strings.Split(rule[6:], " ")
 		return v.validateOneof(field.Name, val, options)
+	case strings.HasPrefix(rule, "len="):
+		lengthStr := rule[4:]
+		length, err := strconv.Atoi(lengthStr)
+		if err != nil {
+			return fmt.Errorf("无效的 len 值: %s", lengthStr)
+		}
+		valStr := fmt.Sprintf("%v", val.Interface())
+		if utf8.RuneCountInString(valStr) != length {
+			return fmt.Errorf("'%s' 长度必须为 %d", field.Name, length)
+		}
+		return nil
 	case strings.HasPrefix(rule, "eqfield="):
 		return nil
 	case strings.HasPrefix(rule, "nefield="):

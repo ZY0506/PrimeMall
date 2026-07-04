@@ -38,13 +38,14 @@ func (l *ApplyAfterSaleLogic) ApplyAfterSale(req *types.AfterSaleReq) (resp *typ
 	}
 	// 调用rpc
 	_, err = l.svcCtx.OrderRpc.ApplyAfterSale(l.ctx, &order.AfterSaleRequest{
-		OrderSn:     req.OrderSn,
-		SkuId:       req.SkuId,
-		Quantity:    req.Quantity,
-		Type:        order.AfterSaleType(req.Type),
-		Reason:      req.Reason,
-		ApplyAmount: req.ApplyAmount,
-		Images:      req.Images,
+		OrderSn:        req.OrderSn,
+		SkuId:          req.SkuId,
+		Quantity:       req.Quantity,
+		Type:           order.AfterSaleType(req.Type),
+		Reason:         req.Reason,
+		ApplyAmount:    req.ApplyAmount,
+		Images:         req.Images,
+		IdempotencyKey: req.IdempotencyKey,
 	})
 	if err != nil {
 		l.Logger.Errorf("调用rpc申请售后失败，error=%v", err)

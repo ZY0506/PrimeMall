@@ -494,7 +494,7 @@ type (
 		PayType         int64    `json:"pay_type,optional" validate:"omitempty,oneof=1 2"` // 支付方式：1-微信，2-支付宝
 		Remark          string   `json:"remark,optional" validate:"omitempty,max=200"` // 订单备注
 		IdempotencyKey  string   `json:"idempotency_key" validate:"required"` // 幂等键（前端生成）
-		CartSkuIds      []uint64 `json:"cart_sku_ids, optional"` // 购物车商品ID列表
+		CartSkuIds      []uint64 `json:"cart_sku_ids,optional"` // 购物车商品ID列表
 		AddressId       uint64   `json:"address_id" validate:"required,min=1"` // 最终使用的地址ID
 		CouponId        uint64   `json:"coupon_id,optional" validate:"omitempty,min=1"` // 优惠券ID（可选）
 	}

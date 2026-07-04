@@ -192,6 +192,10 @@ service AdminAfterSale {
 // 优惠券管理（聚合 MarketingRpc）
 service AdminCoupon {
   rpc GetCouponDetail(IdReq) returns (CouponDetailResp);
+  rpc ListCoupons(AdminListCouponsReq) returns (AdminListCouponsResp);
+  rpc CreateCoupon(AdminCreateCouponReq) returns (Empty);
+  rpc UpdateCoupon(AdminUpdateCouponReq) returns (Empty);
+  rpc UpdateCouponStatus(AdminUpdateCouponStatusReq) returns (Empty);
 }
 
 message CouponDetailResp {
@@ -210,6 +214,70 @@ message CouponDetailResp {
   int32 status = 13;                      // 1-启用 2-禁用
   string description = 14;                // 描述
   int64 created_at = 15;                  // 创建时间 Unix秒
+}
+
+message AdminCouponItem {
+  uint64 id = 1;
+  string name = 2;
+  int64 type = 3;
+  int64 threshold_amount = 4;
+  int64 reduce_amount = 5;
+  int32 discount_rate = 6;
+  int64 max_discount_amount = 7;
+  int32 total_quantity = 8;
+  int32 used_quantity = 9;
+  int32 per_user_limit = 10;
+  int64 start_time = 11;
+  int64 end_time = 12;
+  int32 status = 13;
+  string description = 14;
+  int64 created_at = 15;
+}
+
+message AdminListCouponsReq {
+  int64 page = 1;
+  int64 page_size = 2;
+  int64 status = 3;
+  string name = 4;
+}
+
+message AdminListCouponsResp {
+  int64 total = 1;
+  repeated AdminCouponItem list = 2;
+}
+
+message AdminCreateCouponReq {
+  string name = 1;
+  int64 type = 2;
+  int64 threshold_amount = 3;
+  int64 reduce_amount = 4;
+  int64 discount_rate = 5;
+  int64 max_discount_amount = 6;
+  int32 total_quantity = 7;
+  int32 per_user_limit = 8;
+  int64 start_time = 9;
+  int64 end_time = 10;
+  string description = 11;
+}
+
+message AdminUpdateCouponReq {
+  uint64 id = 1;
+  string name = 2;
+  int64 type = 3;
+  int64 threshold_amount = 4;
+  int64 reduce_amount = 5;
+  int64 discount_rate = 6;
+  int64 max_discount_amount = 7;
+  int32 total_quantity = 8;
+  int32 per_user_limit = 9;
+  int64 start_time = 10;
+  int64 end_time = 11;
+  string description = 12;
+}
+
+message AdminUpdateCouponStatusReq {
+  uint64 id = 1;
+  int32 status = 2;
 }
 
 

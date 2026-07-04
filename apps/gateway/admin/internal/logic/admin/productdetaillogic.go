@@ -6,6 +6,7 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/types"
 	"github.com/ZY0506/PrimeMall/apps/service/admin/rpc/types/admin"
 	"github.com/zeromicro/go-zero/core/logx"
+	"time"
 )
 
 type ProductDetailLogic struct {
@@ -31,20 +32,31 @@ func (l *ProductDetailLogic) ProductDetail(req *types.IdReq) (resp *types.AdminP
 	for _, s := range rpcResp.Skus {
 		specs := make([]types.ProductSpecItem, 0, len(s.Specs))
 		for _, sp := range s.Specs {
-			specs = append(specs, types.ProductSpecItem{Name: sp.Key, Value: sp.Value})
+			specs = append(specs, types.ProductSpecItem{Name: sp.Key, Values: sp.Value})
 		}
 		skus = append(skus, types.AdminSkuItem{
 			Id: s.Id, Code: s.SkuCode, Pic: s.Images, Price: s.Price,
 			Stock: s.Stock, Weight: s.Weight, SpecData: specs,
 		})
 	}
+	// 默认价格为所有 SKU 中的最低价
+	var price int64
+	if len(rpcResp.Skus) > 0 {
+		price = rpcResp.Skus[0].Price
+		for _, s := range rpcResp.Skus[1:] {
+			if s.Price < price {
+				price = s.Price
+			}
+		}
+	}
 	createdAt := ""
 	if rpcResp.CreatedAt != nil {
-		createdAt = rpcResp.CreatedAt.AsTime().Format("2006-01-02 15:04:05")
+		createdAt = rpcResp.CreatedAt.AsTime().Format(time.RFC3339)
 	}
 	return &types.AdminProductDetailResp{
 		Id: rpcResp.Id, CategoryId: rpcResp.CategoryId, Brand: rpcResp.Brand,
-		Name: rpcResp.Name, Description: rpcResp.Description, Content: rpcResp.Content,
+		Name: rpcResp.Name, Price: price, Sales: rpcResp.SalesCount,
+		Description: rpcResp.Description, Content: rpcResp.Content,
 		DefaultPic: rpcResp.Cover, BannerPics: rpcResp.Images, VideoUrl: rpcResp.VideoUrl,
 		FreightTemplateId: rpcResp.FreightTemplateId, Status: int64(rpcResp.Status),
 		Skus: skus, CreatedAt: createdAt,

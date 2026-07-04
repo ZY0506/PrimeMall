@@ -27,20 +27,20 @@ func (l *ShipOrderLogic) ShipOrder(req *types.ShipOrderReq) error {
 	if req.OrderSn == "" {
 		return errorx.NewBizError(int32(response.ErrCodeInvalidParam), "订单号不能为空")
 	}
-	if req.DeliveryCompany == "" {
+	if req.DeliveryCorp == "" {
 		return errorx.NewBizError(int32(response.ErrCodeInvalidParam), "物流公司不能为空")
 	}
 	if req.DeliverySn == "" {
 		return errorx.NewBizError(int32(response.ErrCodeInvalidParam), "物流单号不能为空")
 	}
 	_, err := l.svcCtx.AdminOrderRpc.ShipOrder(l.ctx, &admin.AdminShipOrderReq{
-		OrderSn: req.OrderSn, DeliveryCompany: req.DeliveryCompany,
+		OrderSn: req.OrderSn, DeliveryCompany: req.DeliveryCorp,
 		DeliverySn: req.DeliverySn,
 	})
 	if err != nil {
 		l.Logger.Errorf("订单发货失败 orderSn=%s: %v", req.OrderSn, err)
 		return err
 	}
-	l.Logger.Infof("订单发货成功 orderSn=%s company=%s", req.OrderSn, req.DeliveryCompany)
+	l.Logger.Infof("订单发货成功 orderSn=%s company=%s", req.OrderSn, req.DeliveryCorp)
 	return nil
 }

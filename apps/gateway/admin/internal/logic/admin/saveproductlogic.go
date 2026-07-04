@@ -34,7 +34,7 @@ func (l *SaveProductLogic) SaveProduct(req *types.SaveProductReq) error {
 	for _, s := range req.Skus {
 		specs := make([]*admin.AdminSpecItem, 0, len(s.SpecData))
 		for _, sp := range s.SpecData {
-			specs = append(specs, &admin.AdminSpecItem{Key: sp.Name, Value: sp.Value})
+			specs = append(specs, &admin.AdminSpecItem{Key: sp.Name, Value: sp.Values})
 		}
 		skus = append(skus, &admin.AdminSkuItem{
 			SkuCode: s.Code, Price: s.Price, Stock: s.Stock,

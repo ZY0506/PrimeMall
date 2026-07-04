@@ -52,7 +52,7 @@ func (l *OrderListLogic) OrderList(req *types.AdminOrderListReq) (resp *types.Ad
 	for _, o := range rpcResp.List {
 		createdAt := ""
 		if o.CreatedAt != nil {
-			createdAt = o.CreatedAt.AsTime().Format("2006-01-02 15:04:05")
+			createdAt = o.CreatedAt.AsTime().Format(time.RFC3339)
 		}
 		list = append(list, types.AdminOrderSnapshot{
 			OrderSn: o.OrderSn, UserId: o.UserId, UserPhone: o.UserPhone,

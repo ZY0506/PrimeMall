@@ -2,6 +2,7 @@ package admin
 
 import (
 	"context"
+	"time"
 
 	"github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/types"
@@ -39,7 +40,7 @@ func (l *OperateLogsLogic) OperateLogs(req *types.Pagination) (resp *types.Admin
 	for _, lg := range rpcResp.List {
 		createdAt := ""
 		if lg.CreatedAt != nil {
-			createdAt = lg.CreatedAt.AsTime().Format("2006-01-02 15:04:05")
+			createdAt = lg.CreatedAt.AsTime().Format(time.RFC3339)
 		}
 		list = append(list, types.AdminOperateLogItem{
 			Id: lg.Id, AdminId: lg.AdminId, Module: lg.Module.String(),

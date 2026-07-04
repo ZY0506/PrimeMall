@@ -1,14 +1,14 @@
 // Code scaffolded by goctl. Safe to edit.
-// goctl 1.9.1
+// goctl 1.10.1
 
 package admin
 
 import (
+	"github.com/ZY0506/PrimeMall/common/response"
 	"net/http"
 
 	"github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/logic/admin"
 	"github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/svc"
-	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 func AdminInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
@@ -16,9 +16,9 @@ func AdminInfoHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		l := admin.NewAdminInfoLogic(r.Context(), svcCtx)
 		resp, err := l.AdminInfo()
 		if err != nil {
-			httpx.ErrorCtx(r.Context(), w, err)
+			response.LogicError(r.Context(), w, err)
 		} else {
-			httpx.OkJsonCtx(r.Context(), w, resp)
+			response.Success(w, r, resp)
 		}
 	}
 }

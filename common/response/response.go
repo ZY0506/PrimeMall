@@ -41,7 +41,7 @@ func Success(w http.ResponseWriter, r *http.Request, data interface{}) {
 
 func ClientError(ctx context.Context, w http.ResponseWriter, bizCode int, errMsg string) {
 	logx.WithContext(ctx).Errorf("ClientError: code=%d, msg=%v", bizCode, errMsg)
-	httpx.WriteJsonCtx(ctx, w, http.StatusBadRequest, Response{
+	httpx.WriteJsonCtx(ctx, w, http.StatusOK, Response{ // 统一返回 200，前端通过 code 区分
 		Code: bizCode,
 		Msg:  errMsg,
 		Data: nil,
