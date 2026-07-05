@@ -7,6 +7,8 @@ info (
 	version: "v1.0"
 )
 
+// goctl api go -api ./apps/gateway/admin/admin.api -dir ./apps/gateway/admin
+// goctl api plugin -plugin goctl-swagger="swagger -filename shop-admin.json" -api ./apps/gateway/admin/admin.api -dir ./doc/api
 // =============================================================
 // 公共类型
 // =============================================================
@@ -28,7 +30,7 @@ type (
 )
 
 // =============================================================
-// 管理员认证
+// 1. 认证模块 (auth)
 // =============================================================
 type (
 	AdminLoginReq {
@@ -39,6 +41,12 @@ type (
 		AccessToken  string `json:"access_token"`
 		AccessExpire int64  `json:"access_expire"`
 	}
+)
+
+// =============================================================
+// 2. 管理员模块 (admin)
+// =============================================================
+type (
 	ChangePasswordReq {
 		OldPassword string `json:"old_password"`
 		NewPassword string `json:"new_password"`
@@ -50,10 +58,23 @@ type (
 		Avatar   string `json:"avatar"`
 		Role     string `json:"role"`
 	}
+	AdminOperateLogItem {
+		Id        uint64 `json:"id"`
+		AdminId   uint64 `json:"admin_id"`
+		Module    string `json:"module"`
+		Action    string `json:"action"`
+		Content   string `json:"content"`
+		Ip        string `json:"ip"`
+		CreatedAt string `json:"created_at"`
+	}
+	AdminOperateLogResp {
+		Total int64                 `json:"total"`
+		List  []AdminOperateLogItem `json:"list"`
+	}
 )
 
 // =============================================================
-// 用户管理
+// 3. 用户管理模块 (user)
 // =============================================================
 type (
 	AdminUserListReq {
@@ -98,7 +119,7 @@ type (
 )
 
 // =============================================================
-// 分类管理
+// 4. 分类管理模块 (category)
 // =============================================================
 type (
 	AdminCategoryItem {
@@ -122,7 +143,7 @@ type (
 )
 
 // =============================================================
-// 商品/SPU/SKU
+// 5. 商品管理模块 (product)
 // =============================================================
 type (
 	ProductSpecItem {
@@ -194,7 +215,7 @@ type (
 )
 
 // =============================================================
-// 订单管理
+// 6. 订单管理模块 (order)
 // =============================================================
 type (
 	AdminOrderListReq {
@@ -217,18 +238,16 @@ type (
 		Total int64                `json:"total"`
 		List  []AdminOrderSnapshot `json:"list"`
 	}
-	// 后台订单商品项
 	AdminOrderItem {
 		SkuId       uint64 `json:"sku_id"`
 		SpuId       uint64 `json:"spu_id"`
 		ProductName string `json:"product_name"`
 		SkuName     string `json:"sku_name"`
 		Pic         string `json:"pic"`
-		Price       int64  `json:"price"` // 成交单价（分）
-		Quantity    int64  `json:"quantity"` // 购买数量
-		TotalAmount int64  `json:"total_amount"` // 小计金额（分）
+		Price       int64  `json:"price"`
+		Quantity    int64  `json:"quantity"`
+		TotalAmount int64  `json:"total_amount"`
 	}
-	// 后台订单地址
 	AdminOrderAddress {
 		ReceiverName  string `json:"receiver_name"`
 		ReceiverPhone string `json:"receiver_phone"`
@@ -237,7 +256,6 @@ type (
 		District      string `json:"district"`
 		DetailAddress string `json:"detail_address"`
 	}
-	// 后台订单详情
 	AdminOrderDetailResp {
 		OrderSn       string            `json:"order_sn"`
 		UserId        uint64            `json:"user_id"`
@@ -271,7 +289,7 @@ type (
 )
 
 // =============================================================
-// 售后管理
+// 7. 售后管理模块 (refund)
 // =============================================================
 type (
 	AdminRefundListReq {
@@ -300,7 +318,7 @@ type (
 )
 
 // =============================================================
-// 优惠券管理
+// 8. 优惠券管理模块 (coupon)
 // =============================================================
 type (
 	SaveCouponReq {
@@ -337,9 +355,6 @@ type (
 		Total int64             `json:"total"`
 		List  []AdminCouponItem `json:"list"`
 	}
-)
-
-type (
 	AdminCouponDetailResp {
 		Id                uint64 `json:"id"`
 		Name              string `json:"name"`
@@ -360,26 +375,7 @@ type (
 )
 
 // =============================================================
-// 操作日志
-// =============================================================
-type (
-	AdminOperateLogItem {
-		Id        uint64 `json:"id"`
-		AdminId   uint64 `json:"admin_id"`
-		Module    string `json:"module"`
-		Action    string `json:"action"`
-		Content   string `json:"content"`
-		Ip        string `json:"ip"`
-		CreatedAt string `json:"created_at"`
-	}
-	AdminOperateLogResp {
-		Total int64                 `json:"total"`
-		List  []AdminOperateLogItem `json:"list"`
-	}
-)
-
-// =============================================================
-// 登录接口
+// 认证接口（无需JWT）
 // =============================================================
 @server (
 	group:  auth
@@ -392,7 +388,7 @@ service admin {
 }
 
 // =============================================================
-// 管理后台接口
+// 管理员模块（需JWT）
 // =============================================================
 @server (
 	jwt:    JwtAuth
@@ -400,84 +396,160 @@ service admin {
 	prefix: /api/v1/admin
 )
 service admin {
-	// 管理员
+	@doc "获取当前管理员信息"
 	@handler adminInfo
 	get /info returns (AdminInfoResp)
 
+	@doc "修改密码"
 	@handler changePassword
 	put /password (ChangePasswordReq)
 
-	// 用户
-	@handler userList
-	get /user/list (AdminUserListReq) returns (AdminUserListResp)
-
-	@handler userDetail
-	get /user/detail/:id (IdReq) returns (AdminUserDetailResp)
-
-	@handler blacklistUser
-	post /user/blacklist (BlackUserReq)
-
-	@handler recoverUser
-	put /user/recover (RecoverUserReq)
-
-	// 分类
-	@handler categoryList
-	get /category/list returns (CategoryListResp)
-
-	@handler saveCategory
-	post /category/save (SaveCategoryReq)
-
-	@handler deleteCategory
-	delete /category/:id (IdReq)
-
-	// 商品
-	@handler productList
-	get /product/list (AdminProductListReq) returns (AdminProductListResp)
-
-	@handler productDetail
-	get /product/detail/:id (IdReq) returns (AdminProductDetailResp)
-
-	@handler saveProduct
-	post /product/save (SaveProductReq)
-
-	@handler updateProductStatus
-	post /product/status (UpdateStatusReq)
-
-	@handler deleteProduct
-	delete /product/:id (IdReq)
-
-	// 订单
-	@handler orderList
-	get /order/list (AdminOrderListReq) returns (AdminOrderListResp)
-
-	@handler orderDetail
-	get /order/detail/:order_sn (OrderSnReq) returns (AdminOrderDetailResp)
-
-	@handler shipOrder
-	post /order/ship (ShipOrderReq)
-
-	// 售后
-	@handler refundList
-	get /refund/list (AdminRefundListReq) returns (AdminRefundListResp)
-
-	@handler handleRefund
-	post /refund/handle (HandleRefundReq)
-
-	// 优惠券
-	@handler couponList
-	get /coupon/list (AdminCouponListReq) returns (AdminCouponListResp)
-
-	@handler couponDetail
-	get /coupon/detail/:id (IdReq) returns (AdminCouponDetailResp)
-
-	@handler saveCoupon
-	post /coupon/save (SaveCouponReq)
-
-	@handler updateCouponStatus
-	post /coupon/status (UpdateStatusReq)
-
-	// 操作日志
+	@doc "操作日志"
 	@handler operateLogs
 	get /operate/logs (Pagination) returns (AdminOperateLogResp)
+}
+
+// =============================================================
+// 用户管理模块（需JWT）
+// =============================================================
+@server (
+	jwt:    JwtAuth
+	group:  user
+	prefix: /api/v1/admin/user
+)
+service admin {
+	@doc "用户列表"
+	@handler userList
+	get /list (AdminUserListReq) returns (AdminUserListResp)
+
+	@doc "用户详情"
+	@handler userDetail
+	get /detail/:id (IdReq) returns (AdminUserDetailResp)
+
+	@doc "拉黑用户"
+	@handler blacklistUser
+	post /blacklist (BlackUserReq)
+
+	@doc "恢复用户"
+	@handler recoverUser
+	put /recover (RecoverUserReq)
+}
+
+// =============================================================
+// 分类管理模块（需JWT）
+// =============================================================
+@server (
+	jwt:    JwtAuth
+	group:  category
+	prefix: /api/v1/admin/category
+)
+service admin {
+	@doc "分类列表"
+	@handler categoryList
+	get /list returns (CategoryListResp)
+
+	@doc "保存分类"
+	@handler saveCategory
+	post /save (SaveCategoryReq)
+
+	@doc "删除分类"
+	@handler deleteCategory
+	delete /:id (IdReq)
+}
+
+// =============================================================
+// 商品管理模块（需JWT）
+// =============================================================
+@server (
+	jwt:    JwtAuth
+	group:  product
+	prefix: /api/v1/admin/product
+)
+service admin {
+	@doc "商品列表"
+	@handler productList
+	get /list (AdminProductListReq) returns (AdminProductListResp)
+
+	@doc "商品详情"
+	@handler productDetail
+	get /detail/:id (IdReq) returns (AdminProductDetailResp)
+
+	@doc "保存商品"
+	@handler saveProduct
+	post /save (SaveProductReq)
+
+	@doc "更新商品状态"
+	@handler updateProductStatus
+	post /status (UpdateStatusReq)
+
+	@doc "删除商品"
+	@handler deleteProduct
+	delete /:id (IdReq)
+}
+
+// =============================================================
+// 订单管理模块（需JWT）
+// =============================================================
+@server (
+	jwt:    JwtAuth
+	group:  order
+	prefix: /api/v1/admin/order
+)
+service admin {
+	@doc "订单列表"
+	@handler orderList
+	get /list (AdminOrderListReq) returns (AdminOrderListResp)
+
+	@doc "订单详情"
+	@handler orderDetail
+	get /detail/:order_sn (OrderSnReq) returns (AdminOrderDetailResp)
+
+	@doc "发货"
+	@handler shipOrder
+	post /ship (ShipOrderReq)
+}
+
+// =============================================================
+// 售后管理模块（需JWT）
+// =============================================================
+@server (
+	jwt:    JwtAuth
+	group:  refund
+	prefix: /api/v1/admin/refund
+)
+service admin {
+	@doc "售后列表"
+	@handler refundList
+	get /list (AdminRefundListReq) returns (AdminRefundListResp)
+
+	@doc "处理售后"
+	@handler handleRefund
+	post /handle (HandleRefundReq)
+}
+
+// =============================================================
+// 优惠券管理模块（需JWT）
+// =============================================================
+@server (
+	jwt:    JwtAuth
+	group:  coupon
+	prefix: /api/v1/admin/coupon
+)
+service admin {
+	@doc "优惠券列表"
+	@handler couponList
+	get /list (AdminCouponListReq) returns (AdminCouponListResp)
+
+	@doc "优惠券详情"
+	@handler couponDetail
+	get /detail/:id (IdReq) returns (AdminCouponDetailResp)
+
+	@doc "保存优惠券"
+	@handler saveCoupon
+	post /save (SaveCouponReq)
+
+	@doc "更新优惠券状态"
+	@handler updateCouponStatus
+	post /status (UpdateStatusReq)
 }
 

@@ -125,9 +125,9 @@ type AdminOrderItem struct {
 	ProductName string `json:"product_name"`
 	SkuName     string `json:"sku_name"`
 	Pic         string `json:"pic"`
-	Price       int64  `json:"price"`        // 成交单价（分）
-	Quantity    int64  `json:"quantity"`     // 购买数量
-	TotalAmount int64  `json:"total_amount"` // 小计金额（分）
+	Price       int64  `json:"price"`
+	Quantity    int64  `json:"quantity"`
+	TotalAmount int64  `json:"total_amount"`
 }
 
 type AdminOrderListReq struct {

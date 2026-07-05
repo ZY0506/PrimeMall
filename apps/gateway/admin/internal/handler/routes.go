@@ -8,6 +8,12 @@ import (
 
 	admin "github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/handler/admin"
 	auth "github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/handler/auth"
+	category "github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/handler/category"
+	coupon "github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/handler/coupon"
+	order "github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/handler/order"
+	product "github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/handler/product"
+	refund "github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/handler/refund"
+	user "github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/handler/user"
 	"github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -17,124 +23,22 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
-				Method:  http.MethodDelete,
-				Path:    "/category/:id",
-				Handler: admin.DeleteCategoryHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/category/list",
-				Handler: admin.CategoryListHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/category/save",
-				Handler: admin.SaveCategoryHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/coupon/detail/:id",
-				Handler: admin.CouponDetailHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/coupon/list",
-				Handler: admin.CouponListHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/coupon/save",
-				Handler: admin.SaveCouponHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/coupon/status",
-				Handler: admin.UpdateCouponStatusHandler(serverCtx),
-			},
-			{
+				// 获取当前管理员信息
 				Method:  http.MethodGet,
 				Path:    "/info",
 				Handler: admin.AdminInfoHandler(serverCtx),
 			},
 			{
+				// 操作日志
 				Method:  http.MethodGet,
 				Path:    "/operate/logs",
 				Handler: admin.OperateLogsHandler(serverCtx),
 			},
 			{
-				Method:  http.MethodGet,
-				Path:    "/order/detail/:order_sn",
-				Handler: admin.OrderDetailHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/order/list",
-				Handler: admin.OrderListHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/order/ship",
-				Handler: admin.ShipOrderHandler(serverCtx),
-			},
-			{
+				// 修改密码
 				Method:  http.MethodPut,
 				Path:    "/password",
 				Handler: admin.ChangePasswordHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodDelete,
-				Path:    "/product/:id",
-				Handler: admin.DeleteProductHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/product/detail/:id",
-				Handler: admin.ProductDetailHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/product/list",
-				Handler: admin.ProductListHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/product/save",
-				Handler: admin.SaveProductHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/product/status",
-				Handler: admin.UpdateProductStatusHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/refund/handle",
-				Handler: admin.HandleRefundHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/refund/list",
-				Handler: admin.RefundListHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/user/blacklist",
-				Handler: admin.BlacklistUserHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/user/detail/:id",
-				Handler: admin.UserDetailHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/user/list",
-				Handler: admin.UserListHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPut,
-				Path:    "/user/recover",
-				Handler: admin.RecoverUserHandler(serverCtx),
 			},
 		},
 		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
@@ -151,5 +55,173 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 		},
 		rest.WithPrefix("/api/v1/admin"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 删除分类
+				Method:  http.MethodDelete,
+				Path:    "/:id",
+				Handler: category.DeleteCategoryHandler(serverCtx),
+			},
+			{
+				// 分类列表
+				Method:  http.MethodGet,
+				Path:    "/list",
+				Handler: category.CategoryListHandler(serverCtx),
+			},
+			{
+				// 保存分类
+				Method:  http.MethodPost,
+				Path:    "/save",
+				Handler: category.SaveCategoryHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
+		rest.WithPrefix("/api/v1/admin/category"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 优惠券详情
+				Method:  http.MethodGet,
+				Path:    "/detail/:id",
+				Handler: coupon.CouponDetailHandler(serverCtx),
+			},
+			{
+				// 优惠券列表
+				Method:  http.MethodGet,
+				Path:    "/list",
+				Handler: coupon.CouponListHandler(serverCtx),
+			},
+			{
+				// 保存优惠券
+				Method:  http.MethodPost,
+				Path:    "/save",
+				Handler: coupon.SaveCouponHandler(serverCtx),
+			},
+			{
+				// 更新优惠券状态
+				Method:  http.MethodPost,
+				Path:    "/status",
+				Handler: coupon.UpdateCouponStatusHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
+		rest.WithPrefix("/api/v1/admin/coupon"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 订单详情
+				Method:  http.MethodGet,
+				Path:    "/detail/:order_sn",
+				Handler: order.OrderDetailHandler(serverCtx),
+			},
+			{
+				// 订单列表
+				Method:  http.MethodGet,
+				Path:    "/list",
+				Handler: order.OrderListHandler(serverCtx),
+			},
+			{
+				// 发货
+				Method:  http.MethodPost,
+				Path:    "/ship",
+				Handler: order.ShipOrderHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
+		rest.WithPrefix("/api/v1/admin/order"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 删除商品
+				Method:  http.MethodDelete,
+				Path:    "/:id",
+				Handler: product.DeleteProductHandler(serverCtx),
+			},
+			{
+				// 商品详情
+				Method:  http.MethodGet,
+				Path:    "/detail/:id",
+				Handler: product.ProductDetailHandler(serverCtx),
+			},
+			{
+				// 商品列表
+				Method:  http.MethodGet,
+				Path:    "/list",
+				Handler: product.ProductListHandler(serverCtx),
+			},
+			{
+				// 保存商品
+				Method:  http.MethodPost,
+				Path:    "/save",
+				Handler: product.SaveProductHandler(serverCtx),
+			},
+			{
+				// 更新商品状态
+				Method:  http.MethodPost,
+				Path:    "/status",
+				Handler: product.UpdateProductStatusHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
+		rest.WithPrefix("/api/v1/admin/product"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 处理售后
+				Method:  http.MethodPost,
+				Path:    "/handle",
+				Handler: refund.HandleRefundHandler(serverCtx),
+			},
+			{
+				// 售后列表
+				Method:  http.MethodGet,
+				Path:    "/list",
+				Handler: refund.RefundListHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
+		rest.WithPrefix("/api/v1/admin/refund"),
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				// 拉黑用户
+				Method:  http.MethodPost,
+				Path:    "/blacklist",
+				Handler: user.BlacklistUserHandler(serverCtx),
+			},
+			{
+				// 用户详情
+				Method:  http.MethodGet,
+				Path:    "/detail/:id",
+				Handler: user.UserDetailHandler(serverCtx),
+			},
+			{
+				// 用户列表
+				Method:  http.MethodGet,
+				Path:    "/list",
+				Handler: user.UserListHandler(serverCtx),
+			},
+			{
+				// 恢复用户
+				Method:  http.MethodPut,
+				Path:    "/recover",
+				Handler: user.RecoverUserHandler(serverCtx),
+			},
+		},
+		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
+		rest.WithPrefix("/api/v1/admin/user"),
 	)
 }
