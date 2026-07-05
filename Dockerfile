@@ -16,6 +16,9 @@ RUN apk add --no-cache git ca-certificates
 
 WORKDIR /build
 
+# 国内 Go 代理（解决 go mod download 被墙问题）
+ENV GOPROXY=https://goproxy.cn,direct
+
 # 缓存依赖层
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
