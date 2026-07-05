@@ -386,8 +386,6 @@ services:
       - ./storage/nginx/logs:/var/log/nginx
     depends_on:
       shop-01: { condition: service_started }
-      shop-02: { condition: service_started }
-      shop-03: { condition: service_started }
     networks:
       - prime_mall_network
 
