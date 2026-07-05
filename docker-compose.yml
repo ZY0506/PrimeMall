@@ -63,8 +63,10 @@ services:
     container_name: mysql-prime_mall
     restart: unless-stopped
     command:
-      - --max_connections=5000
+      - --max_connections=500
       - --skip-name-resolve
+      - --innodb_buffer_pool_size=512M
+      - --innodb_log_buffer_size=16M
     environment:
       - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-123456}
       - TZ=Asia/Shanghai
@@ -175,7 +177,7 @@ services:
       - node.name=es-prime_mall
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - TZ=Asia/Shanghai
       - "cluster.routing.allocation.disk.watermark.low=85%"
       - "cluster.routing.allocation.disk.watermark.high=92%"
@@ -344,11 +346,12 @@ services:
       search-rpc: { condition: service_started }
     <<: *app-restart
 
-  shop-02:
-    <<: *shop-common
+  # shop-02: 4核4G VM 资源有限，只跑1个实例
+  # shop-02:
+  #   <<: *shop-common
 
-  shop-03:
-    <<: *shop-common
+  # shop-03:
+  #   <<: *shop-common
 
   # -----------------------------------------------------------------
   # admin-api — 管理后台 HTTP 接口
