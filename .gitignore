@@ -50,5 +50,4 @@ Thumbs.db
 /doc/bug
 
 /doc/production-checklist.md
-/deployments/docker/mysql/init/99-seed-data.sql
 /bug
