@@ -118,7 +118,7 @@ const (
 	PREFIX_ORDER_SN         = "PM"
 	PREFIX_SETTLEMENT_TOKEN = "SToken"
 	SETTLEMENT_TOKEN_KEY    = "order:settlement_token:"
-	SETTLEMENT_TOKEN_EXPIRE = 15 * 60 * time.Second
+	SETTLEMENT_TOKEN_EXPIRE = 2 * 60 * time.Second
 )
 
 // 订单类型
@@ -227,16 +227,16 @@ const (
 
 // 商品缓存
 const (
-	ProductDetailKey    = "product:detail:"       // + spuId → 商品详情JSON
-	ProductDetailTTL    = 10 * 60 * time.Second   // 10分钟
-	ProductListKey      = "product:list:"          // + categoryId:page:sort → 商品列表JSON
-	ProductListTTL      = 5 * 60 * time.Second    // 5分钟
-	ProductStockKey     = "product:stock:"         // + skuId → 库存数量
-	ProductStockTTL     = 10 * time.Second         // 10秒，浏览展示用
-	ProductHotKey       = "product:hot:skus"       // 热销SKU ID列表（预热用）
-	ProductHotTTL       = 30 * 60 * time.Second    // 30分钟
-	ProductCategoryKey  = "product:category:"      // + categoryId → 分类JSON
-	ProductCategoryTTL  = 30 * 60 * time.Second    // 30分钟
+	ProductDetailKey   = "product:detail:"     // + spuId → 商品详情JSON
+	ProductDetailTTL   = 10 * 60 * time.Second // 10分钟
+	ProductListKey     = "product:list:"       // + categoryId:page:sort → 商品列表JSON
+	ProductListTTL     = 5 * 60 * time.Second  // 5分钟
+	ProductStockKey    = "product:stock:"      // + skuId → 库存数量
+	ProductStockTTL    = 10 * time.Second      // 10秒，浏览展示用
+	ProductHotKey      = "product:hot:skus"    // 热销SKU ID列表（预热用）
+	ProductHotTTL      = 30 * 60 * time.Second // 30分钟
+	ProductCategoryKey = "product:category:"   // + categoryId → 分类JSON
+	ProductCategoryTTL = 30 * 60 * time.Second // 30分钟
 )
 
 // 异步订单创建

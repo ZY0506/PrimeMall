@@ -3,6 +3,7 @@ package orderlogic
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -13,6 +14,7 @@ import (
 	"github.com/ZY0506/PrimeMall/common/errorx"
 	"github.com/ZY0506/PrimeMall/common/response"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -63,6 +65,10 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (resp *orde
 	var cacheJson string
 	cacheJson, err = l.svcCtx.Client.Get(l.ctx, cacheKey).Result()
 	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			l.Logger.Errorf("结算令牌已过期或不存在，settlement_token=%s", in.SettlementToken)
+			return nil, errorx.NewBizError(response.ErrCodePreOrderFailed, "结算信息已过期，请重新预下单")
+		}
 		l.Logger.Errorf("获取结算缓存失败: %v", err)
 		return nil, err
 	}

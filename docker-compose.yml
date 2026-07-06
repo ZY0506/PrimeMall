@@ -65,7 +65,7 @@ services:
     command:
       - --max_connections=500
       - --skip-name-resolve
-      - --innodb_buffer_pool_size=256M
+      - --innodb_buffer_pool_size=384M
       - --innodb_log_buffer_size=16M
     environment:
       - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-123456}
@@ -97,7 +97,7 @@ services:
       redis-server
       --appendonly yes
       --requirepass ${REDIS_PASSWORD:-123456}
-      --maxmemory 256mb
+      --maxmemory 512mb
       --maxmemory-policy allkeys-lru
     ports:
       - "${REDIS_PORT:-16379}:6379"
