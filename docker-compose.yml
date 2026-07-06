@@ -97,8 +97,8 @@ services:
       redis-server
       --appendonly yes
       --requirepass ${REDIS_PASSWORD:-123456}
-      --maxmemory 512mb
-      --maxmemory-policy allkeys-lru
+      --maxmemory 640mb
+      --maxmemory-policy volatile-lru
     ports:
       - "${REDIS_PORT:-16379}:6379"
     volumes:

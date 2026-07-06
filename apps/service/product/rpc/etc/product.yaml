@@ -15,8 +15,8 @@ RDB:
   Addr: ${REDIS_HOST}:${REDIS_PORT}
   RedisPassword: "${REDIS_PASSWORD}"
   RedisDB: 0
-  RedisPoolSize: 100
-  RedisMinIdleConns: 20
+  RedisPoolSize: 30
+  RedisMinIdleConns: 5
 
 SearchRpc:
   Etcd:
