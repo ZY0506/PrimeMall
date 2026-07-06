@@ -346,9 +346,9 @@ services:
       search-rpc: { condition: service_started }
     <<: *app-restart
 
-  # shop-02: 4核4G VM 资源有限，只跑1个实例
-  # shop-02:
-  #   <<: *shop-common
+  # shop-02: 启用第二个网关实例
+  shop-02:
+    <<: *shop-common
 
   # shop-03:
   #   <<: *shop-common
@@ -386,6 +386,7 @@ services:
       - ./storage/nginx/logs:/var/log/nginx
     depends_on:
       shop-01: { condition: service_started }
+      shop-02: { condition: service_started }
     networks:
       - prime_mall_network
 

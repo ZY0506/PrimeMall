@@ -1,7 +1,7 @@
 Name: shop-api
 Host: 0.0.0.0
 Port: 9091
-Timeout: 10000
+Timeout: 30000
 
 UserRpc:
   Etcd:
@@ -56,8 +56,8 @@ RDB:
   Addr: ${REDIS_HOST}:${REDIS_PORT}
   RedisPassword: "${REDIS_PASSWORD}"
   RedisDB: 0
-  RedisPoolSize: 30
-  RedisMinIdleConns: 5
+  RedisPoolSize: 60
+  RedisMinIdleConns: 10
 
 OssConfig:
   AccessKeyId: ${OSS_ACCESS_KEY}
