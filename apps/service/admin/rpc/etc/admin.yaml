@@ -13,15 +13,15 @@ JWT:
 
 DB:
   DSN: ${DB_USER}:${DB_PASSWORD}@tcp(${DB_HOST}:${DB_PORT})/shop_admin?charset=utf8mb4&parseTime=True&loc=Local
-  MaxIdleConns: 10
-  MaxOpenConns: 30
+  MaxIdleConns: 50
+  MaxOpenConns: 200
 
 RDB:
   Addr: ${REDIS_HOST}:${REDIS_PORT}
   RedisPassword: "${REDIS_PASSWORD}"
   RedisDB: 0
-  RedisPoolSize: 30
-  RedisMinIdleConns: 10
+  RedisPoolSize: 100
+  RedisMinIdleConns: 20
 
 Snowflake:
   NodeID: 6

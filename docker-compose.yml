@@ -49,11 +49,6 @@ x-app-restart: &app-restart
   restart: unless-stopped
   networks:
     - prime_mall_network
-  deploy:
-    resources:
-      limits:
-        cpus: "0.75"
-        memory: 384M
 
 # ================================================================
 # 服务定义
