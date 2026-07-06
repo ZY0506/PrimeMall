@@ -49,6 +49,11 @@ x-app-restart: &app-restart
   restart: unless-stopped
   networks:
     - prime_mall_network
+  deploy:
+    resources:
+      limits:
+        cpus: "0.75"
+        memory: 384M
 
 # ================================================================
 # 服务定义
@@ -65,7 +70,7 @@ services:
     command:
       - --max_connections=500
       - --skip-name-resolve
-      - --innodb_buffer_pool_size=512M
+      - --innodb_buffer_pool_size=256M
       - --innodb_log_buffer_size=16M
     environment:
       - MYSQL_ROOT_PASSWORD=${DB_PASSWORD:-123456}
@@ -177,7 +182,7 @@ services:
       - node.name=es-prime_mall
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
       - TZ=Asia/Shanghai
       - "cluster.routing.allocation.disk.watermark.low=85%"
       - "cluster.routing.allocation.disk.watermark.high=92%"
