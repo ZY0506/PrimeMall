@@ -37,16 +37,17 @@ func (l *LockStockLogic) LockStock(in *product.UpdateStockReq) (*product.StockCh
 		}
 	}
 
-	// 获取分布式锁（降低DB乐观锁竞争）
+	// 获取分布式锁（应用层串行化同一 SKU 的并发请求）
 	skuIds := make([]uint64, len(in.Items))
 	for i, item := range in.Items {
 		skuIds[i] = item.SkuId
 	}
-	if !acquireStockLocks(l.ctx, l.svcCtx.Client, skuIds) {
+	token, ok := acquireStockLocks(l.ctx, l.svcCtx.Client, skuIds)
+	if !ok {
 		l.Logger.Errorf("订单：%s 获取库存锁超时", in.OrderSn)
 		return nil, errorx.NewBizError(response.ErrCodeTooFrequent, "系统繁忙，请稍后重试")
 	}
-	defer releaseStockLocksByIds(l.ctx, l.svcCtx.Client, skuIds)
+	defer token.release(l.ctx, l.svcCtx.Client)
 
 	// 锁定库存
 	ret, err := l.svcCtx.ProductSkuModel.LockStock(l.ctx, in.Items, in.OrderSn)

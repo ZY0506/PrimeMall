@@ -162,7 +162,6 @@
 | `cost_price` | int64 | 成本价（单位：分） |
 | `stock` | int64 | 库存数量 |
 | `locked_stock` | int64 | 锁定库存数量（秒杀/预占占用的库存） |
-| `version` | bigint unsigned | 乐观锁版本号（用于并发控制） |
 | `spec_data` | text | 规格数据（JSON格式），如 `{"颜色":"红色","尺寸":"XL"}` |
 | `images` | text | SKU专属图片列表（JSON数组，可空） |
 | `weight` | int64 | SKU重量（单位：克） |

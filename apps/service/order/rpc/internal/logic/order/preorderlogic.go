@@ -4,9 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
-	"sync"
-
 	"github.com/ZY0506/PrimeMall/apps/service/marketing/rpc/client/marketing"
 	marketingtypes "github.com/ZY0506/PrimeMall/apps/service/marketing/rpc/types/marketing"
 	"github.com/ZY0506/PrimeMall/apps/service/product/rpc/types/product"
@@ -15,6 +12,8 @@ import (
 	"github.com/ZY0506/PrimeMall/common/ctxdata"
 	"github.com/ZY0506/PrimeMall/common/errorx"
 	"github.com/ZY0506/PrimeMall/common/response"
+	"golang.org/x/sync/errgroup"
+	"strings"
 
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/types/order"
@@ -95,57 +94,62 @@ func (l *PreOrderLogic) PreOrder(in *order.PreOrderRequest) (*order.PreOrderResp
 	}
 
 	// ===================== 3/4/6. 并行RPC调用 =====================
-	// 以下三个RPC调用互不依赖，可同时执行：
-	//   - UserRpc.CheckUserStatus (依赖: userId)
-	//   - UserRpc.GetAddressById   (依赖: addressId, userId)
-	//   - ProductRpc.GetSkuListByIds (依赖: skuIds)
 	var (
 		userStatusResp *user.CheckUserStatusResp
 		addressResp    *user.AddressItem
 		skusResp       *product.SkuListResp
-
-		userStatusErr error
-		addressErr    error
-		skusErr       error
 	)
 
-	var wg sync.WaitGroup
-	wg.Add(3)
-
-	go func() {
-		defer wg.Done()
-		userStatusResp, userStatusErr = l.svcCtx.UserRpc.CheckUserStatus(l.ctx, &user.CheckUserStatusReq{
+	g, gctx := errgroup.WithContext(l.ctx)
+	g.Go(func() error {
+		resp, err := l.svcCtx.UserRpc.CheckUserStatus(gctx, &user.CheckUserStatusReq{
 			UserId:    userId,
 			CheckType: constants.USER_STATUS_RESTRICTED,
 		})
-	}()
-	go func() {
-		defer wg.Done()
-		addressResp, addressErr = l.svcCtx.UserRpc.GetAddressById(l.ctx, &user.GetAddressReq{
+		if err != nil {
+			// 日志区分是哪个RPC失败；err是rpc原生错误，可以直接向上返回给前端
+			l.Logger.Errorf("校验用户状态RPC失败, err=%v", err)
+			return err
+		}
+		userStatusResp = resp
+		return nil
+	})
+
+	g.Go(func() error {
+		resp, err := l.svcCtx.UserRpc.GetAddressById(gctx, &user.GetAddressReq{
 			AddressId: in.AddressId,
 			UserId:    userId,
 		})
-	}()
-	go func() {
-		defer wg.Done()
-		skusResp, skusErr = l.svcCtx.ProductRpc.GetSkuListByIds(l.ctx, &product.SkuIdsReq{SkuIds: skuIds})
-	}()
+		if err != nil {
+			l.Logger.Errorf("查询地址RPC失败, err=%v", err)
+			return err
+		}
+		addressResp = resp
+		return nil
+	})
 
-	wg.Wait()
+	g.Go(func() error {
+		resp, err := l.svcCtx.ProductRpc.GetSkuListByIds(gctx, &product.SkuIdsReq{SkuIds: skuIds})
+		if err != nil {
+			l.Logger.Errorf("查询sku列表RPC失败, err=%v", err)
+			return err
+		}
+		skusResp = resp
+		return nil
+	})
 
-	// ===================== 检查并行RPC结果 =====================
-	if userStatusErr != nil {
-		l.Logger.Errorf("校验用户状态失败，error=%v", userStatusErr)
-		return nil, userStatusErr
+	// 只要任意goroutine return err，g.Wait拿到就是那个RPC原生err，直接返回，上层会转成前端响应
+	if err := g.Wait(); err != nil {
+		// 这里可以只打兜底日志；细分错误日志已经在各个goroutine内打印完成
+		return nil, err
 	}
+
+	// 到这里，所有RPC调用本身没有错误；下面做【业务状态校验，不是RPC调用错误】
 	if !userStatusResp.Allowed {
+		// 这是resp里面业务状态，不是rpc调用err，需要自己构造biz error
 		return nil, errorx.NewBizError(response.ErrCodeUserRestricted, userStatusResp.Reason)
 	}
 
-	if addressErr != nil {
-		l.Logger.Errorf("查询地址失败，error=%v", addressErr)
-		return nil, addressErr
-	}
 	// 地址快照
 	addrSnapshot := &order.AddressSnapshot{
 		ReceiverName:  addressResp.ReceiverName,
@@ -164,10 +168,6 @@ func (l *PreOrderLogic) PreOrder(in *order.PreOrderRequest) (*order.PreOrderResp
 		return nil, err
 	}
 
-	if skusErr != nil {
-		l.Logger.Errorf("获取SKU列表失败，error=%v", skusErr)
-		return nil, skusErr
-	}
 	if len(skusResp.SkuItems) == 0 {
 		return nil, errorx.NewBizError(response.ErrCodePreOrderFailed, "商品不存在")
 	}

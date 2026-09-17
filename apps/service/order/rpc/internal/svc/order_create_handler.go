@@ -60,6 +60,18 @@ func (sc *ServiceContext) orderCreateHandler(msg []byte) error {
 		return err
 	}
 
+	// 订单处理完毕（无论成功、失败落取消单、幂等命中还是 panic），都要清掉"处理中"快照。
+	// 用兜底 defer 而不是逐个出口删除：本 handler 出口较多，逐个删容易漏，且消费协程 panic
+	// 时（pkg/mq/rabbitmq/consumer.go 只记日志、不 ACK/NACK）无法覆盖。
+	// 必须用独立 context：上面的 ctx 带 10s 超时，此处可能已失效。
+	defer func() {
+		dctx, dcancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer dcancel()
+		if delErr := sc.Client.Del(dctx, constants.OrderProcessingKey+createMsg.OrderSn).Err(); delErr != nil {
+			logx.WithContext(ctx).Errorf("删除订单处理中快照失败，order_sn=%s, error=%v", createMsg.OrderSn, delErr)
+		}
+	}()
+
 	logx.WithContext(ctx).Infof("开始异步创建订单，order_sn=%s", createMsg.OrderSn)
 
 	// ===================== 1. 幂等校验 =====================

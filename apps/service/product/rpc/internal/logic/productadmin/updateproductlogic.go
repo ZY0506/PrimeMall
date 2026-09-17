@@ -158,7 +158,6 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 					existingSku.Images = sql.NullString{String: string(imagesData), Valid: len(skuItem.Images) > 0}
 					existingSku.Weight = skuItem.Weight
 					existingSku.Status = skuItem.Status
-					existingSku.Version = existingSku.Version + 1
 					skusToUpdate = append(skusToUpdate, &existingSku)
 				} else {
 					newSku := &model.ProductSku{
@@ -170,7 +169,6 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 						CostPrice:   skuItem.CostPrice,
 						Stock:       skuItem.Stock,
 						LockedStock: 0,
-						Version:     0,
 						SpecData:    string(specsData),
 						Images:      sql.NullString{String: string(imagesData), Valid: len(skuItem.Images) > 0},
 						Weight:      skuItem.Weight,
@@ -189,7 +187,6 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 					CostPrice:   skuItem.CostPrice,
 					Stock:       skuItem.Stock,
 					LockedStock: 0,
-					Version:     0,
 					SpecData:    string(specsData),
 					Images:      sql.NullString{String: string(imagesData), Valid: len(skuItem.Images) > 0},
 					Weight:      skuItem.Weight,

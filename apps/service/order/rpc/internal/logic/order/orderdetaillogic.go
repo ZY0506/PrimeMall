@@ -13,9 +13,10 @@ import (
 	"github.com/ZY0506/PrimeMall/common/ctxdata"
 	"github.com/ZY0506/PrimeMall/common/errorx"
 	"github.com/ZY0506/PrimeMall/common/response"
-	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/zeromicro/go-zero/core/logx"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type OrderDetailLogic struct {
@@ -42,8 +43,9 @@ func (l *OrderDetailLogic) OrderDetail(in *order.OrderDetailRequest) (*order.Ord
 	orderInfo, err := l.svcCtx.OrderInfoModel.FindOneByOrderSn(l.ctx, in.OrderSn)
 	if err != nil {
 		if errors.Is(err, model.ErrNotFound) {
-			l.Logger.Errorf("订单号：%s 不存在", in.OrderSn)
-			return nil, errorx.NewBizError(response.ErrCodeOrderNotFound, "订单不存在")
+			// 异步下单窗口：消息已发出但消费端尚未落库，DB 查不到属正常情况。
+			// 回查"处理中"快照，返回 status=5，避免用户下完单立刻进详情看到"订单不存在"。
+			return l.buildProcessingDetail(in.OrderSn, userId)
 		}
 		l.Logger.Errorf("获取订单信息失败,error=%v", err)
 		return nil, err
@@ -143,5 +145,81 @@ func (l *OrderDetailLogic) OrderDetail(in *order.OrderDetailRequest) (*order.Ord
 		DeliveryTime:  deliveryTime,
 		CancelTime:    cancelTime,
 		FinishTime:    finishTime,
+	}, nil
+}
+
+// buildProcessingDetail 在订单尚未落库时回查"处理中"快照（下单请求已受理、消费端尚在处理），
+// 返回 status=5 的订单详情。消费端落库成功后快照即被删除，此后一律以 DB 为准。
+// 快照缺失（消息丢失、消费失败、TTL 过期）时仍返回"订单不存在"，保持原有的降级行为。
+func (l *OrderDetailLogic) buildProcessingDetail(orderSn string, userId uint64) (*order.OrderDetailResponse, error) {
+	notFound := errorx.NewBizError(response.ErrCodeOrderNotFound, "订单不存在")
+
+	snapshot, err := l.svcCtx.Client.Get(l.ctx, constants.OrderProcessingKey+orderSn).Result()
+	if err != nil {
+		if !errors.Is(err, redis.Nil) {
+			l.Logger.Errorf("查询订单处理中快照失败, order_sn=%s, error=%v", orderSn, err)
+		}
+		l.Logger.Errorf("订单号：%s 不存在", orderSn)
+		return nil, notFound
+	}
+
+	var msg svc.OrderCreateMessage
+	if err = json.Unmarshal([]byte(snapshot), &msg); err != nil {
+		l.Logger.Errorf("解析订单处理中快照失败, order_sn=%s, error=%v", orderSn, err)
+		return nil, notFound
+	}
+
+	// 权限校验必须在返回任何数据之前：快照内含结算令牌、幂等键等敏感字段
+	if msg.UserId != userId {
+		l.Logger.Errorf("用户ID不匹配（处理中快照）, order_sn=%s", orderSn)
+		return nil, errorx.NewBizError(response.ErrCodePermissionDenied, "用户无权限操作")
+	}
+
+	var addrSnap order.AddressSnapshot
+	if err = json.Unmarshal([]byte(msg.AddressSnapshot), &addrSnap); err != nil {
+		l.Logger.Errorf("反序列化地址快照失败, order_sn=%s, error=%v", orderSn, err)
+		return nil, err
+	}
+	addr := &order.AddressSnapshot{
+		ReceiverName:  addrSnap.ReceiverName,
+		ReceiverPhone: addrSnap.ReceiverPhone,
+	}
+	if addrSnap.Detail != nil {
+		addr.Detail = &order.AddressDetail{
+			Province:      addrSnap.Detail.Province,
+			City:          addrSnap.Detail.City,
+			District:      addrSnap.Detail.District,
+			DetailAddress: addrSnap.Detail.DetailAddress,
+			PostalCode:    addrSnap.Detail.PostalCode,
+		}
+	}
+
+	items := make([]*order.OrderItem, 0, len(msg.ItemSnapshots))
+	for _, v := range msg.ItemSnapshots {
+		items = append(items, &order.OrderItem{
+			SkuId:       v.SkuId,
+			SpuId:       v.SpuId,
+			ProductName: v.SpuName,
+			SkuName:     v.SkuName,
+			Pic:         v.SkuPic,
+			Price:       v.Price,
+			Quantity:    v.Count,
+			TotalAmount: v.TotalAmount,
+		})
+	}
+
+	l.Logger.Infof("订单处理中，返回下单快照, order_sn=%s", orderSn)
+	return &order.OrderDetailResponse{
+		Base: &order.OrderListItem{
+			OrderSn:    msg.OrderSn,
+			Status:     order.OrderStatus(constants.ORDER_STATUS_PROCESSING),
+			PayAmount:  msg.PayAmount,
+			CreateTime: timestamppb.Now(),
+			Items:      items,
+		},
+		Address:       addr,
+		FreightAmount: msg.FreightAmount,
+		CouponAmount:  msg.CouponDiscount,
+		Remark:        msg.Remark,
 	}, nil
 }

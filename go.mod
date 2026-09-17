@@ -14,6 +14,7 @@ require (
 	github.com/rabbitmq/amqp091-go v1.9.0
 	github.com/zeromicro/go-zero v1.10.1
 	golang.org/x/crypto v0.52.0
+	golang.org/x/sync v0.20.0
 	golang.org/x/time v0.14.0
 	google.golang.org/grpc v1.79.3
 	google.golang.org/protobuf v1.36.11

@@ -47,7 +47,6 @@ type (
 		CostPrice   int64          `db:"cost_price"`   // 成本价
 		Stock       int64          `db:"stock"`        // 库存数量
 		LockedStock int64          `db:"locked_stock"` // 锁定库存数量
-		Version     uint64         `db:"version"`      // 乐观锁版本号（用于并发控制）
 		SpecData    string         `db:"spec_data"`    // 规格数据（JSON格式）：{颜色:红色},{尺寸:XL}
 		Images      sql.NullString `db:"images"`       // SKU专属图片列表（JSON数组）
 		Weight      int64          `db:"weight"`       // SKU重量（kg）
@@ -100,14 +99,14 @@ func (m *defaultProductSkuModel) FindOneBySkuCode(ctx context.Context, skuCode s
 }
 
 func (m *defaultProductSkuModel) Insert(ctx context.Context, data *ProductSku) (sql.Result, error) {
-	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, productSkuRowsExpectAutoSet)
-	ret, err := m.conn.ExecCtx(ctx, query, data.SpuId, data.SpuName, data.SkuCode, data.Price, data.MarketPrice, data.CostPrice, data.Stock, data.LockedStock, data.Version, data.SpecData, data.Images, data.Weight, data.Status, data.DeletedAt)
+	query := fmt.Sprintf("insert into %s (%s) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", m.table, productSkuRowsExpectAutoSet)
+	ret, err := m.conn.ExecCtx(ctx, query, data.SpuId, data.SpuName, data.SkuCode, data.Price, data.MarketPrice, data.CostPrice, data.Stock, data.LockedStock, data.SpecData, data.Images, data.Weight, data.Status, data.DeletedAt)
 	return ret, err
 }
 
 func (m *defaultProductSkuModel) Update(ctx context.Context, newData *ProductSku) error {
 	query := fmt.Sprintf("update %s set %s where `id` = ?", m.table, productSkuRowsWithPlaceHolder)
-	_, err := m.conn.ExecCtx(ctx, query, newData.SpuId, newData.SpuName, newData.SkuCode, newData.Price, newData.MarketPrice, newData.CostPrice, newData.Stock, newData.LockedStock, newData.Version, newData.SpecData, newData.Images, newData.Weight, newData.Status, newData.DeletedAt, newData.Id)
+	_, err := m.conn.ExecCtx(ctx, query, newData.SpuId, newData.SpuName, newData.SkuCode, newData.Price, newData.MarketPrice, newData.CostPrice, newData.Stock, newData.LockedStock, newData.SpecData, newData.Images, newData.Weight, newData.Status, newData.DeletedAt, newData.Id)
 	return err
 }
 

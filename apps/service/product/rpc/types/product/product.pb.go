@@ -1832,7 +1832,6 @@ type SkuItem struct {
 	CostPrice     int64                  `protobuf:"varint,7,opt,name=cost_price,json=costPrice,proto3" json:"cost_price,omitempty"`       // 成本价（分）
 	Stock         int64                  `protobuf:"varint,8,opt,name=stock,proto3" json:"stock,omitempty"`                                // 物理库存总数（总库存）
 	LockedStock   int64                  `protobuf:"varint,9,opt,name=locked_stock,json=lockedStock,proto3" json:"locked_stock,omitempty"` // 锁定库存数量
-	Version       uint32                 `protobuf:"varint,10,opt,name=version,proto3" json:"version,omitempty"`                           // 乐观锁版本号
 	Specs         []*SpecItem            `protobuf:"bytes,11,rep,name=specs,proto3" json:"specs,omitempty"`                                // 规格 JSON 结构化
 	Images        []string               `protobuf:"bytes,12,rep,name=images,proto3" json:"images,omitempty"`                              // SKU专属图片
 	Weight        int64                  `protobuf:"varint,13,opt,name=weight,proto3" json:"weight,omitempty"`                             // 重量（克）
@@ -1931,13 +1930,6 @@ func (x *SkuItem) GetStock() int64 {
 func (x *SkuItem) GetLockedStock() int64 {
 	if x != nil {
 		return x.LockedStock
-	}
-	return 0
-}
-
-func (x *SkuItem) GetVersion() uint32 {
-	if x != nil {
-		return x.Version
 	}
 	return 0
 }
@@ -2159,7 +2151,6 @@ type UpdateSkuReq struct {
 	Images        []string               `protobuf:"bytes,8,rep,name=images,proto3" json:"images,omitempty"`
 	Weight        int64                  `protobuf:"varint,9,opt,name=weight,proto3" json:"weight,omitempty"`
 	Status        int64                  `protobuf:"varint,10,opt,name=status,proto3" json:"status,omitempty"`
-	Version       uint32                 `protobuf:"varint,11,opt,name=version,proto3" json:"version,omitempty"` // 乐观锁版本
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -2260,13 +2251,6 @@ func (x *UpdateSkuReq) GetWeight() int64 {
 func (x *UpdateSkuReq) GetStatus() int64 {
 	if x != nil {
 		return x.Status
-	}
-	return 0
-}
-
-func (x *UpdateSkuReq) GetVersion() uint32 {
-	if x != nil {
-		return x.Version
 	}
 	return 0
 }
@@ -4082,7 +4066,7 @@ const file_apps_service_product_rpc_product_proto_rawDesc = "" +
 	"\x04list\x18\x02 \x03(\v2\x14.product.ProductItemR\x04list\"2\n" +
 	"\bSpecItem\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value\"\xa1\x03\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value\"\x8d\x03\n" +
 	"\aSkuItem\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x15\n" +
 	"\x06spu_id\x18\x02 \x01(\x04R\x05spuId\x12\x19\n" +
@@ -4093,15 +4077,14 @@ const file_apps_service_product_rpc_product_proto_rawDesc = "" +
 	"\n" +
 	"cost_price\x18\a \x01(\x03R\tcostPrice\x12\x14\n" +
 	"\x05stock\x18\b \x01(\x03R\x05stock\x12!\n" +
-	"\flocked_stock\x18\t \x01(\x03R\vlockedStock\x12\x18\n" +
-	"\aversion\x18\n" +
-	" \x01(\rR\aversion\x12'\n" +
+	"\flocked_stock\x18\t \x01(\x03R\vlockedStock\x12'\n" +
 	"\x05specs\x18\v \x03(\v2\x11.product.SpecItemR\x05specs\x12\x16\n" +
 	"\x06images\x18\f \x03(\tR\x06images\x12\x16\n" +
 	"\x06weight\x18\r \x01(\x03R\x06weight\x12\x16\n" +
 	"\x06status\x18\x0e \x01(\x03R\x06status\x12\x1d\n" +
 	"\n" +
-	"spu_status\x18\x0f \x01(\x03R\tspuStatus\"G\n" +
+	"spu_status\x18\x0f \x01(\x03R\tspuStatusJ\x04\b\n" +
+	"\x10\v\"G\n" +
 	"\tSkuSimple\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x14\n" +
 	"\x05price\x18\x02 \x01(\x03R\x05price\x12\x14\n" +
@@ -4116,7 +4099,7 @@ const file_apps_service_product_rpc_product_proto_rawDesc = "" +
 	"\x05stock\x18\x06 \x01(\x03R\x05stock\x12'\n" +
 	"\x05specs\x18\a \x03(\v2\x11.product.SpecItemR\x05specs\x12\x16\n" +
 	"\x06images\x18\b \x03(\tR\x06images\x12\x16\n" +
-	"\x06weight\x18\t \x01(\x03R\x06weight\"\xb2\x02\n" +
+	"\x06weight\x18\t \x01(\x03R\x06weight\"\x9e\x02\n" +
 	"\fUpdateSkuReq\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\x12\x19\n" +
 	"\bsku_code\x18\x02 \x01(\tR\askuCode\x12\x14\n" +
@@ -4129,8 +4112,7 @@ const file_apps_service_product_rpc_product_proto_rawDesc = "" +
 	"\x06images\x18\b \x03(\tR\x06images\x12\x16\n" +
 	"\x06weight\x18\t \x01(\x03R\x06weight\x12\x16\n" +
 	"\x06status\x18\n" +
-	" \x01(\x03R\x06status\x12\x18\n" +
-	"\aversion\x18\v \x01(\rR\aversion\"S\n" +
+	" \x01(\x03R\x06statusJ\x04\b\v\x10\f\"S\n" +
 	"\x14ListSkusByProductReq\x12\x15\n" +
 	"\x06spu_id\x18\x01 \x01(\x04R\x05spuId\x12$\n" +
 	"\x04page\x18\x02 \x01(\v2\x10.product.PageReqR\x04page\"[\n" +

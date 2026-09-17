@@ -40,10 +40,11 @@ func (l *UnlockStockLogic) UnlockStock(in *product.UpdateStockReq) (*product.Sto
 	for i, item := range in.Items {
 		skuIds[i] = item.SkuId
 	}
-	if !acquireStockLocks(l.ctx, l.svcCtx.Client, skuIds) {
+	token, ok := acquireStockLocks(l.ctx, l.svcCtx.Client, skuIds)
+	if !ok {
 		return &product.StockChangeResp{}, errorx.NewBizError(response.ErrCodeTooFrequent, "系统繁忙，请稍后重试")
 	}
-	defer releaseStockLocksByIds(l.ctx, l.svcCtx.Client, skuIds)
+	defer token.release(l.ctx, l.svcCtx.Client)
 
 	ret, err := l.svcCtx.ProductSkuModel.UnlockStock(l.ctx, in.Items, in.OrderSn)
 	if err != nil {

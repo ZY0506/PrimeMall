@@ -87,7 +87,6 @@ func (l *AdjustStockLogic) AdjustStock(in *product.AdjustStockReq) (*product.Sto
 			}
 
 			sku.Stock = afterStock
-			sku.Version = sku.Version + 1
 
 			err = skuModel.UpdateTx(ctx, session, sku)
 			if err != nil {
@@ -151,7 +150,7 @@ func (l *AdjustStockLogic) AdjustStock(in *product.AdjustStockReq) (*product.Sto
 			break
 		}
 	}
-// 清除被调整SKU的库存缓存
+	// 清除被调整SKU的库存缓存
 	for _, item := range in.Items {
 		stockKey := constants.ProductStockKey + strconv.FormatUint(item.SkuId, 10)
 		l.svcCtx.Client.Del(l.ctx, stockKey)

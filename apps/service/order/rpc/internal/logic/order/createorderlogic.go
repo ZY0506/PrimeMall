@@ -121,6 +121,15 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (resp *orde
 	}
 
 	msgBytes, _ := json.Marshal(msg)
+
+	// 写入"处理中"快照：消费端落库之前订单详情查库是查不到的，详情接口在 DB miss 时
+	// 回查该 key 并返回 ORDER_STATUS_PROCESSING，避免用户下完单立刻进详情看到"订单不存在"。
+	// 必须在 Publish 之前写入——消费端完成时会删除该 key，若先发消息再写，
+	// 快速消费者可能先删后写，反而留下一个存活满 TTL 的脏 key。
+	if setErr := l.svcCtx.Client.Set(l.ctx, constants.OrderProcessingKey+orderSn, msgBytes, constants.OrderProcessingTTL).Err(); setErr != nil {
+		l.Logger.Errorf("写入订单处理中快照失败，order_sn=%s, error=%v", orderSn, setErr)
+	}
+
 	err = l.svcCtx.MQClient.Publish(l.ctx, "", constants.ORDER_CREATE_ROUTING_KEY, msgBytes)
 	if err != nil {
 		l.Logger.Errorf("发送订单创建消息失败，error=%v", err)

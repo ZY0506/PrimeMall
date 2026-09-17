@@ -73,7 +73,6 @@ CREATE TABLE IF NOT EXISTS `product_sku` (
     `cost_price`   BIGINT          NOT NULL DEFAULT '0' COMMENT '成本价',
     `stock`        INT             NOT NULL DEFAULT '0' COMMENT '库存数量',
     `locked_stock` INT             NOT NULL DEFAULT '0' COMMENT '锁定库存数量',
-    `version`      INT UNSIGNED    NOT NULL DEFAULT '0' COMMENT '乐观锁版本号（用于并发控制）',
     `spec_data`    JSON            NOT NULL COMMENT '规格数据（JSON格式）：{颜色:红色},{尺寸:XL}',
     `images`       JSON                     DEFAULT NULL COMMENT 'SKU专属图片列表（JSON数组）',
     `weight`       BIGINT                   DEFAULT '0' COMMENT 'SKU重量（kg）',

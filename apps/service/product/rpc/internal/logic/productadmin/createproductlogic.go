@@ -104,7 +104,6 @@ func (l *CreateProductLogic) CreateProduct(in *product.CreateProductReq) (*produ
 			CostPrice:   skuItem.CostPrice,
 			Stock:       skuItem.Stock,
 			LockedStock: 0,
-			Version:     0,
 			SpecData:    string(specsData),
 			Images:      sql.NullString{String: string(imagesData), Valid: len(skuItem.Images) > 0},
 			Weight:      skuItem.Weight,

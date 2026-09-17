@@ -99,11 +99,6 @@ const (
 	PRODUCT_SKU_STATUS_DISABLED
 )
 
-// MAX_RETRY_COUNT 重试机制次数
-const (
-	MAX_RETRY_COUNT = 3
-)
-
 const (
 	STOCK_CHANGE_TYPE_LOCKED        = iota + 1 // 锁定库存
 	STOCK_CHANGE_TYPE_UNLOCKED                 // 解锁库存
@@ -242,6 +237,10 @@ const (
 // 异步订单创建
 const (
 	ORDER_CREATE_ROUTING_KEY = "order.create"
+	// OrderProcessingKey 下单请求已受理、但消费端尚未落库的订单快照（+ orderSn）
+	// 订单详情在 DB 查不到时回查该快照，返回 ORDER_STATUS_PROCESSING，避免"读己之所写"窗口内看到"订单不存在"
+	OrderProcessingKey = "order:processing:"
+	OrderProcessingTTL = 5 * time.Minute
 )
 
 // 支付服务 Redis Key 前缀
