@@ -5,6 +5,13 @@ option go_package = "./product";
 
 // goctl rpc protoc .\apps\service\product\rpc\product.proto --go_out=apps/service/product/rpc/types --go-grpc_out apps/service/product/rpc/types --zrpc_out=apps/service/product/rpc/ -m
 
+// 已删除的 RPC（记录以免编号/名称被静默复用）：
+//   service ProductInternal 原编号 7：rpc BatchGetStock(SkuIdsReq) returns (BatchStockResp)
+//     —— 零调用方，随之删除 message BatchStockResp。
+//     protoc 不允许在 service 内使用 reserved（会报 Expected "rpc"），故以注释占位。
+//     删除后其后的方法编号整体前移（GetSkuListByIds 8→7、CalculateFreight 9→8）；
+//     gRPC 按方法名全串派发，编号变化不影响线上兼容性。
+
 // ==================== RPC（对外/公共） ====================
 service Product {
   // 分类
@@ -63,8 +70,6 @@ service ProductInternal {
   rpc RollbackStock(UpdateStockReq) returns (StockChangeResp);
   // 回滚库存（订单取消/退款）
   rpc RevertDeductStock(UpdateStockReq) returns (StockChangeResp);
-  // 批量查询库存（订单服务校验，返回可用库存）
-  rpc BatchGetStock(SkuIdsReq) returns (BatchStockResp);
   // 批量获取Sku
   rpc GetSkuListByIds(SkuIdsReq) returns (SkuListResp);
   // 计算运费
@@ -498,10 +503,6 @@ message SkuStockResult {
 
 message CalculatePriceResp{
   int64 total_price = 1;
-}
-
-message BatchStockResp {
-  map<uint64, int64> stocks = 1; // sku_id -> 可用库存 (stock - locked_stock)
 }
 
 message SkuListResp{

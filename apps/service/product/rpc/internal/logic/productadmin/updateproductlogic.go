@@ -246,12 +246,6 @@ func (l *UpdateProductLogic) UpdateProduct(in *product.UpdateProductReq) (*produ
 		l.svcCtx.Client.Del(l.ctx, keys...)
 	}
 
-	// 清除每个SKU的库存缓存
-	for _, sku := range in.Skus {
-		stockKey := constants.ProductStockKey + strconv.FormatUint(sku.Id, 10)
-		l.svcCtx.Client.Del(l.ctx, stockKey)
-	}
-
 	// 同步商品到ES搜索引擎（异步非阻塞）
 	go func() {
 		defer func() {

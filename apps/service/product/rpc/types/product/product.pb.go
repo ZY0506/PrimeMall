@@ -3835,50 +3835,6 @@ func (x *CalculatePriceResp) GetTotalPrice() int64 {
 	return 0
 }
 
-type BatchStockResp struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Stocks        map[uint64]int64       `protobuf:"bytes,1,rep,name=stocks,proto3" json:"stocks,omitempty" protobuf_key:"varint,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"` // sku_id -> 可用库存 (stock - locked_stock)
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *BatchStockResp) Reset() {
-	*x = BatchStockResp{}
-	mi := &file_apps_service_product_rpc_product_proto_msgTypes[48]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *BatchStockResp) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*BatchStockResp) ProtoMessage() {}
-
-func (x *BatchStockResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_product_rpc_product_proto_msgTypes[48]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use BatchStockResp.ProtoReflect.Descriptor instead.
-func (*BatchStockResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_product_rpc_product_proto_rawDescGZIP(), []int{48}
-}
-
-func (x *BatchStockResp) GetStocks() map[uint64]int64 {
-	if x != nil {
-		return x.Stocks
-	}
-	return nil
-}
-
 type SkuListResp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SkuItems      []*SkuItem             `protobuf:"bytes,1,rep,name=sku_items,json=skuItems,proto3" json:"sku_items,omitempty"`
@@ -3888,7 +3844,7 @@ type SkuListResp struct {
 
 func (x *SkuListResp) Reset() {
 	*x = SkuListResp{}
-	mi := &file_apps_service_product_rpc_product_proto_msgTypes[49]
+	mi := &file_apps_service_product_rpc_product_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -3900,7 +3856,7 @@ func (x *SkuListResp) String() string {
 func (*SkuListResp) ProtoMessage() {}
 
 func (x *SkuListResp) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_service_product_rpc_product_proto_msgTypes[49]
+	mi := &file_apps_service_product_rpc_product_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3913,7 +3869,7 @@ func (x *SkuListResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SkuListResp.ProtoReflect.Descriptor instead.
 func (*SkuListResp) Descriptor() ([]byte, []int) {
-	return file_apps_service_product_rpc_product_proto_rawDescGZIP(), []int{49}
+	return file_apps_service_product_rpc_product_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *SkuListResp) GetSkuItems() []*SkuItem {
@@ -4261,12 +4217,7 @@ const file_apps_service_product_rpc_product_proto_rawDesc = "" +
 	"\x0ecurrent_locked\x18\x05 \x01(\x03R\rcurrentLocked\"5\n" +
 	"\x12CalculatePriceResp\x12\x1f\n" +
 	"\vtotal_price\x18\x01 \x01(\x03R\n" +
-	"totalPrice\"\x88\x01\n" +
-	"\x0eBatchStockResp\x12;\n" +
-	"\x06stocks\x18\x01 \x03(\v2#.product.BatchStockResp.StocksEntryR\x06stocks\x1a9\n" +
-	"\vStocksEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\x04R\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\x03R\x05value:\x028\x01\"<\n" +
+	"totalPrice\"<\n" +
 	"\vSkuListResp\x12-\n" +
 	"\tsku_items\x18\x01 \x03(\v2\x10.product.SkuItemR\bskuItems*d\n" +
 	"\rProductStatus\x12\x1a\n" +
@@ -4312,14 +4263,13 @@ const file_apps_service_product_rpc_product_proto_rawDesc = "" +
 	"\x14ListFreightTemplates\x12\x10.product.PageReq\x1a!.product.ListFreightTemplatesResp\x12>\n" +
 	"\x12GetFreightTemplate\x12\x0e.product.IdReq\x1a\x18.product.FreightTemplate\x12@\n" +
 	"\vAdjustStock\x12\x17.product.AdjustStockReq\x1a\x18.product.StockChangeResp\x12F\n" +
-	"\rListStockLogs\x12\x19.product.ListStockLogsReq\x1a\x1a.product.ListStockLogsResp2\xab\x04\n" +
+	"\rListStockLogs\x12\x19.product.ListStockLogsReq\x1a\x1a.product.ListStockLogsResp2\xed\x03\n" +
 	"\x0fProductInternal\x12>\n" +
 	"\tLockStock\x12\x17.product.UpdateStockReq\x1a\x18.product.StockChangeResp\x12@\n" +
 	"\vUnlockStock\x12\x17.product.UpdateStockReq\x1a\x18.product.StockChangeResp\x12@\n" +
 	"\vDeductStock\x12\x17.product.UpdateStockReq\x1a\x18.product.StockChangeResp\x12B\n" +
 	"\rRollbackStock\x12\x17.product.UpdateStockReq\x1a\x18.product.StockChangeResp\x12F\n" +
-	"\x11RevertDeductStock\x12\x17.product.UpdateStockReq\x1a\x18.product.StockChangeResp\x12<\n" +
-	"\rBatchGetStock\x12\x12.product.SkuIdsReq\x1a\x17.product.BatchStockResp\x12;\n" +
+	"\x11RevertDeductStock\x12\x17.product.UpdateStockReq\x1a\x18.product.StockChangeResp\x12;\n" +
 	"\x0fGetSkuListByIds\x12\x12.product.SkuIdsReq\x1a\x14.product.SkuListResp\x12M\n" +
 	"\x10CalculateFreight\x12\x1c.product.CalculateFreightReq\x1a\x1b.product.CalculatePriceRespB\vZ\t./productb\x06proto3"
 
@@ -4336,7 +4286,7 @@ func file_apps_service_product_rpc_product_proto_rawDescGZIP() []byte {
 }
 
 var file_apps_service_product_rpc_product_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_apps_service_product_rpc_product_proto_msgTypes = make([]protoimpl.MessageInfo, 51)
+var file_apps_service_product_rpc_product_proto_msgTypes = make([]protoimpl.MessageInfo, 49)
 var file_apps_service_product_rpc_product_proto_goTypes = []any{
 	(ProductStatus)(0),               // 0: product.ProductStatus
 	(RecommendScene)(0),              // 1: product.RecommendScene
@@ -4389,9 +4339,7 @@ var file_apps_service_product_rpc_product_proto_goTypes = []any{
 	(*StockChangeResp)(nil),          // 48: product.StockChangeResp
 	(*SkuStockResult)(nil),           // 49: product.SkuStockResult
 	(*CalculatePriceResp)(nil),       // 50: product.CalculatePriceResp
-	(*BatchStockResp)(nil),           // 51: product.BatchStockResp
-	(*SkuListResp)(nil),              // 52: product.SkuListResp
-	nil,                              // 53: product.BatchStockResp.StocksEntry
+	(*SkuListResp)(nil),              // 51: product.SkuListResp
 }
 var file_apps_service_product_rpc_product_proto_depIdxs = []int32{
 	8,  // 0: product.Category.children:type_name -> product.Category
@@ -4438,77 +4386,74 @@ var file_apps_service_product_rpc_product_proto_depIdxs = []int32{
 	44, // 41: product.AdjustStockReq.items:type_name -> product.SkuStockItem
 	44, // 42: product.CalculateFreightReq.items:type_name -> product.SkuStockItem
 	49, // 43: product.StockChangeResp.results:type_name -> product.SkuStockResult
-	53, // 44: product.BatchStockResp.stocks:type_name -> product.BatchStockResp.StocksEntry
-	26, // 45: product.SkuListResp.sku_items:type_name -> product.SkuItem
-	3,  // 46: product.Product.CategoryTree:input_type -> product.Empty
-	4,  // 47: product.Product.CategoryInfo:input_type -> product.IdReq
-	16, // 48: product.Product.ListProducts:input_type -> product.ProductListReq
-	4,  // 49: product.Product.ProductDetail:input_type -> product.IdReq
-	35, // 50: product.Product.Recommend:input_type -> product.RecommendReq
-	7,  // 51: product.Product.BatchGetSkus:input_type -> product.SkuIdsReq
-	13, // 52: product.ProductAdmin.CreateCategory:input_type -> product.CreateCategoryReq
-	14, // 53: product.ProductAdmin.UpdateCategory:input_type -> product.UpdateCategoryReq
-	4,  // 54: product.ProductAdmin.DeleteCategory:input_type -> product.IdReq
-	11, // 55: product.ProductAdmin.ListCategories:input_type -> product.ListCategoriesReq
-	3,  // 56: product.ProductAdmin.TreeCategories:input_type -> product.Empty
-	20, // 57: product.ProductAdmin.CreateProduct:input_type -> product.CreateProductReq
-	21, // 58: product.ProductAdmin.UpdateProduct:input_type -> product.UpdateProductReq
-	4,  // 59: product.ProductAdmin.DeleteProduct:input_type -> product.IdReq
-	17, // 60: product.ProductAdmin.ListProductsAdmin:input_type -> product.ListProductsAdminReq
-	4,  // 61: product.ProductAdmin.GetProductAdmin:input_type -> product.IdReq
-	22, // 62: product.ProductAdmin.UpdateProductStatus:input_type -> product.UpdateProductStatusReq
-	37, // 63: product.ProductAdmin.CreateFreightTemplate:input_type -> product.CreateFreightTemplateReq
-	38, // 64: product.ProductAdmin.UpdateFreightTemplate:input_type -> product.UpdateFreightTemplateReq
-	4,  // 65: product.ProductAdmin.DeleteFreightTemplate:input_type -> product.IdReq
-	5,  // 66: product.ProductAdmin.ListFreightTemplates:input_type -> product.PageReq
-	4,  // 67: product.ProductAdmin.GetFreightTemplate:input_type -> product.IdReq
-	46, // 68: product.ProductAdmin.AdjustStock:input_type -> product.AdjustStockReq
-	42, // 69: product.ProductAdmin.ListStockLogs:input_type -> product.ListStockLogsReq
-	45, // 70: product.ProductInternal.LockStock:input_type -> product.UpdateStockReq
-	45, // 71: product.ProductInternal.UnlockStock:input_type -> product.UpdateStockReq
-	45, // 72: product.ProductInternal.DeductStock:input_type -> product.UpdateStockReq
-	45, // 73: product.ProductInternal.RollbackStock:input_type -> product.UpdateStockReq
-	45, // 74: product.ProductInternal.RevertDeductStock:input_type -> product.UpdateStockReq
-	7,  // 75: product.ProductInternal.BatchGetStock:input_type -> product.SkuIdsReq
-	7,  // 76: product.ProductInternal.GetSkuListByIds:input_type -> product.SkuIdsReq
-	47, // 77: product.ProductInternal.CalculateFreight:input_type -> product.CalculateFreightReq
-	9,  // 78: product.Product.CategoryTree:output_type -> product.CategoryTreeResp
-	10, // 79: product.Product.CategoryInfo:output_type -> product.CategoryResp
-	24, // 80: product.Product.ListProducts:output_type -> product.ProductListResp
-	34, // 81: product.Product.ProductDetail:output_type -> product.ProductDetailResp
-	24, // 82: product.Product.Recommend:output_type -> product.ProductListResp
-	32, // 83: product.Product.BatchGetSkus:output_type -> product.BatchSkuResp
-	3,  // 84: product.ProductAdmin.CreateCategory:output_type -> product.Empty
-	3,  // 85: product.ProductAdmin.UpdateCategory:output_type -> product.Empty
-	3,  // 86: product.ProductAdmin.DeleteCategory:output_type -> product.Empty
-	12, // 87: product.ProductAdmin.ListCategories:output_type -> product.ListCategoriesResp
-	9,  // 88: product.ProductAdmin.TreeCategories:output_type -> product.CategoryTreeResp
-	3,  // 89: product.ProductAdmin.CreateProduct:output_type -> product.Empty
-	3,  // 90: product.ProductAdmin.UpdateProduct:output_type -> product.Empty
-	3,  // 91: product.ProductAdmin.DeleteProduct:output_type -> product.Empty
-	19, // 92: product.ProductAdmin.ListProductsAdmin:output_type -> product.ListProductsAdminResp
-	34, // 93: product.ProductAdmin.GetProductAdmin:output_type -> product.ProductDetailResp
-	3,  // 94: product.ProductAdmin.UpdateProductStatus:output_type -> product.Empty
-	3,  // 95: product.ProductAdmin.CreateFreightTemplate:output_type -> product.Empty
-	3,  // 96: product.ProductAdmin.UpdateFreightTemplate:output_type -> product.Empty
-	3,  // 97: product.ProductAdmin.DeleteFreightTemplate:output_type -> product.Empty
-	39, // 98: product.ProductAdmin.ListFreightTemplates:output_type -> product.ListFreightTemplatesResp
-	36, // 99: product.ProductAdmin.GetFreightTemplate:output_type -> product.FreightTemplate
-	48, // 100: product.ProductAdmin.AdjustStock:output_type -> product.StockChangeResp
-	43, // 101: product.ProductAdmin.ListStockLogs:output_type -> product.ListStockLogsResp
-	48, // 102: product.ProductInternal.LockStock:output_type -> product.StockChangeResp
-	48, // 103: product.ProductInternal.UnlockStock:output_type -> product.StockChangeResp
-	48, // 104: product.ProductInternal.DeductStock:output_type -> product.StockChangeResp
-	48, // 105: product.ProductInternal.RollbackStock:output_type -> product.StockChangeResp
-	48, // 106: product.ProductInternal.RevertDeductStock:output_type -> product.StockChangeResp
-	51, // 107: product.ProductInternal.BatchGetStock:output_type -> product.BatchStockResp
-	52, // 108: product.ProductInternal.GetSkuListByIds:output_type -> product.SkuListResp
-	50, // 109: product.ProductInternal.CalculateFreight:output_type -> product.CalculatePriceResp
-	78, // [78:110] is the sub-list for method output_type
-	46, // [46:78] is the sub-list for method input_type
-	46, // [46:46] is the sub-list for extension type_name
-	46, // [46:46] is the sub-list for extension extendee
-	0,  // [0:46] is the sub-list for field type_name
+	26, // 44: product.SkuListResp.sku_items:type_name -> product.SkuItem
+	3,  // 45: product.Product.CategoryTree:input_type -> product.Empty
+	4,  // 46: product.Product.CategoryInfo:input_type -> product.IdReq
+	16, // 47: product.Product.ListProducts:input_type -> product.ProductListReq
+	4,  // 48: product.Product.ProductDetail:input_type -> product.IdReq
+	35, // 49: product.Product.Recommend:input_type -> product.RecommendReq
+	7,  // 50: product.Product.BatchGetSkus:input_type -> product.SkuIdsReq
+	13, // 51: product.ProductAdmin.CreateCategory:input_type -> product.CreateCategoryReq
+	14, // 52: product.ProductAdmin.UpdateCategory:input_type -> product.UpdateCategoryReq
+	4,  // 53: product.ProductAdmin.DeleteCategory:input_type -> product.IdReq
+	11, // 54: product.ProductAdmin.ListCategories:input_type -> product.ListCategoriesReq
+	3,  // 55: product.ProductAdmin.TreeCategories:input_type -> product.Empty
+	20, // 56: product.ProductAdmin.CreateProduct:input_type -> product.CreateProductReq
+	21, // 57: product.ProductAdmin.UpdateProduct:input_type -> product.UpdateProductReq
+	4,  // 58: product.ProductAdmin.DeleteProduct:input_type -> product.IdReq
+	17, // 59: product.ProductAdmin.ListProductsAdmin:input_type -> product.ListProductsAdminReq
+	4,  // 60: product.ProductAdmin.GetProductAdmin:input_type -> product.IdReq
+	22, // 61: product.ProductAdmin.UpdateProductStatus:input_type -> product.UpdateProductStatusReq
+	37, // 62: product.ProductAdmin.CreateFreightTemplate:input_type -> product.CreateFreightTemplateReq
+	38, // 63: product.ProductAdmin.UpdateFreightTemplate:input_type -> product.UpdateFreightTemplateReq
+	4,  // 64: product.ProductAdmin.DeleteFreightTemplate:input_type -> product.IdReq
+	5,  // 65: product.ProductAdmin.ListFreightTemplates:input_type -> product.PageReq
+	4,  // 66: product.ProductAdmin.GetFreightTemplate:input_type -> product.IdReq
+	46, // 67: product.ProductAdmin.AdjustStock:input_type -> product.AdjustStockReq
+	42, // 68: product.ProductAdmin.ListStockLogs:input_type -> product.ListStockLogsReq
+	45, // 69: product.ProductInternal.LockStock:input_type -> product.UpdateStockReq
+	45, // 70: product.ProductInternal.UnlockStock:input_type -> product.UpdateStockReq
+	45, // 71: product.ProductInternal.DeductStock:input_type -> product.UpdateStockReq
+	45, // 72: product.ProductInternal.RollbackStock:input_type -> product.UpdateStockReq
+	45, // 73: product.ProductInternal.RevertDeductStock:input_type -> product.UpdateStockReq
+	7,  // 74: product.ProductInternal.GetSkuListByIds:input_type -> product.SkuIdsReq
+	47, // 75: product.ProductInternal.CalculateFreight:input_type -> product.CalculateFreightReq
+	9,  // 76: product.Product.CategoryTree:output_type -> product.CategoryTreeResp
+	10, // 77: product.Product.CategoryInfo:output_type -> product.CategoryResp
+	24, // 78: product.Product.ListProducts:output_type -> product.ProductListResp
+	34, // 79: product.Product.ProductDetail:output_type -> product.ProductDetailResp
+	24, // 80: product.Product.Recommend:output_type -> product.ProductListResp
+	32, // 81: product.Product.BatchGetSkus:output_type -> product.BatchSkuResp
+	3,  // 82: product.ProductAdmin.CreateCategory:output_type -> product.Empty
+	3,  // 83: product.ProductAdmin.UpdateCategory:output_type -> product.Empty
+	3,  // 84: product.ProductAdmin.DeleteCategory:output_type -> product.Empty
+	12, // 85: product.ProductAdmin.ListCategories:output_type -> product.ListCategoriesResp
+	9,  // 86: product.ProductAdmin.TreeCategories:output_type -> product.CategoryTreeResp
+	3,  // 87: product.ProductAdmin.CreateProduct:output_type -> product.Empty
+	3,  // 88: product.ProductAdmin.UpdateProduct:output_type -> product.Empty
+	3,  // 89: product.ProductAdmin.DeleteProduct:output_type -> product.Empty
+	19, // 90: product.ProductAdmin.ListProductsAdmin:output_type -> product.ListProductsAdminResp
+	34, // 91: product.ProductAdmin.GetProductAdmin:output_type -> product.ProductDetailResp
+	3,  // 92: product.ProductAdmin.UpdateProductStatus:output_type -> product.Empty
+	3,  // 93: product.ProductAdmin.CreateFreightTemplate:output_type -> product.Empty
+	3,  // 94: product.ProductAdmin.UpdateFreightTemplate:output_type -> product.Empty
+	3,  // 95: product.ProductAdmin.DeleteFreightTemplate:output_type -> product.Empty
+	39, // 96: product.ProductAdmin.ListFreightTemplates:output_type -> product.ListFreightTemplatesResp
+	36, // 97: product.ProductAdmin.GetFreightTemplate:output_type -> product.FreightTemplate
+	48, // 98: product.ProductAdmin.AdjustStock:output_type -> product.StockChangeResp
+	43, // 99: product.ProductAdmin.ListStockLogs:output_type -> product.ListStockLogsResp
+	48, // 100: product.ProductInternal.LockStock:output_type -> product.StockChangeResp
+	48, // 101: product.ProductInternal.UnlockStock:output_type -> product.StockChangeResp
+	48, // 102: product.ProductInternal.DeductStock:output_type -> product.StockChangeResp
+	48, // 103: product.ProductInternal.RollbackStock:output_type -> product.StockChangeResp
+	48, // 104: product.ProductInternal.RevertDeductStock:output_type -> product.StockChangeResp
+	51, // 105: product.ProductInternal.GetSkuListByIds:output_type -> product.SkuListResp
+	50, // 106: product.ProductInternal.CalculateFreight:output_type -> product.CalculatePriceResp
+	76, // [76:107] is the sub-list for method output_type
+	45, // [45:76] is the sub-list for method input_type
+	45, // [45:45] is the sub-list for extension type_name
+	45, // [45:45] is the sub-list for extension extendee
+	0,  // [0:45] is the sub-list for field type_name
 }
 
 func init() { file_apps_service_product_rpc_product_proto_init() }
@@ -4522,7 +4467,7 @@ func file_apps_service_product_rpc_product_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_apps_service_product_rpc_product_proto_rawDesc), len(file_apps_service_product_rpc_product_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   51,
+			NumMessages:   49,
 			NumExtensions: 0,
 			NumServices:   3,
 		},

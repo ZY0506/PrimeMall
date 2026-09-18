@@ -34,13 +34,11 @@ type (
 	customProductSku interface {
 		FindByIds(ctx context.Context, spuIds []uint64) (*[]ProductSkuWithStatus, error)
 		FindListBySpuId(ctx context.Context, spuId uint64) (*[]ProductSku, error)
-		FindHotSkus(ctx context.Context, limit int) (*[]ProductSku, error)
 		LockStock(ctx context.Context, items []*product.SkuStockItem, orderSn string) (*[]*product.SkuStockResult, error)
 		UnlockStock(ctx context.Context, items []*product.SkuStockItem, orderSn string) (*[]*product.SkuStockResult, error)
 		RollbackStock(ctx context.Context, items []*product.SkuStockItem, orderSn string) (*[]*product.SkuStockResult, error)
 		DeductStock(ctx context.Context, items []*product.SkuStockItem, orderSn string) (*[]*product.SkuStockResult, error)
 		RevertDeduct(ctx context.Context, items []*product.SkuStockItem, orderSn string) (*[]*product.SkuStockResult, error)
-		CalculateSkusPrice(ctx context.Context, items []*product.SkuStockItem) (int64, error)
 		InsertTx(ctx context.Context, session sqlx.Session, data *ProductSku) (sql.Result, error)
 		BatchInsertTx(ctx context.Context, session sqlx.Session, data []*ProductSku) error
 		UpdateTx(ctx context.Context, session sqlx.Session, data *ProductSku) error
@@ -130,17 +128,6 @@ func (m *defaultProductSkuModel) FindListBySpuId(ctx context.Context, spuId uint
 	query := fmt.Sprintf("select %s from %s where `spu_id` = ? and `status` = 1 and `deleted_at` IS NULL", productSkuRows, m.table)
 	var resp []ProductSku
 	err := m.conn.QueryRowsCtx(ctx, &resp, query, spuId)
-	if err != nil {
-		return nil, err
-	}
-	return &resp, nil
-}
-
-// FindHotSkus 查询热销SKU（用于缓存预热）
-func (m *defaultProductSkuModel) FindHotSkus(ctx context.Context, limit int) (*[]ProductSku, error) {
-	query := fmt.Sprintf("select %s from %s where `status` = 1 and `deleted_at` IS NULL order by `stock` desc limit ?", productSkuRows, m.table)
-	var resp []ProductSku
-	err := m.conn.QueryRowsCtx(ctx, &resp, query, limit)
 	if err != nil {
 		return nil, err
 	}
@@ -429,28 +416,6 @@ func (m *defaultProductSkuModel) RevertDeduct(ctx context.Context, items []*prod
 		abortMsg:    "部分商品操作失败，已整体回滚",
 		flipMsg:     "因其他商品原因，操作失败",
 	})
-}
-
-// CalculateSkusPrice 计算价格
-func (m *defaultProductSkuModel) CalculateSkusPrice(ctx context.Context, items []*product.SkuStockItem) (int64, error) {
-	var total int64
-	for _, item := range items {
-		sku, err := m.FindOne(ctx, item.SkuId)
-		if err != nil {
-			if errors.Is(err, ErrNotFound) {
-				msg := fmt.Sprintf("skuId=%d,商品不存在", item.SkuId)
-				logx.WithContext(ctx).Errorf("商品不存在, skuId=%d", item.SkuId)
-				return 0, errorx.NewBizError(response.ErrCodeSkuNotFound, msg)
-			}
-			logx.WithContext(ctx).Errorf("查询商品失败, error=%v", err)
-			return 0, err
-
-		}
-		if sku != nil {
-			total += sku.Price * item.Quantity
-		}
-	}
-	return total, nil
 }
 
 // isLatestStockChangeOfType 判断 (orderSn, skuId) 的最新一条库存流水是否就是本次要写入的 changeType。

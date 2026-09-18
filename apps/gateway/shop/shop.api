@@ -894,26 +894,6 @@ type (
 		Available   []UserCoupon `json:"available"` // 可使用的优惠券
 		Unavailable []UserCoupon `json:"unavailable"` // 不可使用的优惠券（含原因）
 	}
-	// ---------- 内部接口（供订单服务调用） ----------
-	// 注意：以下接口仅供内部服务调用，普通用户不应直接访问。
-	// 后续将通过 IP 白名单、独立 JWT 或 mTLS 等方式限制访问来源。
-	UseCouponReq {
-		UserCouponId uint64 `json:"user_coupon_id" validate:"required,min=1"` // 用户优惠券记录ID
-		OrderSn      string `path:"order_sn" json:"order_sn" validate:"required"` // 订单号
-	}
-	UseCouponResp {
-		Success        bool   `json:"success"` // 是否成功
-		DiscountAmount int64  `json:"discount_amount"` // 实际减免金额（单位：分）
-		ErrorMsg       string `json:"error_msg,optional"` // 错误信息
-	}
-	UnlockCouponReq {
-		UserCouponId uint64 `json:"user_coupon_id" validate:"required,min=1"` // 用户优惠券记录ID
-		OrderSn      string `json:"order_sn" validate:"require"` // 订单号
-	}
-	UnlockCouponResp {
-		Success  bool   `json:"success"` // 是否成功
-		ErrorMsg string `json:"error_msg,optional"` // 错误信息
-	}
 )
 
 // C端优惠券接口（需登录）
@@ -939,24 +919,6 @@ service shop-api {
 	@doc "结算页：根据订单金额获取可用优惠券"
 	@handler availableCoupons
 	post /available (AvailableCouponsReq) returns (AvailableCouponsResp)
-}
-
-// 内部接口（仅供订单服务等可信调用方使用）
-// 当前使用 JwtAuth，但应配置专用 client 凭证或后续改为 IP 白名单/独立 JWT 签发者。
-@server (
-	jwt:        JwtAuth
-	middleware: TokenBlacklistMiddleware
-	group:      marketing/internal_api
-	prefix:     /internal/v1/coupon
-)
-service shop-api {
-	@doc "订单服务：使用优惠券（锁定并扣减）"
-	@handler useCoupon
-	post /use (UseCouponReq) returns (UseCouponResp)
-
-	@doc "订单服务：解锁优惠券（订单取消时回滚）"
-	@handler unlockCoupon
-	post /unlock (UnlockCouponReq) returns (UnlockCouponResp)
 }
 
 // ==================== ES商品搜索 ====================

@@ -8,7 +8,6 @@ import (
 
 	auth "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/auth"
 	marketingcoupon "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/marketing/coupon"
-	marketinginternal_api "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/marketing/internal_api"
 	orderaftersale "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/order/aftersale"
 	ordercart "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/order/cart"
 	ordercore "github.com/ZY0506/PrimeMall/apps/gateway/shop/internal/handler/order/core"
@@ -152,28 +151,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		),
 		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
 		rest.WithPrefix("/api/v1/marketing/coupon"),
-	)
-
-	server.AddRoutes(
-		rest.WithMiddlewares(
-			[]rest.Middleware{serverCtx.TokenBlacklistMiddleware},
-			[]rest.Route{
-				{
-					// 订单服务：解锁优惠券（订单取消时回滚）
-					Method:  http.MethodPost,
-					Path:    "/unlock",
-					Handler: marketinginternal_api.UnlockCouponHandler(serverCtx),
-				},
-				{
-					// 订单服务：使用优惠券（锁定并扣减）
-					Method:  http.MethodPost,
-					Path:    "/use",
-					Handler: marketinginternal_api.UseCouponHandler(serverCtx),
-				},
-			}...,
-		),
-		rest.WithJwt(serverCtx.Config.JwtAuth.AccessSecret),
-		rest.WithPrefix("/internal/v1/coupon"),
 	)
 
 	server.AddRoutes(

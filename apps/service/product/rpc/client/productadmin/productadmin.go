@@ -18,7 +18,6 @@ type (
 	AttrFilter               = product.AttrFilter
 	AttributeItem            = product.AttributeItem
 	BatchSkuResp             = product.BatchSkuResp
-	BatchStockResp           = product.BatchStockResp
 	CalculateFreightReq      = product.CalculateFreightReq
 	CalculatePriceResp       = product.CalculatePriceResp
 	Category                 = product.Category

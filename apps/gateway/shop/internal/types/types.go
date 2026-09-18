@@ -563,16 +563,6 @@ type SpecItem struct {
 	Values string `json:"values"`
 }
 
-type UnlockCouponReq struct {
-	UserCouponId uint64 `json:"user_coupon_id" validate:"required,min=1"` // 用户优惠券记录ID
-	OrderSn      string `json:"order_sn" validate:"required"`             // 订单号
-}
-
-type UnlockCouponResp struct {
-	Success  bool   `json:"success"`            // 是否成功
-	ErrorMsg string `json:"error_msg,optional"` // 错误信息
-}
-
 type UpdateAddressReq struct {
 	AddressItem
 }
@@ -601,17 +591,6 @@ type UpdateUserInfoReq struct {
 	Avatar   string `json:"avatar,optional" validate:"omitempty,min=1,max=255"`         // 头像URL（可选）
 	Gender   int64  `json:"gender,optional" validate:"omitempty,oneof=0 1 2"`           // 性别：0-未知，1-男，2-女（可选）
 	Birthday string `json:"birthday,optional" validate:"omitempty,datetime=2006-01-02"` // 生日，RFC3339日期格式（例如 2006-01-02，可选）
-}
-
-type UseCouponReq struct {
-	UserCouponId uint64 `json:"user_coupon_id" validate:"required,min=1"` // 用户优惠券记录ID
-	OrderSn      string `json:"order_sn" validate:"required"`             // 订单号
-}
-
-type UseCouponResp struct {
-	Success        bool   `json:"success"`            // 是否成功
-	DiscountAmount int64  `json:"discount_amount"`    // 实际减免金额（单位：分）
-	ErrorMsg       string `json:"error_msg,optional"` // 错误信息
 }
 
 type UserCoupon struct {

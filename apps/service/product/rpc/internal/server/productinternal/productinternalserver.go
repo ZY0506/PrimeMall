@@ -53,12 +53,6 @@ func (s *ProductInternalServer) RevertDeductStock(ctx context.Context, in *produ
 	return l.RevertDeductStock(in)
 }
 
-// 批量查询库存（订单服务校验，返回可用库存）
-func (s *ProductInternalServer) BatchGetStock(ctx context.Context, in *product.SkuIdsReq) (*product.BatchStockResp, error) {
-	l := productinternallogic.NewBatchGetStockLogic(ctx, s.svcCtx)
-	return l.BatchGetStock(in)
-}
-
 // 批量获取Sku
 func (s *ProductInternalServer) GetSkuListByIds(ctx context.Context, in *product.SkuIdsReq) (*product.SkuListResp, error) {
 	l := productinternallogic.NewGetSkuListByIdsLogic(ctx, s.svcCtx)

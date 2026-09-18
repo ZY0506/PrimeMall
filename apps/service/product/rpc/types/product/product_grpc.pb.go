@@ -1088,7 +1088,6 @@ const (
 	ProductInternal_DeductStock_FullMethodName       = "/product.ProductInternal/DeductStock"
 	ProductInternal_RollbackStock_FullMethodName     = "/product.ProductInternal/RollbackStock"
 	ProductInternal_RevertDeductStock_FullMethodName = "/product.ProductInternal/RevertDeductStock"
-	ProductInternal_BatchGetStock_FullMethodName     = "/product.ProductInternal/BatchGetStock"
 	ProductInternal_GetSkuListByIds_FullMethodName   = "/product.ProductInternal/GetSkuListByIds"
 	ProductInternal_CalculateFreight_FullMethodName  = "/product.ProductInternal/CalculateFreight"
 )
@@ -1109,8 +1108,6 @@ type ProductInternalClient interface {
 	RollbackStock(ctx context.Context, in *UpdateStockReq, opts ...grpc.CallOption) (*StockChangeResp, error)
 	// 回滚库存（订单取消/退款）
 	RevertDeductStock(ctx context.Context, in *UpdateStockReq, opts ...grpc.CallOption) (*StockChangeResp, error)
-	// 批量查询库存（订单服务校验，返回可用库存）
-	BatchGetStock(ctx context.Context, in *SkuIdsReq, opts ...grpc.CallOption) (*BatchStockResp, error)
 	// 批量获取Sku
 	GetSkuListByIds(ctx context.Context, in *SkuIdsReq, opts ...grpc.CallOption) (*SkuListResp, error)
 	// 计算运费
@@ -1175,16 +1172,6 @@ func (c *productInternalClient) RevertDeductStock(ctx context.Context, in *Updat
 	return out, nil
 }
 
-func (c *productInternalClient) BatchGetStock(ctx context.Context, in *SkuIdsReq, opts ...grpc.CallOption) (*BatchStockResp, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(BatchStockResp)
-	err := c.cc.Invoke(ctx, ProductInternal_BatchGetStock_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *productInternalClient) GetSkuListByIds(ctx context.Context, in *SkuIdsReq, opts ...grpc.CallOption) (*SkuListResp, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(SkuListResp)
@@ -1221,8 +1208,6 @@ type ProductInternalServer interface {
 	RollbackStock(context.Context, *UpdateStockReq) (*StockChangeResp, error)
 	// 回滚库存（订单取消/退款）
 	RevertDeductStock(context.Context, *UpdateStockReq) (*StockChangeResp, error)
-	// 批量查询库存（订单服务校验，返回可用库存）
-	BatchGetStock(context.Context, *SkuIdsReq) (*BatchStockResp, error)
 	// 批量获取Sku
 	GetSkuListByIds(context.Context, *SkuIdsReq) (*SkuListResp, error)
 	// 计算运费
@@ -1251,9 +1236,6 @@ func (UnimplementedProductInternalServer) RollbackStock(context.Context, *Update
 }
 func (UnimplementedProductInternalServer) RevertDeductStock(context.Context, *UpdateStockReq) (*StockChangeResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RevertDeductStock not implemented")
-}
-func (UnimplementedProductInternalServer) BatchGetStock(context.Context, *SkuIdsReq) (*BatchStockResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method BatchGetStock not implemented")
 }
 func (UnimplementedProductInternalServer) GetSkuListByIds(context.Context, *SkuIdsReq) (*SkuListResp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSkuListByIds not implemented")
@@ -1372,24 +1354,6 @@ func _ProductInternal_RevertDeductStock_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ProductInternal_BatchGetStock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SkuIdsReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ProductInternalServer).BatchGetStock(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ProductInternal_BatchGetStock_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ProductInternalServer).BatchGetStock(ctx, req.(*SkuIdsReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _ProductInternal_GetSkuListByIds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SkuIdsReq)
 	if err := dec(in); err != nil {
@@ -1452,10 +1416,6 @@ var ProductInternal_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RevertDeductStock",
 			Handler:    _ProductInternal_RevertDeductStock_Handler,
-		},
-		{
-			MethodName: "BatchGetStock",
-			Handler:    _ProductInternal_BatchGetStock_Handler,
 		},
 		{
 			MethodName: "GetSkuListByIds",

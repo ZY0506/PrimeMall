@@ -18,7 +18,6 @@ type (
 	AttrFilter               = product.AttrFilter
 	AttributeItem            = product.AttributeItem
 	BatchSkuResp             = product.BatchSkuResp
-	BatchStockResp           = product.BatchStockResp
 	CalculateFreightReq      = product.CalculateFreightReq
 	CalculatePriceResp       = product.CalculatePriceResp
 	Category                 = product.Category
@@ -76,8 +75,6 @@ type (
 		RollbackStock(ctx context.Context, in *UpdateStockReq, opts ...grpc.CallOption) (*StockChangeResp, error)
 		// 回滚库存（订单取消/退款）
 		RevertDeductStock(ctx context.Context, in *UpdateStockReq, opts ...grpc.CallOption) (*StockChangeResp, error)
-		// 批量查询库存（订单服务校验，返回可用库存）
-		BatchGetStock(ctx context.Context, in *SkuIdsReq, opts ...grpc.CallOption) (*BatchStockResp, error)
 		// 批量获取Sku
 		GetSkuListByIds(ctx context.Context, in *SkuIdsReq, opts ...grpc.CallOption) (*SkuListResp, error)
 		// 计算运费
@@ -123,12 +120,6 @@ func (m *defaultProductInternal) RollbackStock(ctx context.Context, in *UpdateSt
 func (m *defaultProductInternal) RevertDeductStock(ctx context.Context, in *UpdateStockReq, opts ...grpc.CallOption) (*StockChangeResp, error) {
 	client := product.NewProductInternalClient(m.cli.Conn())
 	return client.RevertDeductStock(ctx, in, opts...)
-}
-
-// 批量查询库存（订单服务校验，返回可用库存）
-func (m *defaultProductInternal) BatchGetStock(ctx context.Context, in *SkuIdsReq, opts ...grpc.CallOption) (*BatchStockResp, error) {
-	client := product.NewProductInternalClient(m.cli.Conn())
-	return client.BatchGetStock(ctx, in, opts...)
 }
 
 // 批量获取Sku

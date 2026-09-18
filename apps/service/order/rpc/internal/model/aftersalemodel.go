@@ -52,6 +52,15 @@ func (m *customAfterSaleModel) UpdateTx(ctx context.Context, session sqlx.Sessio
 	return err
 }
 
+// afterSaleItemTable 是 after_sale_item 的表名。生成文件把它硬编码在构造函数里、
+// 没有导出常量，join 时只能在此复制一份；改表名时两边要一起改。
+const afterSaleItemTable = "`after_sale_item`"
+
+// FindOneByOrderSnSkuId 查询指定订单下、指定 SKU 是否还有未完成（未终态）的售后单。
+//
+// sku_id 列只存在于 after_sale_item：after_sale 表没有该列，直接写 where sku_id = ?
+// 会报 MySQL 1054 Unknown column，整条申请售后链路直接失败。必须以 after_sale_sn 关联
+// after_sale_item 才能拿到 SKU 维度（走 after_sale_item 的 idx_sku_id 索引）。
 func (m *customAfterSaleModel) FindOneByOrderSnSkuId(ctx context.Context, orderSn string, skuId uint64, unfinishedStatus []int64) (*AfterSale, error) {
 	// 动态生成 IN 子句的占位符 (?, ?, ...)
 	placeholders := make([]string, len(unfinishedStatus))
@@ -60,7 +69,15 @@ func (m *customAfterSaleModel) FindOneByOrderSnSkuId(ctx context.Context, orderS
 	}
 	inClause := strings.Join(placeholders, ", ")
 
-	query := fmt.Sprintf("select %s from %s where order_sn = ? and sku_id = ? and status in (%s) limit 1", afterSaleRows, m.table, inClause)
+	// afterSaleRows 是逗号分隔的 `col` 列表，逐列加 a. 前缀以消除 join 的列名歧义。
+	cols := strings.Split(afterSaleRows, ",")
+	for i := range cols {
+		cols[i] = "a." + strings.TrimSpace(cols[i])
+	}
+
+	query := fmt.Sprintf(
+		"select %s from %s a inner join %s i on i.after_sale_sn = a.after_sale_sn where a.order_sn = ? and i.sku_id = ? and a.status in (%s) limit 1",
+		strings.Join(cols, ","), m.table, afterSaleItemTable, inClause)
 
 	// 构建参数列表：orderSn, skuId, 然后是 unfinishedStatus 的所有元素
 	args := make([]interface{}, 0, 2+len(unfinishedStatus))

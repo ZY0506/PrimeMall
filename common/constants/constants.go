@@ -7,7 +7,6 @@ const (
 	SCENE_LOGIN        = "login"
 	SCENE_REGISTER     = "register"
 	SCENE_RESET_PWD    = "reset_pwd"
-	SCENE_UPDATE_PWD   = "update_pwd"
 	SCENE_UPDATE_PHONE = "update_phone"
 
 	LOGIN_BY_PASSWORD = "password"
@@ -26,17 +25,9 @@ const (
 const (
 	IDEMPOTENCY_KEY   = "idempotency:"
 	IDEMPOTENCY_EXIRE = 30 * time.Second
-	// Lua脚本：原子删除幂等键并重新设置（用于幂等键过期但订单未创建的竞态场景）
-	LuaResetIdempotencyKey = `
-		redis.call("DEL", KEYS[1])
-		return redis.call("SET", KEYS[1], ARGV[1], "NX", "PX", ARGV[2])
-		`
 	USER_SERVICE      = "user_service:"
-	PRODUCT_SERVICE   = "product_service:"
 	ORDER_SERVICE     = "order_service:"
 	PAYMENT_SERVICE   = "payment_service:"
-	SEARCH_SERVICE    = "search_service:"
-	MARKETING_SERVICE = "marketing_service:"
 )
 
 // 用户状态
@@ -119,8 +110,6 @@ const (
 // 订单类型
 const (
 	ORDER_TYPE_NORMAL = iota + 1
-	ORDER_TYPE_SECKILL
-	ORDER_TYPE_GROUPON
 )
 
 // 订单状态
@@ -143,14 +132,6 @@ var OrderStatusMap = map[int]string{
 	ORDER_STATUS_CANCELED:    "已取消",
 	ORDER_STATUS_AFTER_SALE:  "售后中",
 }
-
-// 存储订单信息的key
-const (
-	ORDER_SN      = "order_sn"
-	ORDER_USER_ID = "userId"
-	ORDER_INFO    = "order_info"
-	ORDER_ITEMS   = "order_items"
-)
 
 // ORDER_EXPIRE_TIME 订单过期时间
 const (
@@ -226,10 +207,6 @@ const (
 	ProductDetailTTL   = 10 * 60 * time.Second // 10分钟
 	ProductListKey     = "product:list:"       // + categoryId:page:sort → 商品列表JSON
 	ProductListTTL     = 5 * 60 * time.Second  // 5分钟
-	ProductStockKey    = "product:stock:"      // + skuId → 库存数量
-	ProductStockTTL    = 10 * time.Second      // 10秒，浏览展示用
-	ProductHotKey      = "product:hot:skus"    // 热销SKU ID列表（预热用）
-	ProductHotTTL      = 30 * 60 * time.Second // 30分钟
 	ProductCategoryKey = "product:category:"   // + categoryId → 分类JSON
 	ProductCategoryTTL = 30 * 60 * time.Second // 30分钟
 )
