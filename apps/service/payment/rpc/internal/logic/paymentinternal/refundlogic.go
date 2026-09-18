@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ZY0506/PrimeMall/apps/service/order/rpc/client/orderinternal"
 	"github.com/ZY0506/PrimeMall/apps/service/payment/rpc/internal/svc"
 	"github.com/ZY0506/PrimeMall/apps/service/payment/rpc/types/payment"
 	"github.com/ZY0506/PrimeMall/common/errorx"
@@ -101,9 +102,41 @@ func (l *RefundLogic) Refund(in *payment.RefundRequest) (*payment.RefundResponse
 
 	l.Logger.Infof("退款成功: refundSn=%s, paymentSn=%s, amount=%d", in.RefundSn, in.PaymentSn, in.RefundAmount)
 
+	// 7. 通知订单服务：认领退款 + 回补库存（退货退款）+ 恢复订单状态
+	l.notifyOrderRefundSuccess(in)
+
 	return &payment.RefundResponse{
 		RefundSn:           in.RefundSn,
 		ThirdPartyRefundNo: fmt.Sprintf("MOCK_REFUND_%s", in.RefundSn),
 		Status:             payment.RefundStatus_REFUND_STATUS_SUCCESS,
 	}, nil
+}
+
+// notifyOrderRefundSuccess 通知订单服务退款已完成，带有限重试。
+//
+// 失败不回滚退款状态——钱确实已经退出去了，把 REFUNDED 改回去只会制造更严重的不一致。
+// 通知本身是幂等的（订单侧以退款单号为键回补库存、以 CAS 认领退款状态），
+// 所以重试以及未来任何形式的重投都是安全的。
+func (l *RefundLogic) notifyOrderRefundSuccess(in *payment.RefundRequest) {
+	const maxAttempts = 3
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		_, err := l.svcCtx.OrderInternalRpc.NotifyRefundSuccess(ctx, &orderinternal.RefundSuccessNotifyRequest{
+			RefundSn:    in.RefundSn,
+			PaymentSn:   in.PaymentSn,
+			OrderSn:     in.OrderSn,
+			AfterSaleId: in.AfterSaleId,
+		})
+		cancel()
+		if err == nil {
+			l.Logger.Infof("通知订单服务退款成功完成: refundSn=%s, attempt=%d", in.RefundSn, attempt)
+			return
+		}
+		l.Logger.Errorf("通知订单服务退款成功失败: refundSn=%s, attempt=%d/%d, err=%v",
+			in.RefundSn, attempt, maxAttempts, err)
+		if attempt < maxAttempts {
+			time.Sleep(time.Duration(attempt) * 300 * time.Millisecond)
+		}
+	}
+	l.Logger.Errorf("通知订单服务退款成功重试耗尽（需人工处理）: refundSn=%s, orderSn=%s", in.RefundSn, in.OrderSn)
 }

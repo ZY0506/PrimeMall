@@ -112,18 +112,44 @@ func (l *NotifyPaymentSuccessLogic) NotifyPaymentSuccess(in *order.PaymentSucces
 	})
 	if err != nil {
 		l.Logger.Errorf("支付成功处理失败, order_sn=%s, err=%v", in.OrderSn, err)
-		// 补偿：库存已扣减但订单状态更新失败，回滚库存
-		rollbackCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if _, unlockErr := l.svcCtx.ProductRpc.UnlockStock(rollbackCtx, &productinternal.UpdateStockReq{
-			Items:   deductItems,
-			OrderSn: in.OrderSn,
-		}); unlockErr != nil {
-			l.Logger.Errorf("回滚库存失败（需人工处理）: order_sn=%s, err=%v", in.OrderSn, unlockErr)
-		}
+		// 补偿：库存已扣减但订单状态未落库，把这次扣减还原回去。
+		// 必须用 RevertDeductStock 而非 UnlockStock：DeductStock 是 stock 与 locked_stock 的
+		// 成对扣减，其唯一逆运算就是 stock += q 且 locked_stock += q；而 UnlockStock 的
+		// stockDelta 恒为 0，只会归还 locked_stock，被多扣的物理库存永远补不回来。
+		l.revertDeductedStock(in.OrderSn, deductItems)
 		return nil, err
 	}
 
 	l.Logger.Infof("支付成功处理完成, order_sn=%s, payment_sn=%s, pay_type=%d", in.OrderSn, in.PaymentSn, payType)
 	return &order.Empty{}, nil
+}
+
+// revertDeductedStock 补偿回滚本次已扣减的库存，带重试。
+//
+// 用独立的 context：请求上下文可能已被上游取消，而补偿必须完成。
+// 每次尝试的 cancel 放在循环内——用 defer 会把定时器占到函数返回为止。
+//
+// 这里不吞错误：调用方仍把原始 err 返回给上游，由 MQ 重投自愈。重投是安全的，
+// 因为扣减与补偿都以「该 (orderSn, skuId) 的最新一条流水类型」为幂等判据
+// （见 ProductSkuModel.isLatestStockChangeOfType）：补偿成功后最新流水是
+// REVERT_DEDUCT，重投时 DeductStock 不会误判为已扣减而跳过。
+func (l *NotifyPaymentSuccessLogic) revertDeductedStock(orderSn string, items []*productinternal.SkuStockItem) {
+	const maxAttempts = 3
+	for attempt := 1; attempt <= maxAttempts; attempt++ {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		_, err := l.svcCtx.ProductRpc.RevertDeductStock(ctx, &productinternal.UpdateStockReq{
+			Items:   items,
+			OrderSn: orderSn,
+		})
+		cancel()
+		if err == nil {
+			l.Logger.Infof("库存补偿成功, order_sn=%s, attempt=%d", orderSn, attempt)
+			return
+		}
+		l.Logger.Errorf("库存补偿失败, order_sn=%s, attempt=%d/%d, err=%v", orderSn, attempt, maxAttempts, err)
+		if attempt < maxAttempts {
+			time.Sleep(time.Duration(attempt) * 300 * time.Millisecond)
+		}
+	}
+	l.Logger.Errorf("库存补偿重试耗尽（需人工处理）, order_sn=%s", orderSn)
 }

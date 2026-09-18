@@ -10,10 +10,12 @@ import (
 	"github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/config"
 	"github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/handler"
 	"github.com/ZY0506/PrimeMall/apps/gateway/admin/internal/svc"
+	"github.com/ZY0506/PrimeMall/common/validate"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest"
+	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
 var configFile = flag.String("f", "etc/admin.yaml", "the config file")
@@ -34,6 +36,10 @@ func main() {
 
 	server := rest.MustNewServer(c.RestConf)
 	defer server.Stop()
+
+	// 注册全局请求参数校验器。admin 的请求类型目前没有任何 validate tag，
+	// 这一步是为后续补 tag 铺路，今天不产生行为变化。
+	httpx.SetValidator(validate.New())
 
 	ctx := svc.NewServiceContext(c)
 	// 注册全局中间件

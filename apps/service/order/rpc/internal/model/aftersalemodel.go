@@ -18,6 +18,7 @@ type (
 		InsertTx(ctx context.Context, session sqlx.Session, data *AfterSale) (sql.Result, error)
 		UpdateTx(ctx context.Context, session sqlx.Session, newData *AfterSale) error
 		FindOneByOrderSnSkuId(ctx context.Context, orderSn string, skuId uint64, unfinishedStatus []int64) (*AfterSale, error)
+		CasRefundStatus(ctx context.Context, id uint64, from, to int64) (int64, error)
 		FindPageByUserId(ctx context.Context, userId uint64, status, offset, size int64) ([]*AfterSale, int64, error)
 		AdminFindPage(ctx context.Context, status, offset, pageSize int64) ([]*AfterSale, int64, error)
 		withSession(session sqlx.Session) AfterSaleModel
@@ -78,6 +79,20 @@ func (m *customAfterSaleModel) FindOneByOrderSnSkuId(ctx context.Context, orderS
 	default:
 		return nil, err
 	}
+}
+
+// CasRefundStatus 以条件原子更新认领一次退款状态流转，返回受影响行数。
+//
+// 用 CAS 而不是「读出再写回」：多路重复的退款成功通知里只有一条能命中 from 状态，
+// 其余返回 0 行。注意命中 0 行不等于"不用处理"——它可能表示上一次通知已经认领过，
+// 调用方仍需继续走幂等的库存回补，否则「已认领但回补前进程挂掉」会永久卡住。
+func (m *customAfterSaleModel) CasRefundStatus(ctx context.Context, id uint64, from, to int64) (int64, error) {
+	query := fmt.Sprintf("update %s set refund_status = ? where `id` = ? and `refund_status` = ?", m.table)
+	res, err := m.conn.ExecCtx(ctx, query, to, id, from)
+	if err != nil {
+		return 0, err
+	}
+	return res.RowsAffected()
 }
 
 func (m *customAfterSaleModel) FindPageByUserId(ctx context.Context, userId uint64, status, offset, size int64) ([]*AfterSale, int64, error) {

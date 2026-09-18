@@ -165,7 +165,8 @@ func (m *defaultProductSkuModel) FindHotSkus(ctx context.Context, limit int) (*[
 type stockChangeSpec struct {
 	// changeType 写入 stock_log.change_type
 	changeType int64
-	// idempotent 是否在更新前做 stock_log 幂等校验
+	// idempotent 是否在更新前做 stock_log 幂等校验。
+	// 判据是该 (orderSn, skuId) 的最新一条流水类型是否等于本次 changeType，详见 isLatestStockChangeOfType。
 	idempotent bool
 	// setClause UPDATE 的 SET 子句（? 为占位符）
 	setClause string
@@ -261,11 +262,11 @@ func (m *defaultProductSkuModel) applyStockChange(ctx context.Context, items []*
 func (m *defaultProductSkuModel) applyOneStockChange(ctx context.Context, session sqlx.Session, orderSn string, item *product.SkuStockItem, spec stockChangeSpec, result *product.SkuStockResult) (bool, error) {
 	// ===================== 1. 幂等校验 =====================
 	if spec.idempotent {
-		exists, err := m.hasStockLog(ctx, session, orderSn, item.SkuId, spec.changeType)
+		done, err := m.isLatestStockChangeOfType(ctx, session, orderSn, item.SkuId, spec.changeType)
 		if err != nil {
 			return false, err
 		}
-		if exists {
+		if done {
 			result.Message = "已处理（幂等）"
 			logx.WithContext(ctx).Infof("库存变更已处理（幂等）, orderSn=%s skuId=%d changeType=%d", orderSn, item.SkuId, spec.changeType)
 			return true, nil
@@ -372,6 +373,10 @@ func (m *defaultProductSkuModel) UnlockStock(ctx context.Context, items []*produ
 func (m *defaultProductSkuModel) RollbackStock(ctx context.Context, items []*product.SkuStockItem, orderSn string) (*[]*product.SkuStockResult, error) {
 	return m.applyStockChange(ctx, items, orderSn, stockChangeSpec{
 		changeType: constants.STOCK_CHANGE_TYPE_ROLLBACK,
+		// orderSn 由调用方传入退款单号而非原订单号：stock_log 唯一键是
+		// (order_sn, sku_id, change_type)，而一个订单可以发生多次部分退款，
+		// 用订单号做键会让第二次退款被幂等判据静默跳过。
+		idempotent: true,
 		// 回滚只增加 stock，不修改 locked_stock：订单支付后 locked_stock 已扣减为 0
 		setClause:   "stock = stock + ?",
 		updateArgs:  func(qty int64, skuId uint64) []interface{} { return []interface{}{qty, skuId} },
@@ -405,10 +410,15 @@ func (m *defaultProductSkuModel) DeductStock(ctx context.Context, items []*produ
 	})
 }
 
-// RevertDeduct 回滚 DeductStock 操作（创建订单事务失败时调用）
+// RevertDeduct 回滚 DeductStock 操作（扣减成功但订单状态落库失败时的补偿）。
+//
+// DeductStock 是 stock 与 locked_stock 的成对扣减，其唯一逆运算就是
+// stock += q 且 locked_stock += q —— 即本方法。UnlockStock 做不到：
+// 它的 stockDelta 恒为 0，只会把 locked_stock 还回去，物理库存永久少扣。
 func (m *defaultProductSkuModel) RevertDeduct(ctx context.Context, items []*product.SkuStockItem, orderSn string) (*[]*product.SkuStockResult, error) {
 	return m.applyStockChange(ctx, items, orderSn, stockChangeSpec{
 		changeType:  constants.STOCK_CHANGE_TYPE_REVERT_DEDUCT,
+		idempotent:  true,
 		setClause:   "stock = stock + ?, locked_stock = locked_stock + ?",
 		updateArgs:  func(qty int64, skuId uint64) []interface{} { return []interface{}{qty, qty, skuId} },
 		successMsg:  "回滚成功",
@@ -443,14 +453,24 @@ func (m *defaultProductSkuModel) CalculateSkusPrice(ctx context.Context, items [
 	return total, nil
 }
 
-func (m *defaultProductSkuModel) hasStockLog(ctx context.Context, session sqlx.Session, orderSn string, skuId uint64, changeType int64) (bool, error) {
-	var count int64
-	err := session.QueryRowCtx(ctx, &count,
-		`SELECT COUNT(1) FROM stock_log WHERE order_sn = ? AND sku_id = ? AND change_type = ?`,
-		orderSn, skuId, changeType,
+// isLatestStockChangeOfType 判断 (orderSn, skuId) 的最新一条库存流水是否就是本次要写入的 changeType。
+//
+// 判据必须是"最新一条的类型"，而不是"历史上是否出现过该类型"：补偿流程会在 DEDUCT 之后补一条
+// REVERT_DEDUCT，若仍按"存在 DEDUCT 流水"跳过，重投时就会在库存已被补回的前提下再次跳过扣减，
+// 最终订单变成已支付而库存从未扣减（超卖）。同理，LockStock 在事务失败解锁库存后重投，
+// 也必须重新锁定，否则订单落库却没有预占。
+func (m *defaultProductSkuModel) isLatestStockChangeOfType(ctx context.Context, session sqlx.Session, orderSn string, skuId uint64, changeType int64) (bool, error) {
+	var latestType int64
+	err := session.QueryRowCtx(ctx, &latestType,
+		`SELECT change_type FROM stock_log WHERE order_sn = ? AND sku_id = ? ORDER BY id DESC LIMIT 1`,
+		orderSn, skuId,
 	)
-	if err != nil {
+	switch {
+	case err == nil:
+		return latestType == changeType, nil
+	case errors.Is(err, sqlx.ErrNotFound):
+		return false, nil
+	default:
 		return false, err
 	}
-	return count > 0, nil
 }
