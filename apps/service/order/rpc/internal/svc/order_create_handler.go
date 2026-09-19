@@ -236,14 +236,26 @@ func (sc *ServiceContext) orderCreateHandler(msg []byte) error {
 	}
 
 	// 发送延迟队列 → 超时取消
-	timeoutMsg, _ := json.Marshal(&order.OrderTimeoutMessage{
+	// TTL 取 ORDER_EXPIRE_TIME，与订单表 expire_time 同源；PublishDelay 会等待 broker 确认，
+	// 只有确认成功才算投递成功，否则超时取消只能靠定时关单任务兜底。
+	timeoutMsg, marshalErr := json.Marshal(&order.OrderTimeoutMessage{
 		OrderSn:          createMsg.OrderSn,
 		CancelReason:     "超时取消",
 		CancelReasonType: constants.CANCEL_REASON_TYPE_TIMEOUT,
 		Items:            unlockStockItems,
 		CouponId:         createMsg.CouponId,
 	})
-	_ = sc.MQClient.Publish(ctx, constants.ORDER_DELAY_QUEUE+"_exchange", constants.ORDER_DELAY_QUEUE, timeoutMsg)
+	if marshalErr != nil {
+		logx.WithContext(ctx).Errorf("序列化超时消息失败，order_sn=%s, err=%v（将由定时关单任务兜底）", createMsg.OrderSn, marshalErr)
+	} else if pubErr := sc.MQClient.PublishDelay(
+		ctx,
+		constants.ORDER_DELAY_QUEUE+"_exchange",
+		constants.ORDER_DELAY_QUEUE,
+		timeoutMsg,
+		constants.ORDER_EXPIRE_TIME,
+	); pubErr != nil {
+		logx.WithContext(ctx).Errorf("发送订单超时延迟消息失败，order_sn=%s, err=%v（将由定时关单任务兜底）", createMsg.OrderSn, pubErr)
+	}
 
 	logx.WithContext(ctx).Infof("异步订单创建成功，order_sn=%s", createMsg.OrderSn)
 	return nil

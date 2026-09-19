@@ -130,9 +130,13 @@ func (l *CreateOrderLogic) CreateOrder(in *order.CreateOrderRequest) (resp *orde
 		l.Logger.Errorf("写入订单处理中快照失败，order_sn=%s, error=%v", orderSn, setErr)
 	}
 
+	// Publish 会等待 broker 的发布确认，返回 nil 才代表消息真的进了 broker
 	err = l.svcCtx.MQClient.Publish(l.ctx, "", constants.ORDER_CREATE_ROUTING_KEY, msgBytes)
 	if err != nil {
-		l.Logger.Errorf("发送订单创建消息失败，error=%v", err)
+		l.Logger.Errorf("发送订单创建消息失败，order_sn=%s, error=%v", orderSn, err)
+		// 消息没发出去，订单不会落库；清掉刚写的"处理中"快照，
+		// 否则详情接口会在快照 TTL 内返回一个永远不会落库的幽灵订单
+		_ = l.svcCtx.Client.Del(l.ctx, constants.OrderProcessingKey+orderSn).Err()
 		return nil, err
 	}
 

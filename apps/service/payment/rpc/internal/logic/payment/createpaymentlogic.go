@@ -93,6 +93,20 @@ func (l *CreatePaymentLogic) CreatePayment(in *payment.CreatePaymentRequest) (*p
 		return nil, errorx.NewBizError(response.ErrCodeOrderExpired, "订单已超时或状态异常，无法支付")
 	}
 
+	// 校验订单是否已过期。
+	// 状态校验不足以拦住过期订单：订单过期后能否变成"已取消"是异步的（延迟队列 / 定时扫描），
+	// 在状态被真正改写之前 status 仍是待支付。此处显式比对 expire_time，
+	// 使支付侧的正确性自带保证，而不是依赖 OrderDetail 接口里的懒检查副作用
+	// （那是读接口，一旦被改成纯读，这里就会静默放行已过期订单）。
+	if orderDetail.ExpireTime == nil || !orderDetail.ExpireTime.IsValid() {
+		// 正常情况下所有订单在下单落库时都会写入 expire_time，缺失属数据异常。
+		// 此处只告警不拦截，避免为一个理论上不存在的场景引入新的支付失败路径。
+		l.Logger.Errorf("订单缺少过期时间，无法校验是否超时, orderSn=%s", in.OrderSn)
+	} else if time.Now().After(orderDetail.ExpireTime.AsTime()) {
+		l.Logger.Errorf("订单已过期, orderSn=%s, expireTime=%v", in.OrderSn, orderDetail.ExpireTime.AsTime())
+		return nil, errorx.NewBizError(response.ErrCodeOrderExpired, "订单已超时，无法支付")
+	}
+
 	// 生成支付流水号
 	paymentSn, err := l.svcCtx.IDGenerator.GenWithPrefix("PAY")
 	if err != nil {

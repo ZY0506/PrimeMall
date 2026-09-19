@@ -64,9 +64,9 @@ func NewServiceContext(c config.Config) *ServiceContext {
 		panic(err)
 	}
 
-	err = mqClient.InitDelayQueue(constants.ORDER_DELAY_QUEUE, constants.ORDER_DLX_EXCHANGE, constants.ORDER_TIMEOUT_ROUTING_KEY, constants.ORDER_TTL_MS)
+	err = mqClient.InitDelayQueue(constants.ORDER_DELAY_QUEUE, constants.ORDER_DLX_EXCHANGE, constants.ORDER_TIMEOUT_ROUTING_KEY)
 	if err != nil {
-		logx.Errorf("rabbitmq init failed,error:%v", err.Error())
+		logx.Errorf("rabbitmq init delay queue failed,error:%v", err.Error())
 		panic(err)
 	}
 
@@ -106,7 +106,7 @@ func (s *ServiceContext) Close() {
 
 func (s *ServiceContext) registerConsumers() {
 	// 订单超时
-	if err := s.MQClient.Subscribe(s.Ctx, "order.timeout", s.handleOrderTimeout); err != nil {
+	if err := s.MQClient.Subscribe(s.Ctx, constants.ORDER_TIMEOUT_ROUTING_KEY, s.handleOrderTimeout); err != nil {
 		logx.Errorf("order.timeout subscribe failed,error:%v", err.Error())
 	}
 

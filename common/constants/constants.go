@@ -133,9 +133,12 @@ var OrderStatusMap = map[int]string{
 	ORDER_STATUS_AFTER_SALE:  "售后中",
 }
 
-// ORDER_EXPIRE_TIME 订单过期时间
+// ORDER_EXPIRE_TIME 订单支付超时时间（15 分钟）。
+// 这是订单超时的唯一来源，同时用于两处，禁止再各自定义常量：
+//  1. order_info.expire_time 的写入值（下单落库时 now + ORDER_EXPIRE_TIME）
+//  2. 超时延迟消息的 TTL（PublishDelay 的 Expiration）
 const (
-	ORDER_EXPIRE_TIME = 15 * 60 * time.Second
+	ORDER_EXPIRE_TIME = 15 * time.Minute
 )
 
 const (
@@ -195,10 +198,12 @@ const (
 
 // 消息队列
 const (
-	ORDER_DELAY_QUEUE         = "order.delay.queue"
+	// ORDER_DELAY_QUEUE 延迟队列。
+	// v2：队列不再携带 x-message-ttl（队列参数不可变，改 TTL 方案必须换名），
+	// TTL 由每条消息的 Expiration 指定，取 ORDER_EXPIRE_TIME。
+	ORDER_DELAY_QUEUE         = "order.delay.queue.v2"
 	ORDER_DLX_EXCHANGE        = "order.dlx"
 	ORDER_TIMEOUT_ROUTING_KEY = "order.timeout"
-	ORDER_TTL_MS              = 15 * 60 * 1000 // 15分钟
 )
 
 // 商品缓存

@@ -164,7 +164,7 @@ func (s *ServiceContext) closeOneExpiredOrder(ctx context.Context, order *model.
 	err = s.DB.TransactCtx(subCtx, func(ctx context.Context, session sqlx.Session) error {
 		order.Status = constants.ORDER_STATUS_CANCELED
 		order.CancelTime = sql.NullTime{Time: time.Now(), Valid: true}
-		order.CancelReasonType = 3 // 超时取消
+		order.CancelReasonType = constants.CANCEL_REASON_TYPE_TIMEOUT
 		order.CancelReason = "订单超时未支付，系统自动取消"
 		return s.OrderInfoModel.UpdateTx(ctx, session, order)
 	})
